@@ -1,0 +1,46 @@
+
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg></span>
+      <div><b>ParkPulse</b><small>LIVE NATIONAL PARK STATUS &amp; TRIP PLANNING</small></div>
+    </div>
+    <nav>
+      <a href="/">Map</a>
+      <a href="/plan" class="on">Plan a Trip</a>
+      <a href="/build-trip">Build a Trip</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero"><div class="in">
+  <span class="pill"><span class="dot"></span> Planning assistant</span>
+  <h1>Plan your national-parks trip</h1>
+  <p>Answer a few questions and I'll build a personalized itinerary — then check live conditions on every park.</p>
+</div></section>
+
+<main><div class="wrap">
+  <div class="prog"><span class="lbl" id="proglbl">Question 1 of 8</span><div class="bar"><div id="barfill"></div></div></div>
+  <div id="thread"></div>
+  <div id="optwrap" class="opts"></div>
+  <div id="result" class="hidden"></div>
+</div></main>
+
+<footer>This planner builds recommendations from your answers · live weather &amp; official info load on each park's status page · ParkPulse</footer>
+
+
+<!-- ParkPulse Planner Bubble (self-contained, drop on any page) -->
+
+<button id="ppb-fab" aria-label="Plan a trip">🧭</button>
+<div id="ppb-panel" role="dialog" aria-label="Trip planner">
+  <div class="ppb-head">
+    <span class="av">🌲</span>
+    <div class="t"><b>Plan a Trip</b><span>ParkPulse assistant</span></div>
+    <button id="ppb-pin" title="Pin to side">⇥</button>
+    <button id="ppb-close" title="Close">✕</button>
+  </div>
+  <div class="ppb-body" id="ppb-body"></div>
+</div>
+
+<!-- /ParkPulse Planner Bubble -->
+
