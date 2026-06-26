@@ -166,7 +166,7 @@ var map=null,gmarkers=[],routePoly=[],routeVisible=true,dirSvc=null,mapOK=false;
 function gll(s){var l=stopLL(s);return l?{lat:l[0],lng:l[1]}:null;}
 function initMap(){
   if(typeof google==='undefined'||!google.maps)return;
-  map=new google.maps.Map(document.getElementById('lmap'),{center:{lat:39.5,lng:-98.35},zoom:4,mapTypeId:'roadmap',mapTypeControl:true,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid']},streetViewControl:true,fullscreenControl:false,zoomControl:true,gestureHandling:'greedy'});
+  map=new google.maps.Map(document.getElementById('lmap'),{center:{lat:39.5,lng:-98.35},zoom:4,mapTypeId:'roadmap',mapTypeControl:true,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid']},streetViewControl:true,fullscreenControl:false,zoomControl:true,gestureHandling:'greedy',styles:window.PARKBUDDY_MAP_STYLE||[]});
   dirSvc=new google.maps.DirectionsService();
   mapOK=true;
 }
@@ -341,7 +341,20 @@ function boot(){
   document.getElementById('food').addEventListener('input',function(e){trip.food=parseFloat(e.target.value)||0;renderCost();renderStats();save();});
   document.getElementById('showmap').addEventListener('change',function(e){routeVisible=e.target.checked;drawMap(false);});
   var ppb=document.getElementById('passportbtn');
-  if(ppb)ppb.onclick=function(){ save(); if(window.__ppPassport){window.__ppPassport.open();} else {toast('Passport loads in a moment…');} };
+  if(ppb)ppb.onclick=function(){
+    save();
+    if(window.__ppPassport){
+      var parkIds=trip.stops.filter(function(s){return s.pid;}).map(function(s){return s.pid;});
+      window.__ppPassport.saveTrip({
+        name:trip.name||'My national-parks trip',
+        startDate:trip.startDate||'',
+        days:tripDays(),
+        miles:totalMiles(),
+        cost:costTotal(),
+        parkIds:parkIds
+      });
+    } else { toast('Passport loads in a moment…'); }
+  };
   document.getElementById('addpark').onclick=function(){var v=document.getElementById('parksel').value;if(!v)return;trip.stops.push({pid:+v,nights:NIGHTS[+v]||1,lodge:''});document.getElementById('parksel').value='';render(true);};
   document.getElementById('addcustom').onclick=function(){
     var nm=(document.getElementById('cname').value||'').trim(),co=(document.getElementById('ccoord').value||'').trim();

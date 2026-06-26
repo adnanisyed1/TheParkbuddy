@@ -10,6 +10,7 @@
     "/supabase-config.js",
     "/auth.js",
     "/parks-data.js",
-    "/passport.js"
+    "/passport.js",
+    "/transition.js"
   ]
 }

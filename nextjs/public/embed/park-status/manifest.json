@@ -12,6 +12,7 @@
     "/embed/park-status/s2.js",
     "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
     "/supabase-config.js",
-    "/auth.js"
+    "/auth.js",
+    "/transition.js"
   ]
 }

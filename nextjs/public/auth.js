@@ -12,7 +12,7 @@
 
    Loads AFTER the Supabase browser client (CDN) and supabase-config.js. */
 (function () {
-  var TRACK = ["pp_trip2", "pp_map_trip", "pp_favorites", "pp_prefs", "pp_stamped"];
+  var TRACK = ["pp_trip2", "pp_map_trip", "pp_favorites", "pp_prefs", "pp_stamped", "pp_passports"];
 
   function configured() {
     var u = window.SUPABASE_URL, k = window.SUPABASE_ANON_KEY;

@@ -255,7 +255,17 @@ function renderCart(){
       `<button class="cart-passport ${myTrip.length?'':'dis'}" id="cart-passport" ${myTrip.length?'':'disabled'}>🛂 Create Trip Passport</button>`+
       `<div class="hint">${myTrip.length?('Sends your '+st.parks+' park'+(st.parks!==1?'s':'')+' to the planner for real drive times, dates &amp; costs.'):'Add parks, then send them to the trip planner.'}</div>`;
     const pp=document.getElementById('cart-passport');
-    if(pp)pp.onclick=()=>{ if(window.__ppPassport)window.__ppPassport.open(); };
+    if(pp)pp.onclick=()=>{
+      if(window.__ppPassport){
+        const ts=tripStats();
+        window.__ppPassport.saveTrip({
+          name:'My map trip',
+          days:ts.days,
+          miles:ts.miles,
+          parkIds:myTrip.map(p=>p.id)
+        });
+      }
+    };
   }
   const ab=document.getElementById('cart-addbtn'); if(ab)ab.onclick=()=>addToTrip(selected);
   body.querySelectorAll('.ci-x').forEach(b=>b.onclick=()=>removeFromTrip(+b.dataset.id));
@@ -381,10 +391,10 @@ function loadGoogle(cb){
 function initMap(){
   var mob=window.matchMedia('(max-width:560px)').matches;
   gmap=new google.maps.Map(document.getElementById('lmap'),{
-    center:{lat:39.5,lng:-98.35},zoom:4,mapTypeId:'terrain',
+    center:{lat:39.5,lng:-98.35},zoom:4,mapTypeId:'roadmap',
     mapTypeControl:true,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid'],position:google.maps.ControlPosition.TOP_RIGHT,style:mob?google.maps.MapTypeControlStyle.DROPDOWN_MENU:google.maps.MapTypeControlStyle.HORIZONTAL_BAR},
     streetViewControl:false,fullscreenControl:false,zoomControl:true,gestureHandling:'greedy',
-    styles:[{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}]
+    styles: window.PARKBUDDY_MAP_STYLE || [{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}]
   });
   PARKS.forEach(function(p){
     var mk=new google.maps.Marker({position:{lat:p.lat,lng:p.lng},title:p.name+' · '+p.state,

@@ -122,7 +122,7 @@
     if(t.action==='passport'){openPassport();return;}
     if(t.action==='signin'){doSignin();return;}
     if(t.action==='soon'){toast(t.h+' is coming soon!');return;}
-    if(t.href){location.href=t.href;}
+    if(t.href){ if(window.__ppTrans){window.__ppTrans.go(t.href);} else {location.href=t.href;} }
   }
   function openPassport(){ if(window.__ppPassport){window.__ppPassport.open();} else {toast('Passport loads in a moment…');} }
 
