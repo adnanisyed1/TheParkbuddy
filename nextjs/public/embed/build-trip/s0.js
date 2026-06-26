@@ -3,7 +3,7 @@ var PARKS=window.TRIP_PARKS||[], PREBUILT=window.TRIP_PREBUILT||[];
 var byId={}; PARKS.forEach(function(p){byId[p.id]=p;});
 var NIGHTS={1:3,4:2,5:2,7:2,8:3,9:2,13:2,14:2,16:2,19:2,20:2,21:3,24:2,25:2,28:2,30:2,33:2,37:3,41:2,48:2,54:2,56:2,57:2,58:2,60:2,61:3};
 var CARS={none:{label:"My own car",mpg:26,rate:0},economy:{label:"Economy car",mpg:32,rate:45},midsize:{label:"Midsize car",mpg:28,rate:55},suv:{label:"SUV",mpg:22,rate:85},minivan:{label:"Minivan / Van",mpg:20,rate:95}};
-var trip={name:"",startDate:"",travelers:2,car:"midsize",gas:3.5,hotel:130,food:40,stops:[]};
+var trip={name:"",startDate:"",travelers:2,car:"midsize",gas:3.5,hotel:130,food:40,stops:[],ovr:{}};
 // stop: {pid|name,lat,lng,custom,kind, nights, lodge, hidden}
 
 function stopLL(s){ if(s.pid){var p=byId[s.pid];return p?[p.lat,p.lng]:null;} return [s.lat,s.lng]; }
@@ -112,28 +112,53 @@ function costParts(){
   var mi=totalMiles(),days=tripDays(),nights=totalNights(),car=CARS[trip.car]||CARS.midsize;
   var trav=Math.max(1,trip.travelers||1);
   var fuel=car.mpg?mi/car.mpg*(trip.gas||3.5):0;
-  var rental=car.rate*days;
-  var lodging=nights*(trip.hotel||0);
+  var rentalEst=car.rate*days;
+  var lodgingEst=nights*(trip.hotel||0);
   var parks=visibleStops().filter(function(s){return s.pid;}).length;
   var passNote=parks>2;
-  var parkFees=passNote?80:parks*35;
+  var ticketsEst=passNote?80:parks*35;
   var foodc=days*trav*(trip.food||0);
-  return {fuel:fuel,rental:rental,lodging:lodging,parkFees:parkFees,food:foodc,parks:parks,passNote:passNote,nights:nights,days:days,car:car,trav:trav,mi:mi};
+  // manual overrides — when a user enters their real price it wins over the estimate
+  var ovr=trip.ovr||{};
+  var rental=(ovr.rental!=null)?ovr.rental:rentalEst;
+  var lodging=(ovr.lodging!=null)?ovr.lodging:lodgingEst;
+  var tickets=(ovr.tickets!=null)?ovr.tickets:ticketsEst;
+  return {fuel:fuel,rental:rental,rentalEst:rentalEst,lodging:lodging,lodgingEst:lodgingEst,parkFees:tickets,ticketsEst:ticketsEst,food:foodc,parks:parks,passNote:passNote,nights:nights,days:days,car:car,trav:trav,mi:mi,ovr:ovr};
 }
 function costTotal(){var c=costParts();return c.fuel+c.rental+c.lodging+c.parkFees+c.food;}
 function money(n){return '$'+Math.round(n).toLocaleString();}
+function setOvr(k,v){trip.ovr=trip.ovr||{};if(v==null||v===''||isNaN(v)){delete trip.ovr[k];}else{trip.ovr[k]=Math.max(0,v);}renderCost();renderStats();save();}
 function renderCost(){
   var c=costParts(),el=document.getElementById('costlines');
+  // [icon, sublabel, value, overrideKey|null, estimate]
   var rows=[
-    ['⛽ Fuel', c.car.mpg?Math.round(c.mi)+' mi · '+c.car.mpg+' mpg':'—', c.fuel],
-    ['🚗 '+c.car.label, c.car.rate?('$'+c.car.rate+'/day × '+c.days+' days'):'using your own car', c.rental],
-    ['🏨 Lodging', c.nights+' nights × $'+(trip.hotel||0), c.lodging],
-    ['🎟️ Park entry', c.passNote?'America the Beautiful annual pass':(c.parks+' park'+(c.parks!==1?'s':'')+' × $35'), c.parkFees],
-    ['🍽️ Food', c.days+' days × '+c.trav+' ppl × $'+(trip.food||0), c.food]
+    ['⛽ Fuel', c.car.mpg?Math.round(c.mi)+' mi · '+c.car.mpg+' mpg':'—', c.fuel, null, c.fuel],
+    ['🚗 '+c.car.label, c.car.rate?('est. $'+c.car.rate+'/day × '+c.days+' days'):'using your own car', c.rental, 'rental', c.rentalEst],
+    ['🏨 Lodging', 'est. '+c.nights+' nights × $'+(trip.hotel||0), c.lodging, 'lodging', c.lodgingEst],
+    ['🎟️ Park entry / tickets', c.passNote?'est. America the Beautiful annual pass':('est. '+c.parks+' park'+(c.parks!==1?'s':'')+' × $35'), c.parkFees, 'tickets', c.ticketsEst],
+    ['🍽️ Food', c.days+' days × '+c.trav+' ppl × $'+(trip.food||0), c.food, null, c.food]
   ];
-  el.innerHTML=rows.map(function(r){return '<div class="line"><div class="lt">'+r[0]+'<small>'+r[1]+'</small></div><div class="amt">'+money(r[2])+'</div></div>';}).join('');
+  el.innerHTML=rows.map(function(r){
+    var key=r[3], overridden=key&&c.ovr[key]!=null;
+    var amt;
+    if(key){
+      amt='<span class="amtwrap'+(overridden?' set':'')+'">$<input class="ovrin" data-k="'+key+'" inputmode="decimal" value="'+Math.round(r[2])+'" title="Type your own price">'+
+        (overridden?'<button class="ovrreset" data-k="'+key+'" title="Back to estimate">↺</button>':'')+'</span>';
+    } else {
+      amt='<span class="amt">'+money(r[2])+'</span>';
+    }
+    var tag=overridden?' <em class="yourprice">your price</em>':'';
+    return '<div class="line"><div class="lt">'+r[0]+'<small>'+r[1]+tag+'</small></div>'+amt+'</div>';
+  }).join('');
   document.getElementById('costtotal').textContent=money(costTotal());
   document.getElementById('costper').textContent=c.trav>1?(money(costTotal()/c.trav)+' per person'):'';
+  el.querySelectorAll('.ovrin').forEach(function(inp){
+    inp.onchange=function(){setOvr(inp.getAttribute('data-k'),parseFloat(inp.value));};
+    inp.onkeydown=function(e){if(e.key==='Enter'){inp.blur();}};
+  });
+  el.querySelectorAll('.ovrreset').forEach(function(b){
+    b.onclick=function(){setOvr(b.getAttribute('data-k'),null);};
+  });
 }
 
 /* map */
@@ -279,10 +304,11 @@ function syncLinks(){
 
 /* persistence */
 function save(){try{localStorage.setItem('pp_trip2',JSON.stringify(shareCompact()));}catch(e){}}
-function shareCompact(){return {n:trip.name,d:trip.startDate,t:trip.travelers,c:trip.car,gas:trip.gas,ho:trip.hotel,fo:trip.food,s:trip.stops};}
+function shareCompact(){return {n:trip.name,d:trip.startDate,t:trip.travelers,c:trip.car,gas:trip.gas,ho:trip.hotel,fo:trip.food,ov:trip.ovr,s:trip.stops};}
 function loadCompact(c){
   trip.name=c.n||'';trip.startDate=c.d||'';trip.travelers=c.t||2;trip.car=c.c||'midsize';
   if(c.gas!=null)trip.gas=c.gas;if(c.ho!=null)trip.hotel=c.ho;if(c.fo!=null)trip.food=c.fo;
+  trip.ovr=(c.ov&&typeof c.ov==='object')?c.ov:{};
   trip.stops=(c.s||[]).map(function(x){
     if(x.pid!=null||x.p!=null){return {pid:(x.pid!=null?x.pid:x.p),nights:(x.ni!=null?x.ni:x.nights),lodge:x.lo||x.lodge||'',hidden:!!x.hidden};}
     if(x.c){return {name:x.c[0],lat:x.c[1],lng:x.c[2],custom:true,kind:x.k||'',nights:(x.ni!=null?x.ni:0),lodge:x.lo||'',hidden:!!x.hidden};}

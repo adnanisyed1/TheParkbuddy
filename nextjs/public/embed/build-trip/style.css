@@ -90,6 +90,13 @@ select:focus,input.tin:focus{border-color:var(--accent)}
 .cost .line:first-child{border-top:none}
 .cost .line .lt{color:#4c5443}.cost .line .lt small{color:var(--muted);font-size:.72rem;display:block}
 .cost .line .amt{font-weight:700;color:var(--accent);font-family:'Spectral',serif}
+.cost .line .lt small em.yourprice{font-style:normal;color:var(--gold);font-weight:700}
+.amtwrap{display:inline-flex;align-items:center;gap:3px;font-family:'Spectral',serif;font-weight:700;color:var(--accent);border:1px solid transparent;border-radius:8px;padding:2px 4px;transition:border-color .15s,background .15s}
+.amtwrap:hover{border-color:var(--border);background:#fff}
+.amtwrap.set{border-color:var(--gold);background:#fffbf0}
+.amtwrap .ovrin{width:62px;border:none;background:transparent;font-family:'Spectral',serif;font-weight:700;font-size:.95rem;color:var(--accent);text-align:right;padding:2px 0;outline:none;-moz-appearance:textfield}
+.amtwrap .ovrin::-webkit-outer-spin-button,.amtwrap .ovrin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.amtwrap .ovrreset{border:none;background:transparent;color:var(--gold);cursor:pointer;font-size:.95rem;line-height:1;padding:0 2px}
 .cost .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;padding-top:11px;border-top:2px solid var(--gold)}
 .cost .total .lt{font-family:'Spectral',serif;font-size:1.05rem;color:var(--head);font-weight:600}
 .cost .total .amt{font-family:'Spectral',serif;font-size:1.5rem;color:var(--accent);font-weight:700}

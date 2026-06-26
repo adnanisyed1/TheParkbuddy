@@ -279,30 +279,50 @@
   }
 
   // ---------- top-right control ----------
-  function topRight() {
-    var ex = document.getElementById("pp-acct"); if (ex) ex.remove();
-    if (!document.body) return;
-    var wrap = document.createElement("div");
-    wrap.id = "pp-acct";
-    wrap.style.cssText = "position:fixed;top:13px;right:15px;z-index:99990;font-family:" + FONT;
+  // Prefer mounting INTO the page header (inline with the nav) so it never
+  // floats over existing buttons; fall back to a fixed pin if no header.
+  function mountTarget() {
+    var header = document.querySelector("#embed-root header") || document.querySelector("header");
+    if (!header) return null;
+    var nav = header.querySelector("nav");
+    if (nav) return nav;
+    var groups = header.querySelectorAll(":scope > div");
+    if (groups.length >= 2) return groups[groups.length - 1];
+    return header;
+  }
+  function buildControl() {
     if (user) {
       var meta = user.user_metadata || {};
       var name = (getPrefs().name || meta.full_name || meta.name || user.email || "U");
       var pic = meta.avatar_url || meta.picture || "";
       var btn = document.createElement("button");
       btn.setAttribute("aria-label", "Open account");
-      btn.style.cssText = "width:38px;height:38px;border-radius:999px;border:2px solid " + CREAM + ";cursor:pointer;overflow:hidden;background:" + GREEN + ";color:#fff;font-weight:700;font-size:15px;box-shadow:0 2px 10px rgba(0,0,0,.28);padding:0;display:flex;align-items:center;justify-content:center";
+      btn.style.cssText = "width:36px;height:36px;border-radius:999px;border:2px solid " + CREAM + ";cursor:pointer;overflow:hidden;background:" + GREEN + ";color:#fff;font-weight:700;font-size:14px;box-shadow:0 1px 5px rgba(0,0,0,.25);padding:0;display:flex;align-items:center;justify-content:center";
       btn.innerHTML = pic ? '<img src="' + esc(pic) + '" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" alt="">' : (name[0] || "U").toUpperCase();
       btn.onclick = openAccount;
-      wrap.appendChild(btn);
-    } else {
-      var pill = document.createElement("button");
-      pill.style.cssText = "display:flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;border:1px solid #e6ddc9;background:" + CREAM + ";color:" + INK + ";font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.16)";
-      pill.innerHTML = GOOGLE_SVG + "Sign in";
-      pill.onclick = openAccount;
-      wrap.appendChild(pill);
+      return btn;
     }
-    document.body.appendChild(wrap);
+    var pill = document.createElement("button");
+    pill.style.cssText = "display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:" + CREAM + ";color:" + INK + ";font-family:" + FONT + ";font-weight:600;font-size:.8rem;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.18);white-space:nowrap";
+    pill.innerHTML = GOOGLE_SVG + "Sign in";
+    pill.onclick = openAccount;
+    return pill;
+  }
+  function topRight() {
+    var ex = document.getElementById("pp-acct"); if (ex) ex.remove();
+    if (!document.body) return;
+    var ctrl = buildControl();
+    var wrap = document.createElement("span");
+    wrap.id = "pp-acct";
+    var t = mountTarget();
+    if (t) {
+      wrap.style.cssText = "display:inline-flex;align-items:center;margin-left:4px;font-family:" + FONT;
+      t.appendChild(wrap);
+    } else {
+      wrap.style.cssText = "position:fixed;top:13px;right:15px;z-index:99990;font-family:" + FONT;
+      document.body.appendChild(wrap);
+    }
+    wrap.appendChild(ctrl);
   }
 
   function render() { topRight(); }
