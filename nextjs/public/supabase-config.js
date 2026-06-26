@@ -9,5 +9,5 @@
 
    Until you fill these in, accounts stay OFF and the app works exactly as before
    (everything saved locally in the browser). */
-window.SUPABASE_URL = "YOUR_SUPABASE_URL";
-window.SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+window.SUPABASE_URL = "https://fsgmwersernbtjugkuhk.supabase.co";
+window.SUPABASE_ANON_KEY = "sb_publishable_XWefJHwU9mPJ9frijodnfQ_XBXFEUnn";
