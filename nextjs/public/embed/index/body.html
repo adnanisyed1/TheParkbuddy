@@ -1,0 +1,67 @@
+
+<header>
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg>
+    <h1>National Parks of the USA</h1></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/build-trip" style="color:#163a2b;text-decoration:none;font-size:.82rem;font-weight:700;background:var(--gold);padding:7px 14px;border-radius:999px">Build a Trip</a>
+    <button id="bantoggle" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--onDark);font-size:.74rem;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer">About ▴</button>
+    <div class="count" id="count">63 parks</div>
+  </div>
+</header>
+<div class="banner open" id="banner">
+  <div class="bcol"><p class="bk">Explore America's</p><h2>National Parks</h2><p class="btag">Live data · Reviews · Trip planning</p></div>
+  <div class="bfeat"><span>🗺️</span><div><b>Interactive Map</b><p>All 63 parks on a real terrain map — pan, zoom, and click any marker.</p></div></div>
+  <div class="bfeat"><span>📡</span><div><b>Live Park Data</b><p>Real-time weather, the forecast, and active alerts per park.</p></div></div>
+  <div class="bfeat"><span>⚑</span><div><b>Official NPS Info</b><p>Photos, hours, fees, and official closures for every park.</p></div></div>
+  <div class="bfeat"><span>✨</span><div><b>Trip Planner</b><p>Answer 8 questions and get a personalized itinerary.</p></div></div>
+</div>
+<div class="body">
+  <div class="mid">
+    <aside class="info" id="info">
+      <button class="ix" id="ix">&times;</button>
+      <div class="itabs">
+        <button class="itab on" data-itab="live">Live</button>
+        <button class="itab" data-itab="about">About</button>
+      </div>
+      <div class="ibody">
+        <div class="ipane on" id="ip-live"></div>
+        <div class="ipane" id="ip-about"></div>
+      </div>
+    </aside>
+    <main class="map">
+      <div id="lmap"></div>
+      <div class="topbar" id="topbar"></div>
+    </main>
+    <aside class="dash" id="dash">
+      <button class="mobtab" id="mobtab">▲ My Trip (0)</button>
+      <div class="cart-h">
+        <div>
+          <div class="cart-t">My Trip</div>
+          <div class="cart-sub" id="cart-sub">No parks yet</div>
+        </div>
+        <button class="cart-clear" id="cart-clear" style="display:none">Clear</button>
+      </div>
+      <div class="cart-stats" id="cart-stats"></div>
+      <div class="dbody" id="cart-body"></div>
+      <div class="cart-foot" id="cart-foot"></div>
+    </aside>
+  </div>
+  <div class="strip" id="strip"></div>
+</div>
+<div class="vtoggle" id="vtoggle"><button data-v="live">📡 Live status</button><button data-v="trip">🧭 Trip tools</button></div>
+
+<!-- ParkPulse Planner Bubble (self-contained, drop on any page) -->
+
+<button id="ppb-fab" aria-label="Plan a trip">🧭</button>
+<div id="ppb-panel" role="dialog" aria-label="Trip planner">
+  <div class="ppb-head">
+    <span class="av">🌲</span>
+    <div class="t"><b>Plan a Trip</b><span>ParkPulse assistant</span></div>
+    <button id="ppb-pin" title="Pin to side">⇥</button>
+    <button id="ppb-close" title="Close">✕</button>
+  </div>
+  <div class="ppb-body" id="ppb-body"></div>
+</div>
+
+<!-- /ParkPulse Planner Bubble -->
+
