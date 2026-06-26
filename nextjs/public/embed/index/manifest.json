@@ -18,6 +18,7 @@
     "/parks-data.js",
     "/passport.js",
     "/map-style.js",
-    "/transition.js"
+    "/transition.js",
+    "/explore-intro.js"
   ]
 }
