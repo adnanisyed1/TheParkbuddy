@@ -162,12 +162,35 @@ function renderLive(){
   const el=document.getElementById("ip-live"); if(!el)return;
   if(!selected){ el.innerHTML=pickPrompt("see its live weather and alerts"); return; }
   const p=selected;
-  el.innerHTML=`<div class="dh2">${p.name}</div><div class="dh2sub">${p.state} · live conditions</div>`+
+  el.innerHTML=`<div class="phero" id="phero"><div class="phero-fade"></div><div class="phero-name">${p.name}<span>${p.state} · live conditions</span></div></div>`+
     `<div class="alertflag" id="pkalert" style="display:none"></div>`+
     `<div class="wxcard"><div class="lbl">Current Conditions</div><div id="wxbody">Loading live conditions…</div></div>`+
+    `<div class="pcard-acts"><button class="pca-add" id="pca-add">＋ Add to trip</button><button class="pca-stamp" id="pca-stamp">🛂 Stamp</button></div>`+
     `<a class="gobtn" href="/park-status?park=${p.id}">View full live status &rarr;</a>`;
+  loadHero(p);
+  wirePcardActions(p);
   if(p.region!=="territory"){ loadWeather(p); loadPeekAlert(p); }
   else { const b=document.getElementById("wxbody"); if(b)b.innerHTML='<span style="color:#9a937f">Outside the National Weather Service coverage area.</span>'; }
+}
+function loadHero(p){
+  var h=document.getElementById("phero"); if(!h)return;
+  fetchNPS(p.name).then(function(d){
+    var img=d&&d.park&&d.park.images&&d.park.images[0]?d.park.images[0].url:null;
+    var hh=document.getElementById("phero"); if(hh&&img){hh.style.backgroundImage="url('"+img+"')";hh.classList.add("loaded");}
+  }).catch(function(){});
+}
+function wirePcardActions(p){
+  var add=document.getElementById("pca-add");
+  if(add){
+    var inTrip=myTrip&&myTrip.some(function(x){return x.id===p.id;});
+    if(inTrip){add.textContent="✓ In your trip";add.classList.add("added");add.disabled=true;}
+    add.onclick=function(){ if(typeof addToTrip==='function')addToTrip(p); add.textContent="✓ In your trip";add.classList.add("added");add.disabled=true; };
+  }
+  var st=document.getElementById("pca-stamp");
+  if(st)st.onclick=function(){
+    try{var arr=JSON.parse(localStorage.getItem("pp_stamped")||"[]");if(!arr.some(function(x){return x.id===p.id;})){arr.push({id:p.id,year:String(new Date().getFullYear())});localStorage.setItem("pp_stamped",JSON.stringify(arr));}}catch(e){}
+    st.textContent="🛂 Stamped!";
+  };
 }
 function renderAbout(){
   const el=document.getElementById("ip-about"); if(!el)return;
@@ -392,8 +415,8 @@ function initMap(){
   var mob=window.matchMedia('(max-width:560px)').matches;
   gmap=new google.maps.Map(document.getElementById('lmap'),{
     center:{lat:39.5,lng:-98.35},zoom:4,mapTypeId:'roadmap',
-    mapTypeControl:true,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid'],position:google.maps.ControlPosition.TOP_RIGHT,style:mob?google.maps.MapTypeControlStyle.DROPDOWN_MENU:google.maps.MapTypeControlStyle.HORIZONTAL_BAR},
-    streetViewControl:false,fullscreenControl:false,zoomControl:true,gestureHandling:'greedy',
+    mapTypeControl:true,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid'],position:google.maps.ControlPosition.BOTTOM_LEFT,style:mob?google.maps.MapTypeControlStyle.DROPDOWN_MENU:google.maps.MapTypeControlStyle.HORIZONTAL_BAR},
+    streetViewControl:false,fullscreenControl:false,zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_BOTTOM},gestureHandling:'greedy',
     styles: window.PARKBUDDY_MAP_STYLE || [{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}]
   });
   PARKS.forEach(function(p){
@@ -406,6 +429,58 @@ function initMap(){
   mapReady=true;
   applyMapFilter(false);
   paintMarkers();
+  setupLocate();
+}
+/* ----- "Parks near me": fly to location, ripple nearby parks ----- */
+function setupLocate(){
+  if(document.getElementById('ex-locate'))return;
+  var root=document.querySelector('.map')||document.getElementById('embed-root'); if(!root)return;
+  var btn=document.createElement('button');
+  btn.id='ex-locate';
+  btn.innerHTML='<span class="pin"></span>Parks near me';
+  root.appendChild(btn);
+  btn.onclick=flyToMe;
+}
+function flyToMe(){
+  var btn=document.getElementById('ex-locate');
+  if(!navigator.geolocation){ if(typeof toast==='function')toast('Location not available on this device.'); return; }
+  if(btn)btn.innerHTML='<span class="pin"></span>Locating…';
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var me={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    if(btn)btn.innerHTML='<span class="pin"></span>Parks near me';
+    // "you are here" marker
+    if(window._meMarker)window._meMarker.setMap(null);
+    window._meMarker=new google.maps.Marker({position:me,map:gmap,zIndex:9999,
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#2a6fdb',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}});
+    // nearest parks by distance
+    var near=PARKS.filter(function(p){return p.region!=='territory';})
+      .map(function(p){return {p:p,d:haversine(me,p)};}).sort(function(a,b){return a.d-b.d;}).slice(0,6);
+    gmap.panTo(me); gmap.setZoom(6);
+    // ripple rings outward, then reveal nearest
+    rippleRings(me);
+    near.forEach(function(o,i){ setTimeout(function(){ bounceMarker(o.p); },350+i*180); });
+    setTimeout(function(){
+      var b=new google.maps.LatLngBounds(); b.extend(me); near.slice(0,4).forEach(function(o){b.extend({lat:o.p.lat,lng:o.p.lng});});
+      gmap.fitBounds(b,80);
+      if(typeof toast==='function')toast('Nearest park: '+near[0].p.name+' · '+Math.round(near[0].d)+' mi');
+    },1700);
+  },function(){ if(btn)btn.innerHTML='<span class="pin"></span>Parks near me'; if(typeof toast==='function')toast('Could not get your location.'); },{enableHighAccuracy:true,timeout:8000});
+}
+function rippleRings(center){
+  var n=0;
+  var iv=setInterval(function(){
+    if(n++>=3){clearInterval(iv);return;}
+    var c=new google.maps.Circle({center:center,radius:1,map:gmap,strokeColor:'#e4be78',strokeOpacity:.8,strokeWeight:2,fillColor:'#e4be78',fillOpacity:.08,clickable:false,zIndex:1});
+    var r=1,grow=setInterval(function(){
+      r+=18000; c.setRadius(r);
+      var op=Math.max(0,.8-(r/420000)); c.setOptions({strokeOpacity:op,fillOpacity:op*0.1});
+      if(r>420000){clearInterval(grow);c.setMap(null);}
+    },24);
+  },360);
+}
+function bounceMarker(p){
+  var mk=gmarkersById[p.id]; if(!mk||!mapReady)return;
+  if(window.google&&google.maps.Animation){ mk.setAnimation(google.maps.Animation.BOUNCE); setTimeout(function(){mk.setAnimation(null);},1400); }
 }
 function applyMapFilter(fit){
   if(!mapReady)return;

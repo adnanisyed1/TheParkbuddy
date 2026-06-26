@@ -262,3 +262,40 @@ body.ppb-pinned-pad{padding-right:380px}
 .ppb-act button,.ppb-act a{font-size:.78rem;font-weight:600;padding:8px 12px;border-radius:8px;cursor:pointer;border:none;text-decoration:none}
 .ppb-act .p{background:#1d4a37;color:#fff}.ppb-act .g{background:#fff;border:1.5px solid #e3d9c5;color:#1d4a37}
 @media(max-width:560px){#ppb-panel.pinned{width:100%;border-left:none}body.ppb-pinned-pad{padding-right:0}#ppb-panel{width:calc(100vw - 32px);height:70vh}}
+
+/* ===== Photographic park card (all viewports) ===== */
+.phero{height:152px;border-radius:14px;background:#1d4a37 center/cover no-repeat;position:relative;margin-bottom:14px;overflow:hidden;box-shadow:0 10px 26px -12px rgba(20,36,28,.55)}
+.phero.loaded{background-color:#0e2a1d}
+.phero-fade{position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(15,36,28,.88))}
+.phero-name{position:absolute;left:14px;bottom:11px;right:14px;z-index:1;color:#fff;font-family:'Spectral',serif;font-weight:700;font-size:1.32rem;line-height:1.08;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+.phero-name span{display:block;font-family:'Hanken Grotesk',sans-serif;font-weight:600;font-size:.74rem;opacity:.88;margin-top:3px;letter-spacing:.01em}
+.pcard-acts{display:flex;gap:8px;margin:0 0 12px}
+.pca-add,.pca-stamp{flex:1;padding:11px;border-radius:10px;border:none;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer}
+.pca-add{background:var(--accent);color:#fff}
+.pca-add.added{background:#eef4e6;color:var(--accent);border:1px solid var(--border);cursor:default}
+.pca-stamp{background:var(--gold);color:#163a2b}
+
+/* ===== Immersive full-bleed Explore (desktop) ===== */
+@media(min-width:861px){
+  .banner{display:none!important}
+  header{position:absolute;top:0;left:0;right:0;z-index:600;background:linear-gradient(180deg,rgba(16,32,24,.86),rgba(16,32,24,.32) 78%,transparent);border-bottom:none!important;box-shadow:none!important;padding:15px 24px}
+  .body{position:absolute;inset:0}
+  .mid{position:relative;flex:1}
+  .map{position:absolute!important;inset:0!important;box-shadow:none!important}
+  .strip{display:none!important}
+  .topbar{top:74px!important;left:50%!important;right:auto!important;transform:translateX(-50%);background:rgba(255,253,247,.7)!important;-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border-radius:999px!important;padding:6px 8px!important;box-shadow:0 12px 30px -12px rgba(20,36,28,.5)!important;gap:6px!important}
+  /* floating glass park card (left) */
+  .info{position:absolute;top:80px;left:18px;bottom:auto;max-height:calc(100vh - 150px);width:0;flex:none;border:none!important;border-radius:18px;background:rgba(255,253,247,.85)!important;-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 22px 52px -16px rgba(20,36,28,.55);transition:transform .32s cubic-bezier(.2,.8,.3,1),opacity .25s;transform:translateX(-20px);opacity:0;pointer-events:none;z-index:520}
+  .info.open{width:368px;transform:none;opacity:1;pointer-events:auto}
+  .info .ibody{padding:16px}
+  .itabs{background:rgba(243,246,239,.6);border-radius:18px 18px 0 0}
+  /* floating glass trip dock (right) */
+  .dash{position:absolute;top:80px;right:18px;bottom:auto;max-height:calc(100vh - 150px);width:344px;flex:none;border:none!important;border-radius:18px;overflow:hidden;background:rgba(255,253,247,.88)!important;-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 22px 52px -16px rgba(20,36,28,.55);z-index:520}
+  .cart-h{background:linear-gradient(180deg,rgba(29,74,55,.08),transparent)}
+  /* floating locate button (bottom center) */
+  #ex-locate{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:540;display:flex;align-items:center;gap:9px;background:rgba(16,32,24,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fbf6ea;border:1px solid rgba(228,190,120,.4);border-radius:999px;padding:12px 22px;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:.86rem;cursor:pointer;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+  #ex-locate:hover{background:#0e2a1d}
+  #ex-locate .pin{width:9px;height:9px;border-radius:50%;background:#e4be78;box-shadow:0 0 0 0 rgba(228,190,120,.6);animation:exlocpulse 2s infinite}
+}
+@keyframes exlocpulse{0%{box-shadow:0 0 0 0 rgba(228,190,120,.55)}70%{box-shadow:0 0 0 10px rgba(228,190,120,0)}100%{box-shadow:0 0 0 0 rgba(228,190,120,0)}}
+@media(max-width:860px){ #ex-locate{position:fixed;left:50%;transform:translateX(-50%);bottom:74px;z-index:1499;display:flex;align-items:center;gap:8px;background:#163a2b;color:#fbf6ea;border:1px solid var(--gold);border-radius:999px;padding:11px 18px;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;box-shadow:0 12px 28px -8px rgba(0,0,0,.5)} #ex-locate .pin{width:8px;height:8px;border-radius:50%;background:#e4be78} }
