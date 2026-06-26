@@ -116,6 +116,8 @@ select:focus,input.tin:focus{border-color:var(--accent)}
 .wa{background:#1faa55;color:#fff}.wa:hover{background:#17924a}
 .sms{background:#2b7de0;color:#fff}.sms:hover{background:#216fcc}
 .clearbtn{margin-top:11px;width:100%;background:none;border:1px solid var(--border);color:#9a6a52;border-radius:9px;padding:8px;font-size:.78rem;font-weight:600;cursor:pointer}
+.passportbtn{margin-top:13px;width:100%;background:#1d4a37;color:#fbf6ea;border:1px solid rgba(199,154,75,.45);border-radius:10px;padding:12px;font-size:.86rem;font-weight:700;cursor:pointer;font-family:inherit}
+.passportbtn:hover{background:#163a2b}
 .clearbtn:hover{border-color:#b06a4a;color:#b06a4a}
 .toggle{display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0}
 .toggle input{accent-color:var(--accent)}

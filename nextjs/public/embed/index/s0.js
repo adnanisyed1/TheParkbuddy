@@ -250,7 +250,13 @@ function renderCart(){
   }
   body.innerHTML=html;
   const foot=document.getElementById('cart-foot');
-  if(foot) foot.innerHTML=`<a class="cart-build ${myTrip.length?'':'dis'}" href="${myTrip.length?buildTripURL():'#'}">Build full itinerary \u2192</a><div class="hint">${myTrip.length?('Sends your '+st.parks+' park'+(st.parks!==1?'s':'')+' to the planner for real drive times, dates &amp; costs.'):'Add parks, then send them to the trip planner.'}</div>`;
+  if(foot){
+    foot.innerHTML=`<a class="cart-build ${myTrip.length?'':'dis'}" href="${myTrip.length?buildTripURL():'#'}">Build full itinerary \u2192</a>`+
+      `<button class="cart-passport ${myTrip.length?'':'dis'}" id="cart-passport" ${myTrip.length?'':'disabled'}>🛂 Create Trip Passport</button>`+
+      `<div class="hint">${myTrip.length?('Sends your '+st.parks+' park'+(st.parks!==1?'s':'')+' to the planner for real drive times, dates &amp; costs.'):'Add parks, then send them to the trip planner.'}</div>`;
+    const pp=document.getElementById('cart-passport');
+    if(pp)pp.onclick=()=>{ if(window.__ppPassport)window.__ppPassport.open(); };
+  }
   const ab=document.getElementById('cart-addbtn'); if(ab)ab.onclick=()=>addToTrip(selected);
   body.querySelectorAll('.ci-x').forEach(b=>b.onclick=()=>removeFromTrip(+b.dataset.id));
   body.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addToTrip(PARKS.find(p=>p.id===+b.getAttribute('data-add'))));

@@ -340,6 +340,8 @@ function boot(){
   document.getElementById('hotel').addEventListener('input',function(e){trip.hotel=parseFloat(e.target.value)||0;renderCost();renderStats();save();});
   document.getElementById('food').addEventListener('input',function(e){trip.food=parseFloat(e.target.value)||0;renderCost();renderStats();save();});
   document.getElementById('showmap').addEventListener('change',function(e){routeVisible=e.target.checked;drawMap(false);});
+  var ppb=document.getElementById('passportbtn');
+  if(ppb)ppb.onclick=function(){ save(); if(window.__ppPassport){window.__ppPassport.open();} else {toast('Passport loads in a moment…');} };
   document.getElementById('addpark').onclick=function(){var v=document.getElementById('parksel').value;if(!v)return;trip.stops.push({pid:+v,nights:NIGHTS[+v]||1,lodge:''});document.getElementById('parksel').value='';render(true);};
   document.getElementById('addcustom').onclick=function(){
     var nm=(document.getElementById('cname').value||'').trim(),co=(document.getElementById('ccoord').value||'').trim();

@@ -12,7 +12,7 @@
 
    Loads AFTER the Supabase browser client (CDN) and supabase-config.js. */
 (function () {
-  var TRACK = ["pp_trip2", "pp_map_trip", "pp_favorites", "pp_prefs"];
+  var TRACK = ["pp_trip2", "pp_map_trip", "pp_favorites", "pp_prefs", "pp_stamped"];
 
   function configured() {
     var u = window.SUPABASE_URL, k = window.SUPABASE_ANON_KEY;
@@ -282,6 +282,8 @@
   // Prefer mounting INTO the page header (inline with the nav) so it never
   // floats over existing buttons; fall back to a fixed pin if no header.
   function mountTarget() {
+    var slot = document.getElementById("pp-acct-slot");
+    if (slot) return slot;
     var header = document.querySelector("#embed-root header") || document.querySelector("header");
     if (!header) return null;
     var nav = header.querySelector("nav");
@@ -330,7 +332,7 @@
 
   window.__ppAuth = { render: render, supa: supa, openAccount: openAccount, showWelcome: showWelcome };
 
-  function mount() { render(); maybeWelcome(); }
+  function mount() { render(); }
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
 
   supa.auth.getSession().then(function (res) {
@@ -341,7 +343,7 @@
       pullCloud().then(function (changed) {
         if (changed && !sessionStorage.getItem("pp_resynced")) { sessionStorage.setItem("pp_resynced", "1"); location.reload(); }
       });
-    } else { sessionStorage.removeItem("pp_resynced"); maybeWelcome(); }
+    } else { sessionStorage.removeItem("pp_resynced"); }
   });
 
   supa.auth.onAuthStateChange(function (evt, session) {

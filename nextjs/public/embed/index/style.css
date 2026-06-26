@@ -136,6 +136,9 @@ select{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:
 .cart-foot{flex:none;padding:12px 16px;border-top:1px solid var(--border)}
 .cart-build{display:block;width:100%;text-align:center;background:var(--gold);color:#163a2b;padding:13px;border-radius:11px;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none}
 .cart-build.dis{opacity:.45;cursor:not-allowed;pointer-events:none}
+.cart-passport{display:block;width:100%;text-align:center;background:#1d4a37;color:#fbf6ea;border:1px solid rgba(199,154,75,.4);padding:12px;border-radius:11px;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:9px;font-family:inherit}
+.cart-passport:hover{background:#163a2b}
+.cart-passport.dis{opacity:.45;cursor:not-allowed;pointer-events:none}
 .cart-foot .hint{font-size:.7rem;color:var(--muted);text-align:center;margin-top:8px;line-height:1.45}
 .mobtab{display:none}
 @media(max-width:860px){

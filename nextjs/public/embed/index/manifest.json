@@ -14,6 +14,8 @@
     "/embed/index/s2.js",
     "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
     "/supabase-config.js",
-    "/auth.js"
+    "/auth.js",
+    "/parks-data.js",
+    "/passport.js"
   ]
 }

@@ -1,7 +1,7 @@
 "use client";
 import EmbeddedSite from "./components/EmbeddedSite";
 
-// Homepage = your interactive Google Maps + live weather + trip cart page.
+// Homepage = the ParkBuddy animated landing (living scenes + bento mosaic + Trip Passport).
 export default function HomePage() {
-  return <EmbeddedSite page="index" />;
+  return <EmbeddedSite page="landing" />;
 }
