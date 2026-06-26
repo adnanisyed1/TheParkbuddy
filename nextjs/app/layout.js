@@ -5,8 +5,8 @@ const spectral = Spectral({ subsets: ["latin"], weight: ["500", "600", "700", "8
 const hanken = Hanken_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-hanken" });
 
 export const metadata = {
-  title: "ParkPulse — National Parks of the USA",
-  description: "Explore all 63 U.S. national parks on an interactive 3D globe with live weather and conditions.",
+  title: "ParkBuddy — Discover, plan & collect the outdoors",
+  description: "Discover the best parks and lakes near you, build real-road trips, and collect a digital Trip Passport.",
 };
 
 export default function RootLayout({ children }) {

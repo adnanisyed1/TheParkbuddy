@@ -117,6 +117,10 @@
       ".pp2-btn{flex:1;padding:11px;border-radius:10px;border:none;font-family:"+SANS+";font-weight:700;font-size:.82rem;cursor:pointer;text-align:center;text-decoration:none}"+
       ".pp2-btn.gold{background:linear-gradient(120deg,"+GOLD2+","+GOLD+");color:"+INK+"}"+
       ".pp2-btn.ghost{background:#fff;border:1px solid #e3d8c2;color:"+GREEN+"}"+
+      ".pp2-wallet{display:flex;gap:10px;margin-top:14px}"+
+      ".pp2-wbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:11px;border:none;cursor:pointer;background:#15241c;color:#fff;font-family:"+SANS+";font-weight:600;font-size:.8rem}"+
+      ".pp2-wbtn:hover{background:#000}"+
+      ".pp2-wlabel{font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:"+MUTED+";text-align:center;margin-top:16px}"+
       "@media(max-width:660px){.pp2-book{flex-direction:column;height:min(640px,92vh)}.pp2-cover{width:auto;border-right:none;border-bottom:2px dashed rgba(228,190,120,.3);padding:22px}.pp2-emblem{display:none}.pp2-grid{grid-template-columns:repeat(2,1fr)}}";
     document.head.appendChild(st);
   }
@@ -207,11 +211,21 @@
         (ids.length?routeHtml(ids):'')+
       '</div>'+
       (ids.length?('<div class="pp2-sec">Stamps — tap a park you\u2019ve visited</div>'+stampsHtml(ids)):'<div class="pp2-empty">This trip has no national parks to stamp yet.</div>')+
+      '<div class="pp2-wlabel">Save this pass</div>'+
+      '<div class="pp2-wallet">'+
+        '<button class="pp2-wbtn" id="pp2-apple"></button>'+
+        '<button class="pp2-wbtn" id="pp2-google"></button>'+
+      '</div>'+
       '<div class="pp2-actions"><a class="pp2-btn gold" href="/build-trip">Plan another trip</a>'+
       '<button class="pp2-btn ghost" id="pp2-share">Share this card</button></div>';
 
     pages.querySelectorAll(".pp2-chip").forEach(function(b){b.onclick=function(){activeId=b.getAttribute("data-card");render();};});
     pages.querySelectorAll(".pp2-stamp").forEach(function(el){el.onclick=function(){toggleStamp(+el.getAttribute("data-id"),el);};});
+    var ap=pages.querySelector("#pp2-apple"), go=pages.querySelector("#pp2-google");
+    if(ap){ap.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.8 2.2 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7c1.2 0 2-1.1 2.7-2.2.5-.7.9-1.6 1.2-2.5-2.6-1-2.7-3.2-2.7-3.3zM14.2 6.1c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.7-.9 2.8 1 .1 2-.5 2.6-1.3z"/></svg>Apple Wallet';
+      ap.onclick=function(){flash("Apple Wallet passes — coming soon!");};}
+    if(go){go.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" stroke="#fff" stroke-width="1.6"/><path d="M3 10h18" stroke="#fff" stroke-width="1.6"/></svg>Google Wallet';
+      go.onclick=function(){flash("Google Wallet passes — coming soon!");};}
     var sh=pages.querySelector("#pp2-share");
     if(sh)sh.onclick=function(){
       var msg=(card.name||"My ParkBuddy trip")+" — "+ids.length+" national parks"+(card.miles?", "+Math.round(card.miles).toLocaleString()+" miles":"")+". My passport: "+stats().stamped+"/"+TOTAL+"!";

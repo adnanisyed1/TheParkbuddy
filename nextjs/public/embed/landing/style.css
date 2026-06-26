@@ -77,6 +77,31 @@ h1.hero em{font-style:italic;color:var(--gold2)}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(54,184,91,.5)}70%{box-shadow:0 0 0 9px rgba(54,184,91,0)}100%{box-shadow:0 0 0 0 rgba(54,184,91,0)}}
 .tile.status .temp{font-family:var(--serif);font-weight:700;font-size:2.1rem;color:var(--green2);margin-top:2px}
 
+/* live internal tile motion */
+.tile .ti{animation:tfloat 5s ease-in-out infinite}
+.tile:nth-child(2n) .ti{animation-delay:-1.6s}
+.tile:nth-child(3n) .ti{animation-delay:-3s}
+@keyframes tfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* eye-catching animated Explore map tile */
+.tile.explore{grid-column:span 2;grid-row:span 2;background:radial-gradient(120% 90% at 70% 10%,#1b4634,#0c241a 80%);border:1px solid rgba(228,190,120,.28);color:var(--cream);overflow:hidden}
+.tile.explore h3{color:var(--cream);font-size:1.7rem}
+.tile.explore p{color:rgba(251,246,234,.8);font-size:.92rem;max-width:30ch}
+.tile.explore .ti{font-size:2rem}
+.tile.explore .go{background:rgba(228,190,120,.2);color:var(--gold2)}
+.tile.explore:hover .go{background:var(--gold);color:#15241c}
+.tile.explore>.ti,.tile.explore>div:not(.exmap),.tile.explore>.go{position:relative;z-index:2}
+.exmap{position:absolute;inset:0;z-index:0}
+.exmap svg{position:absolute;inset:0;width:100%;height:100%}
+.exmap .blob{fill:rgba(228,190,120,.05);stroke:rgba(228,190,120,.18);stroke-width:1}
+.exmap .route{fill:none;stroke:rgba(228,190,120,.5);stroke-width:2;stroke-linecap:round;stroke-dasharray:520;stroke-dashoffset:520;animation:exdraw 3.4s ease-in-out .4s forwards}
+@keyframes exdraw{to{stroke-dashoffset:0}}
+.exmap .dot{position:absolute;width:8px;height:8px;border-radius:50%;background:#e4be78;transform:translate(-50%,-50%);box-shadow:0 0 0 0 rgba(228,190,120,.5)}
+.exmap .dot.p{animation:expulse 2.8s infinite}
+@keyframes expulse{0%{box-shadow:0 0 0 0 rgba(228,190,120,.5)}70%{box-shadow:0 0 0 13px rgba(228,190,120,0)}100%{box-shadow:0 0 0 0 rgba(228,190,120,0)}}
+.exmap .sweep{position:absolute;left:50%;top:55%;width:160%;height:160%;transform:translate(-50%,-50%);border-radius:50%;background:conic-gradient(from 0deg,rgba(228,190,120,.16),transparent 22%);animation:exspin 6s linear infinite}
+@keyframes exspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
 .radar{position:absolute;right:-14px;bottom:-14px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(29,74,55,.1),transparent 70%);overflow:hidden;opacity:.9}
 .radar::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(29,74,55,.32),transparent 28%);animation:spin 3.4s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}

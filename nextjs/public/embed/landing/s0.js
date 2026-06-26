@@ -88,13 +88,14 @@
   /* ---------- bento tiles ---------- */
   var TILES=[
     {cls:'passport', ti:'🛂', h:'Create your Trip Passport', p:'Every itinerary becomes a collectible passport. Earn a stamp for every park you explore.', action:'passport'},
+    {cls:'explore', ti:'🗺️', h:'Explore the map', p:'All 63 parks on a live terrain map — find what\u2019s near you.', href:'/explore'},
     {cls:'status', ti:'🌤️', h:'Live Park Status', p:'Real-time weather, alerts & closures.', live:true, href:'/explore'},
-    {ti:'📍', h:'Parks near me', p:'Best parks & lakes nearby — any city.', radar:true, href:'/explore'},
-    {ti:'🗺️', h:'Build a trip', p:'Real-road routes & costs.', href:'/build-trip'},
+    {ti:'📍', h:'Parks near me', p:'Best parks & lakes nearby.', radar:true, href:'/explore'},
+    {ti:'🧭', h:'Build a trip', p:'Real-road routes & costs.', href:'/build-trip'},
     {ti:'🏅', h:'My passports', p:'Your collection & ranks.', action:'passport'},
-    {ti:'👥', h:'Community', p:'Trips & tips from explorers.', action:'soon'},
-    {ti:'🛍️', h:'Shop', p:'Maps, posters & patches.', action:'soon'},
-    {ti:'📖', h:'About', p:'Why ParkBuddy.', href:'/explore'}
+    {ti:'👥', h:'Community', p:'Trips & tips.', action:'soon'},
+    {ti:'🛍️', h:'Shop', p:'Maps & patches.', action:'soon'},
+    {ti:'📖', h:'About', p:'Why ParkBuddy.', href:'/about'}
   ];
   function buildTiles(){
     var b=document.getElementById('bento'); if(!b)return;
@@ -105,6 +106,10 @@
           '<div><h3>'+t.h+'</h3><p>'+t.p+'</p></div>'+
           '<div class="crest"><div class="ring"><svg width="60" height="60"><circle cx="30" cy="30" r="25" stroke="rgba(228,190,120,.2)" stroke-width="5" fill="none"></circle><circle id="pp-ring" cx="30" cy="30" r="25" stroke="#e4be78" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"></circle></svg><span class="pct" id="pp-pct">0%</span></div>'+
           '<div class="meta"><b id="pp-count">0 of 63 parks</b><br><span id="pp-sub">Start your first passport</span></div></div>'+
+          '<div class="go">→</div>';
+      } else if(t.cls==='explore'){
+        inner='<div class="exmap" id="exmap"></div><div class="ti">'+t.ti+'</div>'+
+          '<div><h3>'+t.h+'</h3><p>'+t.p+'</p></div>'+
           '<div class="go">→</div>';
       } else {
         inner='<div class="ti">'+t.ti+'</div>'+(t.radar?'<div class="radar"></div>':'')+
@@ -117,6 +122,19 @@
     b.querySelectorAll('.tile').forEach(function(el){
       el.onclick=function(){ handle(TILES[+el.getAttribute('data-i')]); };
     });
+    buildExploreMap();
+  }
+  /* animated mini-map inside the Explore tile: stylized US blob, pulsing park dots, drawn route */
+  function buildExploreMap(){
+    var m=document.getElementById('exmap'); if(!m)return;
+    var dots=[[20,42],[31,30],[44,55],[57,38],[68,60],[78,44],[40,72],[62,24],[86,66]];
+    var route=[[20,42],[31,30],[44,55],[57,38],[68,60],[78,44]];
+    var pts=route.map(function(p){return (p[0]/100*340)+','+(p[1]/100*220);}).join(' ');
+    m.innerHTML='<div class="sweep"></div>'+
+      '<svg viewBox="0 0 340 220" preserveAspectRatio="none">'+
+      '<path class="blob" d="M30 80 Q60 30 130 38 Q210 28 300 60 Q330 110 280 160 Q200 205 110 180 Q40 165 30 80 Z"></path>'+
+      '<polyline class="route" points="'+pts+'"></polyline></svg>'+
+      dots.map(function(d,i){return '<span class="dot'+(i%2?' p':'')+'" style="left:'+d[0]+'%;top:'+d[1]+'%;animation-delay:'+(i*.3)+'s"></span>';}).join('');
   }
   function handle(t){
     if(t.action==='passport'){openPassport();return;}
