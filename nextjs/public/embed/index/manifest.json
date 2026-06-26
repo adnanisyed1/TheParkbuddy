@@ -11,6 +11,9 @@
     "/season-fx.js",
     "/embed/index/s0.js",
     "/embed/index/s1.js",
-    "/embed/index/s2.js"
+    "/embed/index/s2.js",
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+    "/supabase-config.js",
+    "/auth.js"
   ]
 }

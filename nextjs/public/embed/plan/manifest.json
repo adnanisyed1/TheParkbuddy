@@ -8,6 +8,9 @@
     "/season-fx.js",
     "/embed/plan/s0.js",
     "/embed/plan/s1.js",
-    "/embed/plan/s2.js"
+    "/embed/plan/s2.js",
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+    "/supabase-config.js",
+    "/auth.js"
   ]
 }

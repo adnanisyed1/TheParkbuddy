@@ -8,6 +8,9 @@
     "/config.js",
     "/trip-data.js",
     "/season-fx.js",
-    "/embed/build-trip/s0.js"
+    "/embed/build-trip/s0.js",
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+    "/supabase-config.js",
+    "/auth.js"
   ]
 }
