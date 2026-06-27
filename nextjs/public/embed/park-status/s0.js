@@ -54,7 +54,18 @@ function init(){
       ['now','do','visit','story'].forEach(function(x){ var pane=el('pane-'+x); if(pane) pane.style.display=(x===t?(x==='now'||x==='visit'?'grid':(x==='do'||x==='story'?'grid':'block')):'none'); });
     }
     document.querySelectorAll('#seg button').forEach(function(b){ b.onclick=function(){ showTab(b.getAttribute('data-tab')); var seg=document.getElementById('seg'); var y=seg.getBoundingClientRect().top+window.scrollY-86; window.scrollTo({top:y,behavior:'smooth'}); }; });
-    el('waalert').addEventListener('click',function(e){ e.preventDefault(); showTab('now'); var a=el('npsalerts'); if(a){var y=a.getBoundingClientRect().top+window.scrollY-70; window.scrollTo({top:y,behavior:'smooth'});} });
+    el('waalert').addEventListener('click',function(e){ e.preventDefault(); openAlertModal(); });
+    function openAlertModal(){
+      var body=el('alertModalBody'); if(!body)return;
+      var nps=el('npsalerts'), wx=el('alerts');
+      body.innerHTML='<div style="font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;margin:0 0 9px">Official NPS · closures</div>'+(nps?nps.innerHTML:'')+
+        '<div style="font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;margin:18px 0 9px">National Weather Service</div>'+(wx?wx.innerHTML:'');
+      el('alertModal').style.display='flex';
+    }
+    function closeAlertModal(){ var m=el('alertModal'); if(m)m.style.display='none'; }
+    var amc=el('alertModalClose'); if(amc)amc.onclick=closeAlertModal;
+    var am=el('alertModal'); if(am)am.addEventListener('click',function(e){ if(e.target===am)closeAlertModal(); });
+    var cue=el('scrollcue'); if(cue)cue.addEventListener('click',function(){ var seg=document.getElementById('seg'); var y=seg.getBoundingClientRect().top+window.scrollY-86; window.scrollTo({top:y,behavior:'smooth'}); });
 
     /* ====================== LIVING SCENE ====================== */
     function hx(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
@@ -63,18 +74,18 @@ function init(){
     function mix(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];}
 
     function silSvg(type,col){
-      if(type==='hiker') return '<svg viewBox="0 0 28 42" width="25" height="38" fill="none" stroke="'+col+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3.4" fill="'+col+'" stroke="none"></circle><path d="M12 9 L12 23"></path><path d="M12 14 L19 19"></path><path d="M12 23 L8 36"></path><path d="M12 23 L16 36"></path><path d="M20 6 L21 38"></path><path d="M9 11 Q4 13 6 20"></path></svg>';
-      if(type==='biker') return '<svg viewBox="0 0 42 32" width="40" height="30" fill="none" stroke="'+col+'" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="23" r="6.5"></circle><circle cx="33" cy="23" r="6.5"></circle><path d="M9 23 L19 23 L26 12 L33 23 M19 23 L23 12"></path><circle cx="25" cy="6.5" r="2.8" fill="'+col+'" stroke="none"></circle><path d="M25 9 L23 14 M23 12 L30 13"></path></svg>';
-      return '<svg viewBox="0 0 52 24" width="46" height="21" fill="none"><path d="M3 14 Q26 24 49 14 Q26 19 3 14 Z" fill="'+col+'"></path><circle cx="26" cy="6" r="3.2" fill="'+col+'"></circle><rect x="24.7" y="8" width="2.6" height="7" rx="1.3" fill="'+col+'"></rect><path d="M15 3 L37 13" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round"></path></svg>';
+      if(type==='hiker') return '<svg viewBox="0 0 28 42" width="36" height="54" fill="none" stroke="'+col+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3.4" fill="'+col+'" stroke="none"></circle><path d="M12 9 L12 23"></path><path d="M12 14 L19 19"></path><path d="M12 23 L8 36"></path><path d="M12 23 L16 36"></path><path d="M20 6 L21 38"></path><path d="M9 11 Q4 13 6 20"></path></svg>';
+      if(type==='biker') return '<svg viewBox="0 0 42 32" width="56" height="42" fill="none" stroke="'+col+'" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="23" r="6.5"></circle><circle cx="33" cy="23" r="6.5"></circle><path d="M9 23 L19 23 L26 12 L33 23 M19 23 L23 12"></path><circle cx="25" cy="6.5" r="2.8" fill="'+col+'" stroke="none"></circle><path d="M25 9 L23 14 M23 12 L30 13"></path></svg>';
+      return '<svg viewBox="0 0 52 24" width="66" height="30" fill="none"><path d="M3 14 Q26 24 49 14 Q26 19 3 14 Z" fill="'+col+'"></path><circle cx="26" cy="6" r="3.2" fill="'+col+'"></circle><rect x="24.7" y="8" width="2.6" height="7" rx="1.3" fill="'+col+'"></rect><path d="M15 3 L37 13" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round"></path></svg>';
     }
     function silhouettes(cfg){
       var night=(cfg.tod==='night');
-      var col=night?'rgba(225,232,228,.5)':'rgba(18,30,22,.6)';
+      var col=night?'rgba(228,235,231,.4)':'rgba(16,28,20,.4)';
       var out='';
       cfg.sils.forEach(function(t,i){
         if(t==='birds'){
           var flock='';
-          for(var b=0;b<3;b++){ flock+='<span style="display:inline-block;margin:0 5px;animation:pb-bob '+(2.2+b*0.4)+'s ease-in-out '+(b*0.3)+'s infinite"><svg viewBox="0 0 24 12" width="'+(15+b*3)+'" height="'+(8+b)+'" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round"><path d="M1 8 Q6 1 12 7 Q18 1 23 8"></path></svg></span>'; }
+          for(var b=0;b<3;b++){ flock+='<span style="display:inline-block;margin:0 7px;animation:pb-bob '+(2.4+b*0.4)+'s ease-in-out '+(b*0.3)+'s infinite"><svg viewBox="0 0 24 12" width="'+(24+b*5)+'" height="'+(12+b*2)+'" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round"><path d="M1 8 Q6 1 12 7 Q18 1 23 8"></path></svg></span>'; }
           out+='<div style="position:absolute;top:'+(15+i*7)+'%;left:0;animation:pb-cross '+(50+i*9)+'s linear '+(i*7)+'s infinite">'+flock+'</div>';
         } else if(t==='raft'||t==='kayak'||t==='canoe'||t==='boat'){
           var bp=cfg.water?(100-cfg.water.y-3)+'%':'11%';
@@ -231,6 +242,9 @@ function init(){
       setBox('nps','<span style="'+S.load+'">Loading official NPS info…</span>');
       fetchNPS(p.name).then(function(d){
         var park=d.park||{};
+        var _imgs=park.images||[];
+        var _hp=el('heroPhoto'), _hpc=el('heroPhotoCol');
+        if(_hp && _hpc && _imgs.length){ _hp.src=_imgs[0].url; _hp.alt=_imgs[0].alt||p.name; _hpc.style.display='block'; var _cap=el('heroPhotoCap'); if(_cap)_cap.textContent=_imgs[0].caption||(p.name+' · National Park Service'); }
         if(park.description){ var al=el('aboutlive'); if(al)al.textContent=park.description; }
         if(park.url){ var nl=el('npslink'); if(nl)nl.href=park.url; }
         _nps=(d.alerts&&d.alerts.length)||0; updateHeroAlerts();
@@ -398,6 +412,7 @@ function init(){
       var rec='https://www.recreation.gov/search?q='+encodeURIComponent(p.name+' National Park');
       el('reserve').innerHTML='<p style="font-size:.86rem;line-height:1.55;color:#525a46;margin-bottom:12px">Some parks require timed-entry or campground reservations, booked on the official government sites — we link you straight there.</p><div style="'+S.row+';margin-top:0"><a style="'+S.btnP+'" href="'+rec+'" target="_blank" rel="noopener">Check reservations on Recreation.gov ↗</a><a style="'+S.btn+'" id="npslink" href="'+npsSearch+'" target="_blank" rel="noopener">Official park page ↗</a></div><p style="font-size:.72rem;color:#8f8b7c;margin-top:10px">Reservations and payment are handled by the official site. Many parks are free or pay-at-gate.</p>';
 
+      var _hpc0=el('heroPhotoCol'); if(_hpc0)_hpc0.style.display='none';
       buildScene(PB.config(current));
       renderBest();
       resetHero();

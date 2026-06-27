@@ -26,6 +26,8 @@
           <b id="terrLabel" style="font-weight:800">—</b><span id="psub" style="color:rgba(251,246,234,.66);font-weight:500">—</span>
         </div>
 
+        <div style="display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1 1 460px;min-width:0">
         <span id="pest" style="display:inline-block;background:#c79a4b;color:#15241c;font-size:.66rem;font-weight:800;letter-spacing:.04em;padding:3px 11px;border-radius:999px;margin-bottom:13px"></span>
         <h1 id="pname" style="font-family:'Spectral',serif;font-weight:800;color:#fbf6ea;font-size:clamp(2.6rem,7vw,5rem);line-height:.96;letter-spacing:-.02em;text-shadow:0 4px 30px rgba(0,0,0,.45);max-width:15ch">—</h1>
 
@@ -40,6 +42,14 @@
             <span style="min-width:0"><b id="abTitle" style="font-size:.9rem;display:block">Checking alerts…</b><span style="font-size:.72rem;color:rgba(251,246,234,.6)">NPS &amp; weather.gov</span></span>
           </a>
         </div>
+        </div>
+        <div id="heroPhotoCol" style="display:none;flex:0 1 360px;min-width:260px">
+          <figure id="heroPhotoWrap" style="margin:0;background:#fbf6ea;padding:8px 8px 0;border-radius:16px;box-shadow:0 26px 60px -26px rgba(0,0,0,.7);transform:rotate(1.3deg);border:1px solid rgba(255,255,255,.45)">
+            <img id="heroPhoto" alt="" style="display:block;width:100%;height:232px;object-fit:cover;border-radius:10px">
+            <figcaption id="heroPhotoCap" style="font-family:'Spectral',serif;font-size:.82rem;color:#5b5848;padding:9px 4px 11px;text-align:center;font-style:italic"></figcaption>
+          </figure>
+        </div>
+        </div>
 
         <div style="margin-top:clamp(24px,4vh,40px);display:flex;flex-direction:column;gap:13px;max-width:920px">
           <div id="bestLead" style="background:linear-gradient(150deg,rgba(29,74,55,.62),rgba(15,44,32,.5));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(228,190,120,.34);border-radius:22px;padding:22px 24px;box-shadow:0 22px 60px -28px rgba(0,0,0,.7)"></div>
@@ -47,9 +57,9 @@
         </div>
       </div>
 
-      <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(251,246,234,.7);font-size:.74rem;font-weight:600;letter-spacing:.02em;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div id="scrollcue" role="button" tabindex="0" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(251,246,234,.8);font-size:.74rem;font-weight:600;letter-spacing:.02em;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
         <span>Live conditions &amp; official info below</span>
-        <span style="animation:pb-bounce 1.8s ease-in-out infinite;font-size:1rem">↓</span>
+        <span style="animation:pb-bounce 1.8s ease-in-out infinite;font-size:1.2rem">↓</span>
       </div>
     </section>
 
@@ -59,7 +69,7 @@
           <button data-tab="now" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fbf6ea">Now</button>
           <button data-tab="do" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">Things to Do</button>
           <button data-tab="visit" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">Plan a Visit</button>
-          <button data-tab="story" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">Story</button>
+          <button data-tab="story" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">About</button>
         </div>
 
         <div id="pane-now" style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(258px,1fr))">
@@ -105,6 +115,16 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div id="alertModal" style="position:fixed;inset:0;z-index:60;display:none;align-items:flex-start;justify-content:center;padding:24px;background:rgba(8,18,12,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)">
+      <div style="background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;max-width:560px;width:100%;margin-top:7vh;box-shadow:0 40px 90px -30px rgba(0,0,0,.7);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fbf6ea">
+          <b style="font-family:'Spectral',serif;font-size:1.05rem;font-weight:700">⚑ Ongoing alerts &amp; closures</b>
+          <button id="alertModalClose" style="background:rgba(255,255,255,.16);border:none;color:#fbf6ea;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:1rem">✕</button>
+        </div>
+        <div id="alertModalBody" style="padding:16px 18px;max-height:62vh;overflow-y:auto"></div>
       </div>
     </div>
 
