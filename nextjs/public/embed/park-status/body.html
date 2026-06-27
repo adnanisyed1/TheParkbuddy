@@ -1,140 +1,114 @@
 
-<header>
-  <a href="/" class="brand" style="text-decoration:none;color:inherit"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg>
-    <div><b>ParkBuddy</b><span>live status for every U.S. national park</span></div></a>
-  <div style="display:flex;align-items:center;gap:10px">
-    <a href="/explore" style="color:rgba(243,237,224,.92);text-decoration:none;font-size:.82rem;font-weight:600;border:1px solid rgba(255,255,255,.22);padding:6px 13px;border-radius:999px">← Map</a>
-    <a href="/build-trip" style="color:#163a2b;text-decoration:none;font-size:.82rem;font-weight:700;background:var(--gold);padding:7px 14px;border-radius:999px">Build a Trip</a>
-    <select id="pick"></select>
-  </div>
-</header>
-<div class="wrap">
-  <section class="wa-hero" id="wahero">
-    <img id="heroimg" alt="">
-    <div class="wa-hero-grad"></div>
-    <div class="wa-hero-inner">
-      <div class="wa-eyebrow"><span id="psub">—</span> <span id="pest"></span></div>
-      <div class="wa-id"><h1 id="pname">—</h1><p class="wa-lead" id="aboutlive"></p></div>
-      <div class="wa-console">
-        <div class="wa-status open" id="wastatus">
-          <span class="beacon"></span>
-          <span class="st-txt"><span class="st-state" id="stState">Open</span><span class="st-sub" id="stSub">Live status</span></span>
-          <span class="st-temp"><span id="heroTemp">—</span><span class="deg">°</span></span>
+<div style="position:relative;min-height:100vh;background:#11281d">
+
+  <div id="livescene" style="position:fixed;inset:0;z-index:0;overflow:hidden;background:linear-gradient(180deg,#3a5f6e 0%,#6f8f86 55%,#cfd9c2 100%)"></div>
+  <div id="sceneveil" style="position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(130% 90% at 50% 8%,transparent 38%,rgba(8,18,12,.5) 100%),linear-gradient(100deg,rgba(7,18,12,.62) 0%,rgba(8,20,14,.28) 46%,transparent 72%)"></div>
+  <div id="grain" style="position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%22.85%22 numOctaves=%223%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
+
+  <div style="position:relative;z-index:4">
+
+    <header style="position:sticky;top:14px;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:11px 15px 11px 16px;margin:14px clamp(12px,3vw,28px) 0;border-radius:20px;background:rgba(16,32,23,.32);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 36px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.14)">
+      <div style="display:flex;align-items:center;gap:11px;color:#fbf6ea">
+        <span style="width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#e4be78,#c79a4b);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.3)"><svg width="19" height="19" viewBox="0 0 24 24" fill="#15241c"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"></path><rect x="11" y="18" width="2" height="4"></rect></svg></span>
+        <div><b style="font-family:'Spectral',serif;font-size:1.2rem;font-weight:700;display:block;line-height:1.05">ParkBuddy</b><span style="color:rgba(243,237,224,.6);font-size:.68rem;letter-spacing:.04em">live status · every U.S. national park</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+        <a href="/explore" style="color:rgba(243,237,224,.92);text-decoration:none;font-size:.82rem;font-weight:600;border:1px solid rgba(255,255,255,.22);padding:7px 13px;border-radius:999px">← Map</a>
+        <a href="/build-trip" style="color:#163a2b;text-decoration:none;font-size:.82rem;font-weight:700;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:8px 15px;border-radius:999px">Build a Trip</a>
+        <select id="pick" style="font-family:inherit;padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.5);font-size:.85rem;font-weight:600;background:rgba(251,246,234,.9);color:#1d4a37;cursor:pointer;max-width:230px;outline:none"></select>
+      </div>
+    </header>
+
+    <section style="min-height:calc(100vh - 96px);display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,4vh,48px) clamp(16px,5vw,56px) clamp(40px,6vh,72px);position:relative">
+      <div style="max-width:1120px;width:100%;margin:0 auto">
+        <div style="display:inline-flex;align-items:center;gap:9px;background:rgba(20,36,28,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:8px 16px 8px 11px;color:#fbf6ea;font-size:.78rem;font-weight:600;margin-bottom:20px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#e4be78;box-shadow:0 0 0 4px rgba(228,190,120,.22)"></span>
+          <b id="terrLabel" style="font-weight:800">—</b><span id="psub" style="color:rgba(251,246,234,.66);font-weight:500">—</span>
         </div>
-        <a class="wa-alertbar" id="waalert" href="#alerts">
-          <span class="ab-ic" id="abIc">…</span>
-          <span class="ab-txt"><b id="abTitle">Checking alerts…</b><span id="abSub">Live from NPS &amp; weather.gov</span></span>
-          <span class="ab-go">View →</span>
-        </a>
+
+        <span id="pest" style="display:inline-block;background:#c79a4b;color:#15241c;font-size:.66rem;font-weight:800;letter-spacing:.04em;padding:3px 11px;border-radius:999px;margin-bottom:13px"></span>
+        <h1 id="pname" style="font-family:'Spectral',serif;font-weight:800;color:#fbf6ea;font-size:clamp(2.6rem,7vw,5rem);line-height:.96;letter-spacing:-.02em;text-shadow:0 4px 30px rgba(0,0,0,.45);max-width:15ch">—</h1>
+
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px">
+          <div style="display:inline-flex;align-items:center;gap:13px;background:rgba(10,26,18,.46);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px 18px">
+            <span id="beacon" style="width:12px;height:12px;border-radius:50%;background:#46d97f;box-shadow:0 0 10px 1px rgba(70,217,127,.7);animation:pb-pulse 2s infinite"></span>
+            <span style="display:flex;flex-direction:column;line-height:1.15"><b id="stState" style="font-family:'Spectral',serif;font-weight:700;font-size:1.18rem;color:#fbf6ea">Open</b><span id="stSub" style="font-size:.72rem;color:rgba(251,246,234,.68);font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">live status</span></span>
+            <span style="font-family:'Spectral',serif;font-weight:700;font-size:2.3rem;color:#fbf6ea;line-height:1;display:flex;align-items:flex-start;margin-left:6px"><span id="heroTemp">—</span><span style="font-size:.46em;margin-top:.12em;opacity:.85">°</span></span>
+          </div>
+          <a id="waalert" href="#now" style="display:inline-flex;align-items:center;gap:11px;text-decoration:none;background:rgba(10,26,18,.46);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px 16px;color:#fbf6ea">
+            <span id="abIc" style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;background:rgba(63,122,52,.3);color:#9fe3a6;flex:none">…</span>
+            <span style="min-width:0"><b id="abTitle" style="font-size:.9rem;display:block">Checking alerts…</b><span style="font-size:.72rem;color:rgba(251,246,234,.6)">NPS &amp; weather.gov</span></span>
+          </a>
+        </div>
+
+        <div style="margin-top:clamp(24px,4vh,40px);display:flex;flex-direction:column;gap:13px;max-width:920px">
+          <div id="bestLead" style="background:linear-gradient(150deg,rgba(29,74,55,.62),rgba(15,44,32,.5));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(228,190,120,.34);border-radius:22px;padding:22px 24px;box-shadow:0 22px 60px -28px rgba(0,0,0,.7)"></div>
+          <div id="bestRest" style="display:flex;gap:13px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+
+      <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(251,246,234,.7);font-size:.74rem;font-weight:600;letter-spacing:.02em;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <span>Live conditions &amp; official info below</span>
+        <span style="animation:pb-bounce 1.8s ease-in-out infinite;font-size:1rem">↓</span>
+      </div>
+    </section>
+
+    <div style="position:relative;background:#fbf6ea;border-radius:30px 30px 0 0;box-shadow:0 -24px 60px -30px rgba(8,18,12,.6);padding:clamp(18px,3vw,30px) clamp(14px,4vw,44px) 40px;margin-top:8px">
+      <div style="max-width:1140px;margin:0 auto">
+        <div id="seg" style="display:flex;gap:6px;padding:5px;background:rgba(255,253,247,.9);border:1px solid #e7ddca;border-radius:16px;box-shadow:0 10px 30px -20px rgba(28,46,34,.5);margin:0 auto 22px;max-width:560px;overflow-x:auto">
+          <button data-tab="now" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fbf6ea">Now</button>
+          <button data-tab="do" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">Things to Do</button>
+          <button data-tab="visit" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">Plan a Visit</button>
+          <button data-tab="story" style="flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;background:transparent;color:#6a7160">Story</button>
+        </div>
+
+        <div id="pane-now" style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(258px,1fr))">
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◷ Today at a glance</h2><div id="glance" style="display:flex;gap:10px;flex-wrap:wrap;color:#8c8473;font-size:.86rem">Loading…</div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">⛅ Weather &amp; 7-day forecast</h2><div id="now" style="color:#8c8473;font-size:.86rem">Loading live weather…</div><div id="fc" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-top:14px;color:#8c8473;font-size:.86rem">Loading forecast…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">☀ Golden hour</h2><div id="arc">—</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◴ Best time to visit</h2><div id="crowd">—</div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">⚑ Official NPS alerts &amp; closures</h2><div id="npsalerts" style="color:#8c8473;font-size:.86rem">Loading official alerts…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">▲ Active weather alerts</h2><div id="alerts" style="color:#8c8473;font-size:.86rem">Checking for alerts…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◎ Location</h2><div id="loc" style="font-size:.9rem;line-height:1.7"></div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">⚐ Quick facts</h2><p id="desc" style="font-size:.92rem;line-height:1.6;color:#3f4636"></p></div>
+        </div>
+
+        <div id="pane-do" style="display:none;grid-template-columns:1fr;gap:16px">
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◈ Things to do</h2><div id="todo" style="color:#8c8473;font-size:.86rem">Loading things to do…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">⚐ Activities at this park</h2><div id="activities" style="color:#8c8473;font-size:.86rem">Loading activities…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">▣ Official photos</h2><div id="gallery" style="color:#8c8473;font-size:.86rem">Loading photos…</div></div>
+        </div>
+
+        <div id="pane-visit" style="display:none;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:16px">
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◆ Reservations &amp; passes</h2><div id="reserve"></div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">$ Entrance fees &amp; passes</h2><div id="fees" style="color:#8c8473;font-size:.86rem">Loading fees…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◷ Hours</h2><div id="hours" style="color:#8c8473;font-size:.86rem">Loading hours…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">⛺ Campgrounds</h2><div id="camps" style="color:#8c8473;font-size:.86rem">Loading campgrounds…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">ℹ Visitor centers</h2><div id="vcenters" style="color:#8c8473;font-size:.86rem">Loading visitor centers…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">➜ Getting there</h2><div id="directions" style="color:#8c8473;font-size:.86rem">Loading directions…</div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◷ Upcoming events</h2><div id="events" style="color:#8c8473;font-size:.86rem">Loading events…</div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">◈ Points of interest</h2><div id="places" style="color:#8c8473;font-size:.86rem">Loading points of interest…</div></div>
+          <div style="grid-column:1/-1;position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">📰 Park news</h2><div id="news" style="color:#8c8473;font-size:.86rem">Loading news…</div></div>
+        </div>
+
+        <div id="pane-story" style="display:none;grid-template-columns:1fr;gap:16px">
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">❦ About this park</h2><p id="aboutlive" style="font-family:'Spectral',serif;font-size:1.08rem;line-height:1.62;color:#3c4a3a"></p><p id="about" style="font-size:.88rem;line-height:1.6;color:#5b5848;margin-top:12px"></p></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">⚑ Official NPS — hours &amp; fees</h2><div id="nps" style="color:#8c8473;font-size:.86rem">Loading official NPS info…</div></div>
+          <div style="position:relative;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.06)"><h2 style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:13px">★ Traveler reviews</h2><div id="revsummary" style="margin-bottom:8px;color:#8c8473;font-size:.86rem">Loading reviews…</div><div id="revlist"></div>
+            <div style="margin-top:18px;border-top:1px solid #e7ddca;padding-top:16px">
+              <div style="font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;color:#1d4a37;font-weight:800;margin-bottom:11px">✎ Write a review</div>
+              <input id="rv-name" maxlength="60" placeholder="Your name" style="width:100%;padding:9px 11px;border:1px solid #e7ddca;border-radius:9px;font-size:.9rem;margin-bottom:9px;font-family:inherit">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span style="font-size:.84rem;color:#8c8473">Rating:</span><div id="rv-stars" style="font-size:1.5rem;cursor:pointer;color:#d8b24a;letter-spacing:2px">☆☆☆☆☆</div></div>
+              <textarea id="rv-body" maxlength="1500" rows="4" placeholder="Share your experience at this park…" style="width:100%;padding:9px 11px;border:1px solid #e7ddca;border-radius:9px;font-size:.9rem;font-family:inherit;resize:vertical;margin-bottom:9px"></textarea>
+              <button id="rv-submit" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fff;border:none;font-size:.84rem;font-weight:700;padding:9px 16px;border-radius:11px;cursor:pointer">Post review</button>
+              <span id="rv-msg" style="font-size:.82rem;margin-left:10px"></span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
-  <div class="tabbar">
-    <button class="tab on" data-tab="live">● Live</button>
-    <button class="tab" data-tab="todo">◈ Things to Do</button>
-    <button class="tab" data-tab="photos">▣ Photos</button>
-    <button class="tab" data-tab="visit">⚑ Fees &amp; Visit</button>
-    <button class="tab" data-tab="news">◷ Events &amp; News</button>
-    <button class="tab" data-tab="about">❦ About</button>
-    <button class="tab" data-tab="reviews">★ Reviews</button>
-  </div>
 
-  <div class="tabpane on" id="pane-live">
-    <div class="bento">
-      <div class="card wa-tile b-4"><h2>◷ Today at a glance</h2><div id="glance" class="glance loading">Loading…</div></div>
-      <div class="card wa-tile b-2"><h2>⛅ Weather</h2><div id="now" class="loading">Loading live weather…</div><div id="fc" class="fc loading" style="margin-top:14px">Loading forecast…</div></div>
-      <div class="card wa-tile"><h2>☀ Golden Hour</h2><div id="arc">—</div></div>
-      <div class="card wa-tile"><h2>◴ Best Time to Visit</h2><div id="crowd">—</div></div>
-      <div class="card wa-tile b-2 wa-link" data-goto="todo"><h2>◈ Things to Do</h2><div id="todoPreview" class="loading">Loading things to do…</div><span class="wa-more">See all things to do →</span></div>
-      <div class="card wa-tile b-2 wa-link" data-goto="about"><h2>❦ About this park</h2><div id="aboutPreview" class="loading">Loading…</div><span class="wa-more">Read full overview →</span></div>
-      <div class="card wa-tile b-4"><h2>⚑ Official NPS Alerts &amp; Closures</h2><div id="npsalerts" class="loading">Loading official alerts…</div></div>
-      <div class="card wa-tile b-2"><h2>▲ Active Weather Alerts</h2><div id="alerts" class="loading">Checking for alerts…</div></div>
-      <div class="card wa-tile"><h2>◎ Location</h2><div id="loc" class="kv"></div></div>
-      <div class="card wa-tile"><h2>⚐ Quick Facts</h2><p class="desc" id="desc"></p></div>
-    </div>
-  </div>
+    <footer style="text-align:center;color:rgba(243,237,224,.75);background:linear-gradient(120deg,#0f2c20,#163a2b);border-top:1px solid rgba(228,190,120,.35);font-size:.72rem;padding:24px;position:relative;z-index:4">Weather from weather.gov · Park photos, info &amp; official alerts from the U.S. National Park Service · ParkBuddy</footer>
 
-  <div class="tabpane" id="pane-todo">
-    <div class="card span2"><h2>◈ Things to Do</h2><div id="todo" class="loading">Loading things to do…</div></div>
-    <div class="card span2" style="margin-top:16px"><h2>⚐ Activities at this park</h2><div id="activities" class="loading">Loading activities…</div></div>
-  </div>
-
-  <div class="tabpane" id="pane-photos">
-    <div class="card span2"><h2>▣ Official Photos</h2><div id="gallery" class="loading">Loading photos…</div></div>
-  </div>
-
-  <div class="tabpane" id="pane-visit">
-    <div class="grid">
-      <div class="card span2"><h2>◆ Reservations &amp; Passes</h2><div id="reserve"></div></div>
-      <div class="card span2"><h2>$ Entrance Fees &amp; Passes</h2><div id="fees" class="loading">Loading fees…</div></div>
-      <div class="card"><h2>◷ Hours</h2><div id="hours" class="loading">Loading hours…</div></div>
-      <div class="card"><h2>⛺ Campgrounds</h2><div id="camps" class="loading">Loading campgrounds…</div></div>
-      <div class="card"><h2>ℹ Visitor Centers</h2><div id="vcenters" class="loading">Loading visitor centers…</div></div>
-      <div class="card"><h2>➜ Getting There</h2><div id="directions" class="loading">Loading directions…</div></div>
-    </div>
-  </div>
-
-  <div class="tabpane" id="pane-news">
-    <div class="grid">
-      <div class="card span2"><h2>◷ Upcoming Events</h2><div id="events" class="loading">Loading events…</div></div>
-      <div class="card span2"><h2>📰 Park News</h2><div id="news" class="loading">Loading news…</div></div>
-      <div class="card span2"><h2>◈ Points of Interest</h2><div id="places" class="loading">Loading points of interest…</div></div>
-    </div>
-  </div>
-
-  <div class="tabpane" id="pane-about">
-    <div class="statrow">
-      <div class="s"><b>63</b><span>National Parks</span></div>
-      <div class="s"><b>50+</b><span>States &amp; Territories</span></div>
-      <div class="s"><b>Live</b><span>Real-time Updates</span></div>
-      <div class="s"><b>Free</b><span>Official NPS Data</span></div>
-    </div>
-    <div class="card span2"><h2>⚑ Official NPS — Hours &amp; Fees</h2><div id="nps" class="loading">Loading official NPS info…</div></div>
-    <div class="card span2" style="margin-top:16px"><h2>❦ About this park</h2><p class="about" id="about"></p></div>
-    <div class="card span2" style="margin-top:16px">
-      <h2>What ParkBuddy offers</h2>
-      <div class="feat"><span class="ic">🗺️</span><div><h4>Interactive park map</h4><p>All 63 national parks on a live map. Tap any tree to open a park, filter by region or state.</p></div></div>
-      <div class="feat"><span class="ic">📡</span><div><h4>Live park data</h4><p>Real-time weather, the 7-period forecast, and active alerts straight from the National Weather Service.</p></div></div>
-      <div class="feat"><span class="ic">⚑</span><div><h4>Official NPS info</h4><p>Park photos, hours, entrance fees, and official closures pulled from the National Park Service.</p></div></div>
-      <div class="feat"><span class="ic">✨</span><div><h4>Trip planner</h4><p>Answer 8 questions and get a personalized itinerary scored across all 63 parks.</p></div></div>
-    </div>
-  </div>
-
-  <div class="tabpane" id="pane-reviews">
-    <div class="card span2">
-      <h2>★ Traveler Reviews</h2>
-      <div id="revsummary" class="loading" style="margin-bottom:6px">Loading reviews…</div>
-      <div id="revlist"></div>
-    </div>
-    <div class="card span2" style="margin-top:16px">
-      <h2>✎ Write a Review</h2>
-      <div id="revform">
-        <input id="rv-name" maxlength="60" placeholder="Your name" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:.9rem;margin-bottom:9px;font-family:inherit">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
-          <span style="font-size:.84rem;color:var(--muted)">Rating:</span>
-          <div id="rv-stars" style="font-size:1.5rem;cursor:pointer;color:#d8b24a;letter-spacing:2px">☆☆☆☆☆</div>
-        </div>
-        <textarea id="rv-body" maxlength="1500" rows="4" placeholder="Share your experience at this park…" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:.9rem;font-family:inherit;resize:vertical;margin-bottom:9px"></textarea>
-        <button id="rv-submit" class="btn primary" style="border:none;cursor:pointer">Post review</button>
-        <span id="rv-msg" style="font-size:.82rem;margin-left:10px"></span>
-      </div>
-    </div>
   </div>
 </div>
-<footer>Weather from weather.gov · Park photos, info &amp; official alerts from the U.S. National Park Service (NPS) · ParkBuddy</footer>
-
-<!-- ParkPulse Planner Bubble (self-contained, drop on any page) -->
-
-<button id="ppb-fab" aria-label="Plan a trip">🧭</button>
-<div id="ppb-panel" role="dialog" aria-label="Trip planner">
-  <div class="ppb-head">
-    <span class="av">🌲</span>
-    <div class="t"><b>Plan a Trip</b><span>ParkBuddy assistant</span></div>
-    <button id="ppb-pin" title="Pin to side">⇥</button>
-    <button id="ppb-close" title="Close">✕</button>
-  </div>
-  <div class="ppb-body" id="ppb-body"></div>
-</div>
-
-<!-- /ParkPulse Planner Bubble -->
-

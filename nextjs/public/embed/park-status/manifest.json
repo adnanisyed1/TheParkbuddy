@@ -2,15 +2,12 @@
   "bodyClass": "",
   "cssLinks": [
     "https://fonts.googleapis.com",
-    "https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+    "https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap"
   ],
   "scripts": [
     "/weather-fx.js",
+    "/parkbuddy-data.js",
     "/embed/park-status/s0.js",
-    "/embed/park-status/s1.js",
-    "/embed/park-status/s2.js",
-    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
-    "/supabase-config.js",
     "/auth.js",
     "/transition.js"
   ]

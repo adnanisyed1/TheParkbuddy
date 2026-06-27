@@ -1,441 +1,422 @@
+/* ParkBuddy — live Park Status (terrain + season living scene). Vanilla build for Next.js embed. */
+(function(){
+function init(){
+    
+    var PB=window.PB, WeatherFX=window.WeatherFX;
+    var PARKS=PB.parks, SI=PB.stateInfo;
+    var el=function(id){return document.getElementById(id);};
+    var rafFlag=false;
 
-const D={"parks": [{"id": 1, "name": "Denali", "state": "Alaska", "year": 1917, "lat": 63.1148, "lng": -151.1926, "region": "alaska", "desc": "North America's highest peak at 20,310 ft, surrounded by six million acres of wild subarctic wilderness."}, {"id": 2, "name": "Gates of the Arctic", "state": "Alaska", "year": 1980, "lat": 67.7806, "lng": -153.3006, "region": "alaska", "desc": "The northernmost US national park \u2014 entirely roadless and trailless. Pure arctic wilderness above the Arctic Circle."}, {"id": 3, "name": "Glacier Bay", "state": "Alaska", "year": 1980, "lat": 58.6658, "lng": -136.9002, "region": "alaska", "desc": "A UNESCO World Heritage Site where massive tidewater glaciers calve directly into the sea."}, {"id": 4, "name": "Katmai", "state": "Alaska", "year": 1980, "lat": 58.5, "lng": -154.0, "region": "alaska", "desc": "World-famous for brown bears catching sockeye salmon at Brooks Falls. Home of the Valley of Ten Thousand Smokes."}, {"id": 5, "name": "Kenai Fjords", "state": "Alaska", "year": 1980, "lat": 59.9187, "lng": -150.1533, "region": "alaska", "desc": "Exit Glacier and the vast Harding Icefield drain into stunning coastal fjords teeming with marine wildlife."}, {"id": 6, "name": "Kobuk Valley", "state": "Alaska", "year": 1980, "lat": 67.3561, "lng": -159.1229, "region": "alaska", "desc": "An arctic sand dune field 25 miles long surrounded by the Brooks Range. No roads exist anywhere in the park."}, {"id": 7, "name": "Lake Clark", "state": "Alaska", "year": 1980, "lat": 60.9728, "lng": -153.4169, "region": "alaska", "desc": "Where the Alaska Range meets the Alaska Peninsula \u2014 wild salmon rivers, volcanic peaks, and critical brown bear habitat."}, {"id": 8, "name": "Wrangell\u2013St. Elias", "state": "Alaska", "year": 1980, "lat": 61.4937, "lng": -142.6028, "region": "alaska", "desc": "America's largest national park \u2014 bigger than Switzerland \u2014 with nine of the 16 highest peaks in the US."}, {"id": 9, "name": "Grand Canyon", "state": "Arizona", "year": 1919, "lat": 36.0544, "lng": -112.1401, "region": "lower48", "desc": "A mile deep, ten miles wide, 277 river miles long \u2014 one of Earth's most sublime geological wonders."}, {"id": 10, "name": "Petrified Forest", "state": "Arizona", "year": 1962, "lat": 34.9828, "lng": -109.788, "region": "lower48", "desc": "Ancient logs turned to rainbow crystal over 225 million years, scattered across the Painted Desert badlands."}, {"id": 11, "name": "Saguaro", "state": "Arizona", "year": 1994, "lat": 32.2967, "lng": -111.1666, "region": "lower48", "desc": "The giant saguaro cactus \u2014 icon of the American Southwest \u2014 lives here up to 200 years, growing its first arm after 75."}, {"id": 12, "name": "Hot Springs", "state": "Arkansas", "year": 1921, "lat": 34.5217, "lng": -93.0424, "region": "lower48", "desc": "Forty-seven naturally hot thermal springs flow from Hot Springs Mountain along the historic Bathhouse Row."}, {"id": 13, "name": "Channel Islands", "state": "California", "year": 1980, "lat": 34.0069, "lng": -119.7785, "region": "lower48", "desc": "Five islands off Southern California \u2014 the 'Gal\u00e1pagos of North America' \u2014 preserving a rare Mediterranean island ecosystem."}, {"id": 14, "name": "Death Valley", "state": "California", "year": 1994, "lat": 36.5323, "lng": -116.9325, "region": "lower48", "desc": "The hottest, driest, lowest national park. Badwater Basin at 282 ft below sea level is North America's lowest point."}, {"id": 15, "name": "Joshua Tree", "state": "California", "year": 1994, "lat": 33.8734, "lng": -115.901, "region": "lower48", "desc": "Where the Mojave and Colorado deserts collide. Otherworldly Joshua trees and sculpted boulders under impossibly clear skies."}, {"id": 16, "name": "Kings Canyon", "state": "California", "year": 1940, "lat": 36.8879, "lng": -118.5551, "region": "lower48", "desc": "One of the deepest canyons in North America \u2014 deeper than the Grand Canyon \u2014 carved by the Kings River through the Sierra Nevada."}, {"id": 17, "name": "Lassen Volcanic", "state": "California", "year": 1916, "lat": 40.4977, "lng": -121.4207, "region": "lower48", "desc": "Boiling springs, fumaroles, mud pots, and a recently active volcano. The southernmost Cascade peak, alive with geothermal energy."}, {"id": 18, "name": "Pinnacles", "state": "California", "year": 2013, "lat": 36.4906, "lng": -121.1825, "region": "lower48", "desc": "Volcanic rock spires rising from a gentle valley, with talus cave systems and a sanctuary for the endangered California condor."}, {"id": 19, "name": "Redwood", "state": "California", "year": 1968, "lat": 41.2132, "lng": -124.0046, "region": "lower48", "desc": "Home to the world's tallest trees \u2014 coast redwoods exceeding 380 feet \u2014 in ancient forests draped in Northern California fog."}, {"id": 20, "name": "Sequoia", "state": "California", "year": 1890, "lat": 36.4864, "lng": -118.5658, "region": "lower48", "desc": "Home to General Sherman \u2014 the largest living tree on Earth by volume, 274 feet tall and roughly 2,200 years old."}, {"id": 21, "name": "Yosemite", "state": "California", "year": 1890, "lat": 37.8651, "lng": -119.5383, "region": "lower48", "desc": "El Capitan, Half Dome, Bridalveil Fall. A glacier-carved valley of incomparable beauty that launched American conservation."}, {"id": 22, "name": "Black Canyon of the Gunnison", "state": "Colorado", "year": 1999, "lat": 38.5754, "lng": -107.7416, "region": "lower48", "desc": "One of the world's most sheer gorges \u2014 2,700 feet deep but barely 40 feet wide at the Narrows."}, {"id": 23, "name": "Great Sand Dunes", "state": "Colorado", "year": 2004, "lat": 37.7325, "lng": -105.5945, "region": "lower48", "desc": "The tallest sand dunes in North America \u2014 up to 750 feet \u2014 backed by the snow-capped Sangre de Cristo Mountains."}, {"id": 24, "name": "Mesa Verde", "state": "Colorado", "year": 1906, "lat": 37.1853, "lng": -108.4896, "region": "lower48", "desc": "The best-preserved Ancestral Puebloan cliff dwellings in North America, including the 150-room Cliff Palace."}, {"id": 25, "name": "Rocky Mountain", "state": "Colorado", "year": 1915, "lat": 40.3428, "lng": -105.6836, "region": "lower48", "desc": "Trail Ridge Road crests at 12,183 feet through alpine tundra. The Continental Divide runs the length of the park."}, {"id": 26, "name": "Biscayne", "state": "Florida", "year": 1980, "lat": 25.4824, "lng": -80.43, "region": "lower48", "desc": "95% water \u2014 a turquoise paradise of coral reefs, mangroves, and tropical islands at the northern edge of the Florida Keys."}, {"id": 27, "name": "Dry Tortugas", "state": "Florida", "year": 1992, "lat": 24.6283, "lng": -82.8733, "region": "lower48", "desc": "70 miles west of Key West, accessible only by boat or seaplane. Fort Jefferson rises from turquoise shallows above Florida's finest coral."}, {"id": 28, "name": "Everglades", "state": "Florida", "year": 1934, "lat": 25.2866, "lng": -80.8987, "region": "lower48", "desc": "The largest subtropical wilderness in the US \u2014 a 60-mile-wide, inch-deep river of water flowing south through sawgrass prairie."}, {"id": 29, "name": "Haleakal\u0101", "state": "Hawaii", "year": 1916, "lat": 20.7204, "lng": -156.1552, "region": "hawaii", "desc": "Maui's dormant shield volcano rises to 10,023 feet. Its summit crater hosts a moonscape of cinder cones and rare silversword plants."}, {"id": 30, "name": "Hawai'i Volcanoes", "state": "Hawaii", "year": 1916, "lat": 19.4194, "lng": -155.2885, "region": "hawaii", "desc": "K\u012blauea and Mauna Loa \u2014 two of Earth's most active volcanoes \u2014 are constantly reshaping the Big Island with new lava flows."}, {"id": 31, "name": "Indiana Dunes", "state": "Indiana", "year": 2019, "lat": 41.653, "lng": -87.0524, "region": "lower48", "desc": "Towering sand dunes rising 200 feet above Lake Michigan's southern shore, surrounding one of the most biodiverse national park landscapes."}, {"id": 32, "name": "Mammoth Cave", "state": "Kentucky", "year": 1941, "lat": 37.1862, "lng": -86.1003, "region": "lower48", "desc": "The world's longest known cave system \u2014 over 400 miles of explored passages beneath the karst landscape of south-central Kentucky."}, {"id": 33, "name": "Acadia", "state": "Maine", "year": 1919, "lat": 44.3386, "lng": -68.2733, "region": "lower48", "desc": "Rugged granite summits, cobblestone shores, and dense boreal forests on Mount Desert Island on the Atlantic coast of Maine."}, {"id": 34, "name": "Isle Royale", "state": "Michigan", "year": 1940, "lat": 48.0, "lng": -88.8327, "region": "lower48", "desc": "A remote island wilderness in Lake Superior, famous for the world's longest-running wolf and moose predator-prey study."}, {"id": 35, "name": "Voyageurs", "state": "Minnesota", "year": 1975, "lat": 48.4839, "lng": -92.8387, "region": "lower48", "desc": "A watery wilderness of four interconnected lakes and 500 islands along the Canadian border, best explored by houseboat or canoe."}, {"id": 36, "name": "Gateway Arch", "state": "Missouri", "year": 2018, "lat": 38.6247, "lng": -90.1851, "region": "lower48", "desc": "The iconic 630-foot stainless steel Gateway Arch on the St. Louis riverfront, commemorating Jefferson's vision of westward expansion."}, {"id": 37, "name": "Glacier", "state": "Montana", "year": 1910, "lat": 48.7596, "lng": -113.787, "region": "lower48", "desc": "Going-to-the-Sun Road traverses one of the most pristine alpine ecosystems in the world. Over 700 miles of trails through ice-carved terrain."}, {"id": 38, "name": "Great Basin", "state": "Nevada", "year": 1986, "lat": 38.9831, "lng": -114.3006, "region": "lower48", "desc": "Ancient bristlecone pines over 5,000 years old, the Lehman Caves marble system, and some of the darkest skies in the continental US."}, {"id": 39, "name": "Carlsbad Caverns", "state": "New Mexico", "year": 1930, "lat": 32.1479, "lng": -104.5567, "region": "lower48", "desc": "Over 119 caves beneath the Chihuahuan Desert, including the Big Room \u2014 8.2 acres at 750 feet underground."}, {"id": 40, "name": "White Sands", "state": "New Mexico", "year": 2019, "lat": 32.7791, "lng": -106.1717, "region": "lower48", "desc": "The world's largest gypsum dune field \u2014 275 square miles of brilliantly white sand formed from an ancient evaporated lake."}, {"id": 41, "name": "Great Smoky Mountains", "state": "NC / Tennessee", "year": 1934, "lat": 35.6532, "lng": -83.507, "region": "lower48", "desc": "America's most visited national park. Ancient mountains wreathed in blue mist with extraordinary biodiversity on both sides of the Appalachian crest."}, {"id": 42, "name": "Theodore Roosevelt", "state": "North Dakota", "year": 1978, "lat": 46.9789, "lng": -103.5387, "region": "lower48", "desc": "Colorful badlands carved by the Little Missouri River \u2014 the landscape that transformed Roosevelt and ignited his conservation mission."}, {"id": 43, "name": "Cuyahoga Valley", "state": "Ohio", "year": 2000, "lat": 41.2808, "lng": -81.5678, "region": "lower48", "desc": "A patchwork of forests, wetlands, and farms along the Cuyahoga River between Cleveland and Akron."}, {"id": 44, "name": "Crater Lake", "state": "Oregon", "year": 1902, "lat": 42.9446, "lng": -122.109, "region": "lower48", "desc": "The deepest lake in the US at 1,943 feet, filling the caldera of a collapsed volcano. Its water is the clearest and bluest imaginable."}, {"id": 45, "name": "Congaree", "state": "South Carolina", "year": 2003, "lat": 33.7948, "lng": -80.782, "region": "lower48", "desc": "The largest intact old-growth bottomland hardwood forest in the southeastern US, with some of the tallest trees east of the Mississippi."}, {"id": 46, "name": "Badlands", "state": "South Dakota", "year": 1978, "lat": 43.8554, "lng": -102.3397, "region": "lower48", "desc": "Sharply eroded buttes, spires, and gullies in an otherworldly landscape \u2014 home to bison, bighorn sheep, and black-footed ferrets."}, {"id": 47, "name": "Wind Cave", "state": "South Dakota", "year": 1903, "lat": 43.5569, "lng": -103.4784, "region": "lower48", "desc": "One of the world's longest cave systems, famous for rare boxwork formations covering the walls like a geometric honeycomb."}, {"id": 48, "name": "Big Bend", "state": "Texas", "year": 1944, "lat": 29.1275, "lng": -103.242, "region": "lower48", "desc": "Where the Chihuahuan Desert meets the Rio Grande. Remote, vast, brilliantly starlit \u2014 one of the best dark-sky parks in the US."}, {"id": 49, "name": "Guadalupe Mountains", "state": "Texas", "year": 1966, "lat": 31.923, "lng": -104.8714, "region": "lower48", "desc": "The remnant of an ancient Permian reef rising from the desert floor, containing the highest peak in Texas at 8,751 feet."}, {"id": 50, "name": "Arches", "state": "Utah", "year": 1971, "lat": 38.683, "lng": -109.5925, "region": "lower48", "desc": "Over 2,000 natural sandstone arches \u2014 the highest concentration on Earth \u2014 including the famous 65-foot Delicate Arch."}, {"id": 51, "name": "Bryce Canyon", "state": "Utah", "year": 1928, "lat": 37.593, "lng": -112.1871, "region": "lower48", "desc": "A geological amphitheater of thousands of hoodoos \u2014 orange, red, and white spires shaped by millennia of frost and erosion."}, {"id": 52, "name": "Canyonlands", "state": "Utah", "year": 1964, "lat": 38.2, "lng": -109.93, "region": "lower48", "desc": "A vast stone wilderness where the Colorado and Green rivers carve the Colorado Plateau into mesas, canyons, and soaring spires."}, {"id": 53, "name": "Capitol Reef", "state": "Utah", "year": 1971, "lat": 38.0877, "lng": -111.1495, "region": "lower48", "desc": "A 100-mile wrinkle in the Earth's crust \u2014 the Waterpocket Fold \u2014 concealing slot canyons, domes, and Fremont petroglyphs."}, {"id": 54, "name": "Zion", "state": "Utah", "year": 1919, "lat": 37.2982, "lng": -113.0263, "region": "lower48", "desc": "Sheer 2,000-foot walls of Navajo sandstone frame the Virgin River. Angels Landing, The Narrows, and Emerald Pools draw millions each year."}, {"id": 55, "name": "Shenandoah", "state": "Virginia", "year": 1935, "lat": 38.2928, "lng": -78.6795, "region": "lower48", "desc": "Skyline Drive winds 105 miles along the Blue Ridge crest, with 500 miles of trails through forest above the Shenandoah Valley."}, {"id": 56, "name": "Mount Rainier", "state": "Washington", "year": 1899, "lat": 46.8523, "lng": -121.7603, "region": "lower48", "desc": "An active stratovolcano draped in 26 named glaciers \u2014 the most glaciated peak in the contiguous US \u2014 rising 14,411 feet."}, {"id": 57, "name": "North Cascades", "state": "Washington", "year": 1968, "lat": 48.7718, "lng": -121.2985, "region": "lower48", "desc": "The American Alps \u2014 over 300 glaciers, jagged peaks, and dense wilderness seeing fewer visitors than almost any other national park."}, {"id": 58, "name": "Olympic", "state": "Washington", "year": 1938, "lat": 47.8021, "lng": -123.6044, "region": "lower48", "desc": "Three distinct ecosystems: glacier-capped peaks, the world's finest temperate rainforest, and a wild Pacific coastline \u2014 all in one park."}, {"id": 59, "name": "New River Gorge", "state": "West Virginia", "year": 2020, "lat": 38.0742, "lng": -80.9998, "region": "lower48", "desc": "One of the deepest Appalachian gorges \u2014 world-class whitewater, rock climbing, and one of the world's longest steel arch bridges."}, {"id": 60, "name": "Grand Teton", "state": "Wyoming", "year": 1929, "lat": 43.7904, "lng": -110.6818, "region": "lower48", "desc": "Cathedral-like granite peaks rise abruptly 7,000 feet above the sagebrush flats of Jackson Hole with no foothills to ease the drama."}, {"id": 61, "name": "Yellowstone", "state": "Wyoming", "year": 1872, "lat": 44.428, "lng": -110.5885, "region": "lower48", "desc": "The world's first national park. Half of Earth's geothermal features \u2014 including Old Faithful \u2014 sit above one of the largest active supervolcanoes."}, {"id": 62, "name": "Virgin Islands", "state": "U.S. Virgin Islands", "year": 1956, "lat": 18.3458, "lng": -64.7281, "region": "territory", "desc": "Crystalline turquoise bays, white sand beaches, and some of the Caribbean's finest coral reefs on the island of St. John."}, {"id": 63, "name": "Nat. Park of American Samoa", "state": "American Samoa", "year": 1988, "lat": -14.2592, "lng": -170.0807, "region": "territory", "desc": "The only US national park south of the equator \u2014 pristine ancient rainforest, coral reefs, and fruit bat colonies on tropical Samoan islands."}], "stateInfo": {"Alaska": "Alaska's eight national parks protect more wilderness than all other parks combined \u2014 vast, roadless, and spectacularly wild. From North America's highest peak to active volcanoes, glacial fjords, and untouched arctic tundra.", "Arizona": "Three parks showcase Arizona's geological grandeur: the Grand Canyon's mile-deep chasm carved over five million years, ancient logs crystallized into rainbow stone at Petrified Forest, and the iconic giant saguaro cacti of the Sonoran Desert.", "Arkansas": "Hot Springs is one of America's oldest federally protected areas, centered on 47 naturally flowing thermal springs that have drawn visitors since the 1800s along the beautifully restored historic Bathhouse Row.", "California": "No state rivals California's nine national parks \u2014 the world's tallest and biggest trees, a glacier-carved valley of incomparable beauty, North America's lowest point, towering coastal redwoods, and alien desert landscapes.", "Colorado": "Colorado's four parks span elevations from Rocky Mountain alpine tundra above 12,000 feet to ancient Ancestral Puebloan cliff dwellings, North America's tallest sand dunes, and one of the continent's most sheer river canyons.", "Florida": "Florida's three parks protect extraordinary subtropical ecosystems: the vast Everglades river of grass, the offshore coral reefs and mangroves of Biscayne, and the remote Civil War-era island fortress of Dry Tortugas.", "Hawaii": "Two parks on two islands capture Hawaii's volcanic heart: Haleakal\u0101's otherworldly summit crater on Maui and the continuously active K\u012blauea and Mauna Loa volcanoes reshaping the Big Island with new lava.", "Indiana": "Indiana Dunes is a surprising biodiversity hotspot \u2014 towering Lake Michigan sand dunes rising 200 feet above the shoreline, surrounded by swamps, bogs, prairie, and forests that support more plant species per acre than many tropical rainforests.", "Kentucky": "Mammoth Cave preserves the world's longest known cave system \u2014 over 400 miles of explored passages \u2014 beneath the rolling karst landscape of south-central Kentucky, carved by centuries of water through limestone.", "Maine": "Acadia is New England's only national park, protecting rugged pink granite coastline, forested mountains, and pristine lakes on Mount Desert Island. Cadillac Mountain is the first place in the continental US to see the sunrise.", "Michigan": "Isle Royale is one of the least-visited parks in the lower 48 \u2014 a remote wilderness island accessible only by boat or seaplane in Lake Superior, home to the world's longest continuously running wolf-moose predator-prey study.", "Minnesota": "Voyageurs covers a vast network of four interconnected lakes and more than 500 islands along the US-Canada border, a waterway wilderness best explored by houseboat, canoe, or snowmobile in winter.", "Missouri": "Gateway Arch in St. Louis commemorates America's westward expansion with the world's tallest man-made arch \u2014 630 feet of gleaming stainless steel on the banks of the Mississippi River.", "Montana": "Glacier National Park preserves one of the most pristine alpine ecosystems in North America. Going-to-the-Sun Road crosses the Continental Divide through tundra alive with mountain goats, grizzly bears, and wildflowers.", "Nevada": "Great Basin is one of the least-visited parks in the US \u2014 protecting ancient bristlecone pine trees over 5,000 years old, the dramatic Lehman Caves marble system, and some of the darkest, most star-filled skies in the country.", "New Mexico": "Two parks reveal New Mexico's geological extremes: Carlsbad Caverns hides an underground cathedral 750 feet below the Chihuahuan Desert, while White Sands spreads 275 square miles of impossibly bright gypsum dunes across the Tularosa Basin.", "NC / Tennessee": "Great Smoky Mountains straddles the Appalachian crest across two states and is America's most visited national park. Ancient mountains draped in blue mist harbor more tree species than all of northern Europe.", "North Dakota": "Theodore Roosevelt National Park preserves the rugged badlands that shaped a young Roosevelt into America's greatest conservation president \u2014 colorful buttes, wild bison herds, and the winding Little Missouri River.", "Ohio": "Cuyahoga Valley protects a green corridor of forests, wetlands, waterfalls, and historic farms along the Cuyahoga River between Cleveland and Akron, one of the most urban national parks in the country.", "Oregon": "Crater Lake holds the deepest water in the United States at 1,943 feet and some of the clearest, most intensely blue water on Earth \u2014 filling the collapsed caldera of ancient Mount Mazama, which erupted 7,700 years ago.", "South Carolina": "Congaree protects the largest intact old-growth bottomland hardwood forest in the southeastern US. Its ancient trees \u2014 some of the tallest east of the Mississippi \u2014 form a cathedral-like canopy above a wild floodplain.", "South Dakota": "South Dakota's two parks reveal contrasting wonders: Wind Cave's honeycomb boxwork formations deep underground, and Badlands' dramatic surface of sharply eroded spires and gullies stretching to the horizon.", "Texas": "Big Bend's vast Chihuahuan Desert meets the Rio Grande in one of the most remote parks in the lower 48. Guadalupe Mountains rises from the same ancient Permian reef, containing the highest peak in Texas.", "Utah": "Utah's Mighty Five are among the most spectacular parks on Earth \u2014 more than 2,000 stone arches at Arches, hoodoo amphitheaters at Bryce Canyon, the Colorado Plateau wilderness of Canyonlands, Capitol Reef's 100-mile fold, and Zion's sheer canyon walls.", "Virginia": "Shenandoah's Skyline Drive winds 105 miles along the Blue Ridge crest, offering sweeping views over the Shenandoah Valley with 500 miles of trails through second-growth forest recovering since the 1930s.", "Washington": "Washington's three parks showcase the Pacific Northwest at its most dramatic: Mount Rainier's 26 glaciers, Olympic's rainforest-to-coastline ecosystems, and North Cascades' 300+ glaciers in the remote American Alps.", "West Virginia": "New River Gorge \u2014 America's newest national park \u2014 protects one of the oldest rivers on Earth carving one of the Appalachians' deepest gorges, with world-class whitewater and the longest steel arch bridge in the Western Hemisphere.", "Wyoming": "Yellowstone and Grand Teton together form one of Earth's greatest protected landscapes. Yellowstone holds half the world's geothermal features above a supervolcano; Grand Teton's cathedral peaks rise without foothills from the Jackson Hole valley floor.", "U.S. Virgin Islands": "Virgin Islands National Park covers nearly two-thirds of St. John, protecting crystalline turquoise bays, white sand beaches, and some of the finest coral reefs in the entire Caribbean.", "American Samoa": "The only US national park in the Southern Hemisphere \u2014 and one of the most remote \u2014 protects pristine tropical rainforest, thriving coral reefs, and ancient Samoan culture across three island groups in the South Pacific."}}, PARKS=D.parks, SI=D.stateInfo;
-const pick=document.getElementById('pick');
-PARKS.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(p=>{
-  const o=document.createElement('option');o.value=p.id;o.textContent=p.name+" — "+p.state;pick.appendChild(o);
-});
-function paramId(){const u=new URLSearchParams(location.search);const q=u.get('park');
-  if(!q)return null;const byId=PARKS.find(p=>String(p.id)===q);if(byId)return byId.id;
-  const byName=PARKS.find(p=>p.name.toLowerCase().replace(/[^a-z]/g,'')===q.toLowerCase().replace(/[^a-z]/g,''));return byName?byName.id:null;}
-let current=paramId()||PARKS.find(p=>p.name==="Yosemite").id;
-pick.value=current;
-pick.onchange=()=>{current=+pick.value;render();};
+    var S={
+      td:'display:flex;gap:13px;padding:13px 0;border-top:1px solid #e7ddca',
+      tdimg:'width:88px;height:66px;object-fit:cover;border-radius:11px;flex:none',
+      h4:'font-size:.96rem;color:#163a2b;margin-bottom:3px;font-family:Spectral,Georgia,serif;font-weight:700',
+      p:'font-size:.83rem;line-height:1.5;color:#525a46',
+      dur:'font-size:.72rem;color:#8c8473;margin-top:3px',
+      achip:'font-size:.76rem;background:rgba(238,243,230,.85);border:1px solid #e7ddca;color:#1d4a37;padding:5px 12px;border-radius:999px;font-weight:600',
+      fee:'padding:11px 0;border-top:1px solid #e7ddca',
+      ft:'display:flex;justify-content:space-between;gap:10px;align-items:baseline',
+      amt:'font-size:1.05rem;font-weight:700;color:#1d4a37;font-family:Spectral,Georgia,serif',
+      vi:'padding:9px 0;border-top:1px solid #e7ddca',
+      btn:'display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:rgba(238,243,230,.85);color:#1d4a37;border:1px solid #e7ddca;font-size:.82rem;font-weight:600;padding:8px 14px;border-radius:11px',
+      btnP:'display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fff;border:1px solid transparent;font-size:.82rem;font-weight:600;padding:8px 14px;border-radius:11px',
+      row:'display:flex;gap:8px;flex-wrap:wrap;margin-top:12px',
+      clear:'display:flex;align-items:center;gap:8px;color:#3f7a34;font-weight:600;font-size:.9rem',
+      gchip:'flex:1 1 116px;min-width:116px;background:#f7f3e9;border:1px solid #e7ddca;border-radius:14px;padding:11px 13px',
+      gk:'font-size:.6rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#8c8473',
+      gv:'font-family:Spectral,Georgia,serif;font-size:1.4rem;font-weight:700;color:#1d4a37;margin-top:4px;line-height:1',
+      gs:'font-size:.68rem;color:#8c8473;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis',
+      load:'color:#8c8473;font-size:.86rem'
+    };
+    var REG={lower48:'Contiguous U.S.',alaska:'Alaska',hawaii:'Hawaii',territory:'U.S. Territory'};
 
-function render(){
-  const p=PARKS.find(x=>x.id===current);
-  document.getElementById('pname').textContent=p.name;
-  document.getElementById('psub').textContent=p.state+"  ·  "+({lower48:"Contiguous U.S.",alaska:"Alaska",hawaii:"Hawaii",territory:"U.S. Territory"})[p.region];
-  document.getElementById('pest').innerHTML=`<span class="est">Established ${p.year}</span>`;
-  document.getElementById('desc').textContent=p.desc;
-  const al=document.getElementById('aboutlive'); if(al)al.textContent=p.desc;
-  const rec='https://www.recreation.gov/search?q='+encodeURIComponent(p.name+' National Park');
-  const npsPark='https://www.google.com/search?q='+encodeURIComponent(p.name+' national park nps.gov reservations');
-  const rb=document.getElementById('reserve');
-  if(rb)rb.innerHTML=`<p style="font-size:.86rem;line-height:1.55;color:#525a46;margin-bottom:12px">Some parks require timed-entry or campground reservations. These are booked on the official government sites — we link you straight there.</p>`+
-    `<div class="btnrow"><a class="btn primary" href="${rec}" target="_blank" rel="noopener">Check reservations on Recreation.gov ↗</a>`+
-    `<a class="btn" id="npslink" href="${npsPark}" target="_blank" rel="noopener">Official park page ↗</a></div>`+
-    `<p style="font-size:.72rem;color:#8f8b7c;margin-top:10px">Reservations and payment are handled by the official site. Many parks are free or pay-at-gate and need no reservation.</p>`;
-  document.getElementById('about').textContent=SI[p.state]||"";
-  const maps=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-  const nps=`https://www.google.com/search?q=${encodeURIComponent(p.name+" national park nps.gov")}`;
-  document.getElementById('loc').innerHTML=
-    `<div><b>Coordinates:</b> ${p.lat.toFixed(3)}, ${p.lng.toFixed(3)}</div>`+
-    `<div class="btnrow"><a class="btn" href="${maps}" target="_blank" rel="noopener">◎ Get directions</a>`+
-    `<a class="btn alt" href="${nps}" target="_blank" rel="noopener">Official NPS info ↗</a></div>`;
-  // reset live panels
-  document.getElementById('now').className='loading';document.getElementById('now').textContent='Loading live weather…';
-  document.getElementById('alerts').className='loading';document.getElementById('alerts').textContent='Checking for alerts…';
-  document.getElementById('fc').className='fc loading';document.getElementById('fc').textContent='Loading forecast…';
-  resetHero(p); crowdGauge(p);
-  _nwsAlerts=0;_npsAlerts=0; if(typeof updateHeroAlerts==='function')updateHeroAlerts(true);
-  var _ap=document.getElementById('aboutPreview'); if(_ap){_ap.className='';_ap.innerHTML='<p class="desc" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">'+p.desc+'</p>';}
-  var _tp=document.getElementById('todoPreview'); if(_tp){_tp.className='loading';_tp.textContent='Loading things to do…';}
-  var _gl=document.getElementById('glance'); if(_gl){_gl.className='glance loading';_gl.textContent='Loading…';}
-  var _ar=document.getElementById('arc'); if(_ar){_ar.innerHTML=sunArcHTML(p);}
-  loadNPS(p);
-  loadReviews(p);
-  if(p.region==='territory'){ offline('This U.S. territory is outside the National Weather Service coverage area.'); return; }
-  loadForecast(p); loadAlerts(p);
-}
-function offline(msg){
-  ['now','fc'].forEach(id=>{const e=document.getElementById(id);e.className=id==='fc'?'fc':'';e.innerHTML='<span class="loading">'+msg+'</span>';});
-  document.getElementById('alerts').className='';document.getElementById('alerts').innerHTML='<span class="loading">'+msg+'</span>';
-  var gl=document.getElementById('glance'); if(gl){gl.className='glance';gl.innerHTML='<div class="gchip" style="flex:1 1 100%"><div class="gk">Coverage</div><div class="gv" style="font-size:1rem">Outside NWS area</div><div class="gs">No live weather for this territory</div></div>';}
-  var tk=document.getElementById('ticker'); if(tk)tk.textContent='Outside National Weather Service coverage';
-  var hc=document.getElementById('heroCond'); if(hc)hc.textContent='Outside NWS coverage';
-}
-function loadForecast(p){
-  fetch(`https://api.weather.gov/points/${p.lat.toFixed(4)},${p.lng.toFixed(4)}`,{headers:{Accept:"application/geo+json"}})
-   .then(r=>{if(!r.ok)throw 0;return r.json()})
-   .then(d=>fetch(d.properties.forecast,{headers:{Accept:"application/geo+json"}}))
-   .then(r=>{if(!r.ok)throw 0;return r.json()})
-   .then(d=>{
-     const per=d.properties.periods; const c=per[0];
-     const now=document.getElementById('now');now.className='';
-     now.innerHTML=(window.WeatherFX)?WeatherFX.card({text:c.shortForecast,temp:c.temperature,unit:'°',bottom:'Wind '+c.windSpeed+' '+c.windDirection+' · '+c.name,size:'lg'}):
-       `<div class="temp">${c.temperature}&deg;</div><div><div class="cond">${c.shortForecast}</div><div class="wind">Wind ${c.windSpeed} ${c.windDirection} · ${c.name}</div></div>`;
-     const fc=document.getElementById('fc');fc.className='fc';
-     fc.innerHTML=per.slice(0,7).map(x=>(window.WeatherFX)?`<div class="d wfxd">`+WeatherFX.card({top:x.name,temp:x.temperature,unit:'°',text:x.shortForecast,size:'sm'})+`</div>`:`<div class="d"><div class="nm">${x.name}</div><div class="t">${x.temperature}&deg;</div><div class="s">${x.shortForecast}</div></div>`).join("");
-     try{paintHero(c);enhanceLive(p,per);}catch(e){}
-   })
-   .catch(()=>offlineWeather());
-}
-function offlineWeather(){
-  const msg='Live weather appears on the published site (it can\'t load from a raw local file).';
-  document.getElementById('now').className='';document.getElementById('now').innerHTML='<span class="loading">'+msg+'</span>';
-  document.getElementById('fc').className='fc';document.getElementById('fc').innerHTML='<span class="loading">'+msg+'</span>';
-  var gl=document.getElementById('glance'); if(gl){gl.className='glance';gl.innerHTML='<div class="gchip" style="flex:1 1 100%"><div class="gk">Live data</div><div class="gv" style="font-size:1rem">On the published site</div><div class="gs">weather.gov can\'t load from a local file</div></div>';}
-  var tk=document.getElementById('ticker'); if(tk)tk.textContent='Live weather shows on the published site';
-}
-function loadAlerts(p){
-  fetch(`https://api.weather.gov/alerts/active?point=${p.lat.toFixed(4)},${p.lng.toFixed(4)}`,{headers:{Accept:"application/geo+json"}})
-   .then(r=>{if(!r.ok)throw 0;return r.json()})
-   .then(d=>{
-     const box=document.getElementById('alerts');box.className='';
-     const fs=(d.features||[]);
-     _nwsAlerts=fs.length; if(typeof updateHeroAlerts==='function')updateHeroAlerts();
-     if(!fs.length){box.innerHTML='<div class="clear">✓ No active alerts — all clear right now.</div>';return;}
-     box.innerHTML=fs.slice(0,5).map(f=>{const a=f.properties;
-       return `<div class="alert sev-${a.severity||'Moderate'}"><div class="ev">${a.event}</div>`+
-         `<div class="hl">${a.headline||''}</div>`+
-         `<div class="tm">Until ${a.expires?new Date(a.expires).toLocaleString():'further notice'}</div></div>`;}).join("");
-   })
-   .catch(()=>{document.getElementById('alerts').className='';
-     document.getElementById('alerts').innerHTML='<span class="loading">Alerts appear on the published site.</span>';});
-}
-const _npsCache={};
-function fetchNPS(name){
-  if(_npsCache[name]) return _npsCache[name];
-  const pr=fetch('/api/nps?name='+encodeURIComponent(name),{headers:{Accept:'application/json'}})
-    .then(r=>{if(!r.ok)throw 0;return r.json()})
-    .then(d=>{ if(d&&d.error)throw 0; return d; })
-    .catch(e=>{ delete _npsCache[name]; throw e; });
-  _npsCache[name]=pr;
-  return pr;
-}
-function setBox(id,html){const el=document.getElementById(id);if(el){el.className='';el.innerHTML=html;}}
-function loadNPS(p){
-  const box=document.getElementById('nps'); if(box){box.className='loading';box.textContent='Loading official NPS info…';}
-  const img=document.getElementById('heroimg'); if(img){img.style.display='none';}
-  var _wh=document.getElementById('wahero'); if(_wh)_wh.classList.remove('has-img');
-  fetchNPS(p.name)
-   .then(d=>{
-     const park=d.park||{};
-     const im=document.getElementById('heroimg');
-     if(im && park.images && park.images.length){ im.src=park.images[0].url; im.alt=park.images[0].alt||p.name; im.style.display='block'; var wh=document.getElementById('wahero'); if(wh)wh.classList.add('has-img'); }
-     if(park.description){ const al=document.getElementById('aboutlive'); if(al)al.textContent=park.description; var abp=document.getElementById('aboutPreview'); if(abp){abp.className='';abp.innerHTML='<p class="desc" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">'+park.description+'</p>';} }
-     if(park.url){ const nl=document.getElementById('npslink'); if(nl)nl.href=park.url; }
-
-     // --- Live tab: official NPS alerts ---
-     const ab=document.getElementById('npsalerts');
-     _npsAlerts=(d.alerts&&d.alerts.length)||0; if(typeof updateHeroAlerts==='function')updateHeroAlerts();
-     if(ab){ ab.className='';
-       if(d.alerts && d.alerts.length){
-         ab.innerHTML=d.alerts.slice(0,8).map(a=>{
-           const sev=(a.category==='Park Closure'||a.category==='Danger')?'Severe':(a.category==='Caution'?'Moderate':'Minor');
-           return `<div class="alert sev-${sev}"><div class="ev">${a.category||'Notice'}: ${a.title||''}</div>`+
-             (a.description?`<div class="hl">${a.description}</div>`:'')+`</div>`;}).join('');
-       } else { ab.innerHTML='<div class="clear">✓ No official NPS alerts or closures posted.</div>'; }
-     }
-
-     // --- About tab: hours + fees summary only ---
-     const box=document.getElementById('nps');
-     if(box){ box.className='';
-       let html='';
-       const fees=(park.entranceFees||[]);
-       const hours=(park.operatingHours&&park.operatingHours[0]&&park.operatingHours[0].description)||'';
-       html+='<div class="npsmeta">';
-       if(fees.length) html+=`<div><b>Entrance:</b> ${fees.map(f=>((f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free')+(f.title?(' — '+f.title):'')).join(' · ')}</div>`;
-       else html+=`<div>Entrance fee information isn't posted for this park.</div>`;
-       if(hours) html+=`<div style="margin-top:5px"><b>Hours:</b> ${hours}</div>`;
-       if(park.url) html+=`<div class="btnrow"><a class="btn" href="${park.url}" target="_blank" rel="noopener">Official park page ↗</a></div>`;
-       html+='</div>';
-       box.innerHTML=html;
-     }
-
-     // --- Things to Do ---
-     const td=d.thingsToDo||[];
-     if(td.length){ setBox('todo', td.map(t=>`<div class="tdcard">`+
-        (t.image?`<img src="${t.image}" alt="">`:'')+
-        `<div><h4>${t.title||''}</h4><p>${t.shortDescription||''}</p>`+
-        (t.duration?`<div class="dur">⏱ ${t.duration}</div>`:'')+
-        (t.url?` <a href="${t.url}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--accent);font-weight:600">Details ↗</a>`:'')+
-        `</div></div>`).join('')); }
-     else setBox('todo','<span class="loading">No things-to-do listed for this park.</span>');
-     var _tpv=document.getElementById('todoPreview'); if(_tpv){_tpv.className='';_tpv.innerHTML=todoPreviewHTML(td);}
-
-     // --- Activities chips ---
-     const acts=(park.activities||[]);
-     setBox('activities', acts.length?`<div class="chiprow">${acts.map(a=>`<span class="achip">${a}</span>`).join('')}</div>`:'<span class="loading">No activities listed.</span>');
-
-     // --- Photos gallery ---
-     const imgs=(park.images||[]);
-     setBox('gallery', imgs.length?`<div class="gallery">${imgs.map(i=>`<a href="${i.url}" target="_blank" rel="noopener"><img src="${i.url}" alt="${(i.alt||'').replace(/"/g,'')}" title="${(i.caption||'').replace(/"/g,'')}"></a>`).join('')}</div>`:'<span class="loading">No photos available.</span>');
-
-     // --- Fees & passes ---
-     const fees=(park.entranceFees||[]), passes=(park.entrancePasses||[]);
-     let feeHtml='';
-     if(fees.length) feeHtml+=fees.map(f=>`<div class="feeitem"><div class="ft"><b>${f.title||'Entrance'}</b><span class="amt">${(f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free'}</span></div>${f.description?`<p>${f.description.slice(0,180)}</p>`:''}</div>`).join('');
-     if(passes.length) feeHtml+=passes.map(f=>`<div class="feeitem"><div class="ft"><b>${f.title||'Pass'}</b><span class="amt">${(f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free'}</span></div></div>`).join('');
-     setBox('fees', feeHtml||'<span class="loading">No fee information posted (many parks are free to enter).</span>');
-
-     // --- Hours ---
-     const oh=(park.operatingHours&&park.operatingHours[0]);
-     setBox('hours', oh?`<p style="font-size:.86rem;line-height:1.5;color:#4c5443">${oh.description||''}</p>`:'<span class="loading">Hours not listed.</span>');
-
-     // --- Campgrounds ---
-     const cg=d.campgrounds||[];
-     setBox('camps', cg.length?`<div class="vlist">${cg.map(c=>`<div class="vi"><b>${c.name||''}</b>${c.description?`<p>${c.description}</p>`:''}`+
-       `${c.reservationUrl?`<a href="${c.reservationUrl}" target="_blank" rel="noopener" style="font-size:.74rem;color:var(--accent);font-weight:700">Reserve ↗</a> `:''}`+
-       `${c.url?`<a href="${c.url}" target="_blank" rel="noopener" style="font-size:.74rem;color:var(--accent);font-weight:600">Details ↗</a>`:''}</div>`).join('')}</div>`:'<span class="loading">No campgrounds listed.</span>');
-
-     // --- Visitor centers ---
-     const vc=d.visitorCenters||[];
-     setBox('vcenters', vc.length?`<div class="vlist">${vc.map(v=>`<div class="vi"><b>${v.name||''}</b>${v.description?`<p>${v.description}</p>`:''}</div>`).join('')}</div>`:'<span class="loading">No visitor centers listed.</span>');
-
-     // --- Directions ---
-     setBox('directions', park.directionsInfo?`<p style="font-size:.84rem;line-height:1.5;color:#4c5443">${park.directionsInfo}</p>${park.url?`<div class="btnrow"><a class="btn" href="${park.url}" target="_blank" rel="noopener">Full directions ↗</a></div>`:''}`:'<span class="loading">No directions posted.</span>');
-
-     // --- Events ---
-     const ev=d.events||[];
-     setBox('events', ev.length?ev.map(e=>`<div class="tdcard"><div><h4>${e.title||''}</h4>`+
-       `<div class="dur">${[e.date,e.times].filter(Boolean).join(' · ')}${e.location?(' · '+e.location):''}</div>`+
-       (e.description?`<p>${e.description}</p>`:'')+
-       (e.url?` <a href="${e.url}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--accent);font-weight:600">Event info ↗</a>`:'')+
-       `</div></div>`).join(''):'<span class="loading">No upcoming events listed.</span>');
-
-     // --- News ---
-     const nw=d.news||[];
-     setBox('news', nw.length?nw.map(n=>`<div class="tdcard"><div><h4>${n.title||''}</h4>`+
-       (n.date?`<div class="dur">${n.date}</div>`:'')+
-       (n.abstract?`<p>${n.abstract}</p>`:'')+
-       (n.url?` <a href="${n.url}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--accent);font-weight:600">Read more ↗</a>`:'')+
-       `</div></div>`).join(''):'<span class="loading">No recent news releases.</span>');
-
-     // --- Points of Interest ---
-     const pl=d.places||[];
-     setBox('places', pl.length?pl.map(x=>`<div class="tdcard">`+
-       (x.image?`<img src="${x.image}" alt="">`:'')+
-       `<div><h4>${x.title||''}</h4>${x.description?`<p>${x.description}</p>`:''}`+
-       (x.url?` <a href="${x.url}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--accent);font-weight:600">Details ↗</a>`:'')+
-       `</div></div>`).join(''):'<span class="loading">No points of interest listed.</span>');
-   })
-   .catch(()=>{
-     const msg='<span class="loading">Official NPS content appears once the site is published with your NPS key set in the host settings. It won\'t load on Live Server or before the key is configured.</span>';
-     ['nps','npsalerts','todo','todoPreview','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(id=>setBox(id,msg));
-   });
-}
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
-    document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('on'));
-    btn.classList.add('on');
-    document.getElementById('pane-'+btn.dataset.tab).classList.add('on');
-  };
-});
-// ===== Reviews (Supabase) =====
-const SB_URL="https://fsgmwersernbtjugkuhk.supabase.co";
-const SB_KEY="sb_publishable_XWefJHwU9mPJ9frijodnfQ_XBXFEUnn";
-const SB_HEAD={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
-const BADWORDS=["fuck","shit","bitch","asshole","cunt","nigger","faggot","retard","whore","dick","pussy","bastard"];
-let rvRating=0;
-function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function hasProfanity(t){const low=(" "+t.toLowerCase()+" ").replace(/[^a-z ]/g," ");return BADWORDS.some(w=>low.includes(" "+w+" "));}
-function starStr(n){n=Math.round(n);return "★★★★★".slice(0,n)+"☆☆☆☆☆".slice(0,5-n);}
-function timeAgo(iso){const d=new Date(iso),s=(Date.now()-d)/1000;if(s<3600)return Math.max(1,Math.floor(s/60))+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";if(s<2592000)return Math.floor(s/86400)+"d ago";return d.toLocaleDateString();}
-function loadReviews(p){
-  const sum=document.getElementById('revsummary'), list=document.getElementById('revlist');
-  if(sum){sum.className='loading';sum.textContent='Loading reviews…';}
-  if(list)list.innerHTML='';
-  fetch(SB_URL+"/rest/v1/reviews?park_id=eq."+p.id+"&order=created_at.desc&select=*",{headers:SB_HEAD})
-   .then(r=>{if(!r.ok)throw 0;return r.json()})
-   .then(rows=>{
-     const sum=document.getElementById('revsummary'), list=document.getElementById('revlist'); if(!sum||!list)return;
-     sum.className='';
-     if(!rows.length){ sum.innerHTML='<span style="color:var(--muted);font-size:.9rem">No reviews yet — be the first to share your experience!</span>'; list.innerHTML=''; return; }
-     const avg=rows.reduce((a,r)=>a+r.rating,0)/rows.length;
-     sum.innerHTML='<div class="revavg"><span class="num">'+avg.toFixed(1)+'</span><div><div class="st">'+starStr(avg)+'</div><div class="ct">'+rows.length+' review'+(rows.length>1?'s':'')+'</div></div></div>';
-     list.innerHTML=rows.map(r=>'<div class="revitem"><div class="rh"><b>'+escapeHtml(r.author)+'</b><span class="when">'+timeAgo(r.created_at)+'</span></div><div class="stars">'+starStr(r.rating)+'</div><p>'+escapeHtml(r.body)+'</p></div>').join('');
-   })
-   .catch(()=>{ const sum=document.getElementById('revsummary'); if(sum){sum.className='';sum.innerHTML='<span style="color:var(--muted);font-size:.9rem">Reviews couldn\'t load right now. Please try again shortly.</span>';} });
-}
-function setupReviewForm(){
-  const stars=document.getElementById('rv-stars');
-  if(stars) stars.addEventListener('click',function(e){
-    const rect=stars.getBoundingClientRect(); const rel=(e.clientX-rect.left)/rect.width;
-    rvRating=Math.max(1,Math.min(5,Math.ceil(rel*5)));
-    stars.textContent="★★★★★".slice(0,rvRating)+"☆☆☆☆☆".slice(0,5-rvRating);
-  });
-  const btn=document.getElementById('rv-submit');
-  if(btn) btn.onclick=submitReview;
-}
-function submitReview(){
-  const p=PARKS.find(x=>x.id===current); if(!p)return;
-  const name=(document.getElementById('rv-name').value||"").trim();
-  const body=(document.getElementById('rv-body').value||"").trim();
-  const msg=document.getElementById('rv-msg');
-  const show=(t,ok)=>{ if(msg){msg.textContent=t;msg.style.color=ok?'#3d7a2a':'#b54a3a';} };
-  if(!name){show("Please add your name.",false);return;}
-  if(rvRating<1){show("Please pick a star rating.",false);return;}
-  if(body.length<3){show("Please write a little more.",false);return;}
-  if(hasProfanity(name)||hasProfanity(body)){show("Please keep it family-friendly.",false);return;}
-  show("Posting…",true);
-  fetch(SB_URL+"/rest/v1/reviews",{method:"POST",headers:Object.assign({},SB_HEAD,{"Prefer":"return=minimal"}),
-    body:JSON.stringify({park_id:p.id,park_name:p.name,author:name,rating:rvRating,body:body})})
-   .then(r=>{ if(!r.ok)throw 0;
-     show("Thanks — your review is posted!",true);
-     document.getElementById('rv-name').value='';document.getElementById('rv-body').value='';
-     rvRating=0; document.getElementById('rv-stars').textContent='☆☆☆☆☆';
-     loadReviews(p);
-   })
-   .catch(()=>show("Couldn't post right now — please try again.",false));
-}
-/* ===== creative live extras: hero scene, ticker, golden-hour arc, crowd gauge ===== */
-function setStatusPill(state,label){
-  var el=document.getElementById('statuspill'); if(!el)return;
-  el.classList.toggle('closed',state==='closed');
-  el.innerHTML='<span class="sp-dot"></span>'+(label||(state==='closed'?'Closed':'Open'));
-}
-function resetHero(p){
-  var t=document.getElementById('heroTemp'); if(t)t.textContent='—';
-  var c=document.getElementById('heroCond'); if(c)c.textContent='';
-  var w=document.getElementById('heroWind'); if(w)w.textContent='';
-  var sc=document.getElementById('scene'); if(sc&&window.WeatherFX)sc.innerHTML=WeatherFX.scene('clear',{size:'lg'});
-  var tk=document.getElementById('ticker'); if(tk)tk.textContent='Fetching live conditions…';
-  setStatusPill('open','Open · 24 hrs');
-  var ss=document.getElementById('stState'); if(ss)ss.textContent='Open';
-  var sb=document.getElementById('stSub'); if(sb)sb.textContent='Fetching conditions…';
-  var ws=document.getElementById('wastatus'); if(ws){ws.classList.add('open');ws.classList.remove('closed');}
-}
-function paintHero(c){
-  var sc=document.getElementById('scene'); if(sc&&window.WeatherFX)sc.innerHTML=WeatherFX.scene(c.shortForecast,{size:'lg'});
-  var t=document.getElementById('heroTemp'); if(t)t.textContent=c.temperature;
-  var cond=document.getElementById('heroCond'); if(cond)cond.textContent=c.shortForecast;
-  var wind=document.getElementById('heroWind'); if(wind)wind.textContent='Wind '+c.windSpeed+' '+c.windDirection+' · '+c.name;
-  var sb=document.getElementById('stSub'); if(sb)sb.textContent=c.shortForecast+' · '+c.temperature+'°';
-}
-var _tickN=0,_tickT=null;
-function startTicker(){
-  _tickN=0; if(_tickT)clearInterval(_tickT);
-  var upd=function(){var tk=document.getElementById('ticker'); if(!tk)return; tk.textContent='Live from weather.gov · updated '+(_tickN===0?'just now':_tickN+' min ago');};
-  upd(); _tickT=setInterval(function(){_tickN++;upd();},60000);
-}
-function fmtTime(d){ if(!d||isNaN(d))return '—'; return d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }
-function sunTimes(lat,lng,date){
-  try{
-    var rad=Math.PI/180, deg=180/Math.PI;
-    var start=new Date(date.getFullYear(),0,0); var doy=Math.floor((date-start)/86400000);
-    var zen=90.833;
-    function calc(isRise){
-      var lngHour=lng/15;
-      var t=isRise?doy+((6-lngHour)/24):doy+((18-lngHour)/24);
-      var M=(0.9856*t)-3.289;
-      var L=M+(1.916*Math.sin(M*rad))+(0.020*Math.sin(2*M*rad))+282.634; L=(L+360)%360;
-      var RA=deg*Math.atan(0.91764*Math.tan(L*rad)); RA=(RA+360)%360;
-      RA=RA+((Math.floor(L/90)*90)-(Math.floor(RA/90)*90)); RA=RA/15;
-      var sinDec=0.39782*Math.sin(L*rad); var cosDec=Math.cos(Math.asin(sinDec));
-      var cosH=(Math.cos(zen*rad)-(sinDec*Math.sin(lat*rad)))/(cosDec*Math.cos(lat*rad));
-      if(cosH>1||cosH<-1)return null;
-      var H=isRise?360-deg*Math.acos(cosH):deg*Math.acos(cosH); H=H/15;
-      var T=H+RA-(0.06571*t)-6.622;
-      var UT=(T-lngHour)%24; return (UT+24)%24;
+    /* ---------- picker ---------- */
+    var pick=el('pick');
+    PARKS.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){
+      var o=document.createElement('option'); o.value=p.id; o.textContent=p.name+' — '+p.state; pick.appendChild(o);
+    });
+    function paramId(){
+      var u=new URLSearchParams(location.search), q=u.get('park'); if(!q)return null;
+      var byId=PARKS.find(function(p){return String(p.id)===q;}); if(byId)return byId.id;
+      var byName=PARKS.find(function(p){return p.name.toLowerCase().replace(/[^a-z]/g,'')===q.toLowerCase().replace(/[^a-z]/g,'');});
+      return byName?byName.id:null;
     }
-    var rUT=calc(true), sUT=calc(false); if(rUT==null||sUT==null)return null;
-    function toLocal(ut){var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0)); d.setUTCMinutes(Math.round(ut*60)); return d;}
-    return {sunrise:toLocal(rUT), sunset:toLocal(sUT)};
-  }catch(e){return null;}
-}
-function sunArcHTML(p){
-  var sun=sunTimes(p.lat,p.lng,new Date());
-  var w=240,h=98,cx=w/2,baseY=h-12,r=Math.min(cx-18,baseY-6);
-  var path='M '+(cx-r)+' '+baseY+' A '+r+' '+r+' 0 0 1 '+(cx+r)+' '+baseY;
-  var frac=0.5,riseS='—',setS='—',note='Daylight';
-  if(sun){
-    riseS=fmtTime(sun.sunrise); setS=fmtTime(sun.sunset);
-    var now=Date.now(), span=sun.sunset.getTime()-sun.sunrise.getTime();
-    frac=(now-sun.sunrise.getTime())/span;
-    if(frac<0){frac=0;note='Before sunrise';}
-    else if(frac>1){frac=1;note='After sunset · night';}
-    else{var gh=span*0.09; note=(now<=sun.sunrise.getTime()+gh||now>=sun.sunset.getTime()-gh)?'✨ Golden hour right now':'Daylight';}
-  } else { note='Polar day/night'; }
-  var theta=Math.PI*(1-frac);
-  var sx=cx+r*Math.cos(theta), sy=baseY-r*Math.sin(theta);
-  var arcLen=Math.PI*r;
-  return '<div class="arc-wrap"><svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+
-    '<defs><linearGradient id="ghg" x1="0" x2="1"><stop offset="0" stop-color="#e4be78"/><stop offset="1" stop-color="#c79a4b"/></linearGradient></defs>'+
-    '<line x1="'+(cx-r-6)+'" y1="'+baseY+'" x2="'+(cx+r+6)+'" y2="'+baseY+'" stroke="#e3d9c5" stroke-width="1.5"/>'+
-    '<path d="'+path+'" fill="none" stroke="#e3d9c5" stroke-width="3" stroke-linecap="round"/>'+
-    '<path d="'+path+'" fill="none" stroke="url(#ghg)" stroke-width="3" stroke-linecap="round" stroke-dasharray="'+arcLen.toFixed(1)+'" stroke-dashoffset="'+(arcLen*(1-frac)).toFixed(1)+'"/>'+
-    '<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="7" fill="#f6b21e" stroke="#fffdf7" stroke-width="2.5"/>'+
-    '</svg>'+
-    '<div class="arc-times"><span><small>Sunrise</small>'+riseS+'</span><span><small>Sunset</small>'+setS+'</span></div>'+
-    '<div class="arc-note">'+note+'</div></div>';
-}
-var ICONIC=new Set([9,21,61,41,25,54,28,30,15,60,37,50,46,5,44]);
-function crowdGauge(p){
-  var el=document.getElementById('crowd'); if(!el)return;
-  var now=new Date(), m=now.getMonth(), dow=now.getDay();
-  var base=ICONIC.has(p.id)?60:36;
-  var seasonAdj=(m>=5&&m<=7)?24:(m===8||m===4)?12:(m>=10||m<=1)?-16:2;
-  var weekendAdj=(dow===0||dow===6)?14:(dow===5)?6:0;
-  var score=Math.max(8,Math.min(97,base+seasonAdj+weekendAdj));
-  var level=score>72?'Busy':score>46?'Moderate':'Quiet';
-  var bestSeason=ICONIC.has(p.id)?'late Sept–Oct or May':'spring &amp; fall';
-  el.innerHTML='<div class="gauge">'+
-    '<div class="lvl">'+level+' <span style="font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">· est. today</span></div>'+
-    '<div class="meter"><div class="pin" style="left:'+score+'%"></div></div>'+
-    '<div class="ends"><span>Quiet</span><span>Packed</span></div>'+
-    '<div class="best">Go on <b>weekday mornings</b> — and visit in <b>'+bestSeason+'</b> for the thinnest crowds.</div>'+
-  '</div>';
-}
-function enhanceLive(p,per){
-  startTicker();
-  var day=per.find(function(x){return x.isDaytime;})||per[0];
-  var night=per.find(function(x){return !x.isDaytime;})||per[1]||per[0];
-  var sun=sunTimes(p.lat,p.lng,new Date());
-  var chips=[
-    ['Now',per[0].temperature+'°',per[0].shortForecast],
-    ['High',(day?day.temperature+'°':'—'),day?day.name:''],
-    ['Low',(night?night.temperature+'°':'—'),night?night.name:''],
-    ['Wind',(per[0].windSpeed||'—'),per[0].windDirection||''],
-    ['Sunrise',sun?fmtTime(sun.sunrise):'—','Local'],
-    ['Sunset',sun?fmtTime(sun.sunset):'—','Local']
-  ];
-  var gl=document.getElementById('glance');
-  if(gl){gl.className='glance'; gl.innerHTML=chips.map(function(c){return '<div class="gchip"><div class="gk">'+c[0]+'</div><div class="gv">'+c[1]+'</div><div class="gs">'+(c[2]||'')+'</div></div>';}).join('');}
-  var ar=document.getElementById('arc'); if(ar)ar.innerHTML=sunArcHTML(p);
-}
-setupReviewForm();
-var _nwsAlerts=0,_npsAlerts=0;
-function updateHeroAlerts(checking){
-  var bar=document.getElementById('waalert'); if(!bar)return;
-  var ic=document.getElementById('abIc'),t=document.getElementById('abTitle'),s=document.getElementById('abSub');
-  bar.classList.remove('active','severe');
-  if(checking){ if(ic)ic.textContent='…'; if(t)t.textContent='Checking alerts…'; if(s)s.textContent='Live from NPS & weather.gov'; return; }
-  var total=_nwsAlerts+_npsAlerts;
-  if(total>0){
-    bar.classList.add(_npsAlerts>0?'severe':'active');
-    if(ic)ic.textContent='⚠';
-    if(t)t.textContent=total+' active alert'+(total>1?'s':'')+(_npsAlerts>0?' · closures':'');
-    if(s)s.textContent='Review before you go';
-  } else {
-    if(ic)ic.textContent='✓';
-    if(t)t.textContent='All clear';
-    if(s)s.textContent='No active alerts or closures';
+    var current=paramId()||PARKS.find(function(p){return p.name==='Yosemite';}).id;
+    pick.value=current;
+    pick.onchange=function(){current=+pick.value; render();};
+
+    /* ---------- tabs ---------- */
+    var BTN='flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;';
+    function showTab(t){
+      document.querySelectorAll('#seg button').forEach(function(b){
+        b.style.cssText=BTN+(b.getAttribute('data-tab')===t?'background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fbf6ea;box-shadow:0 6px 16px -8px rgba(15,44,32,.7)':'background:transparent;color:#6a7160');
+      });
+      ['now','do','visit','story'].forEach(function(x){ var pane=el('pane-'+x); if(pane) pane.style.display=(x===t?(x==='now'||x==='visit'?'grid':(x==='do'||x==='story'?'grid':'block')):'none'); });
+    }
+    document.querySelectorAll('#seg button').forEach(function(b){ b.onclick=function(){ showTab(b.getAttribute('data-tab')); var seg=document.getElementById('seg'); var y=seg.getBoundingClientRect().top+window.scrollY-86; window.scrollTo({top:y,behavior:'smooth'}); }; });
+    el('waalert').addEventListener('click',function(e){ e.preventDefault(); showTab('now'); var a=el('npsalerts'); if(a){var y=a.getBoundingClientRect().top+window.scrollY-70; window.scrollTo({top:y,behavior:'smooth'});} });
+
+    /* ====================== LIVING SCENE ====================== */
+    function hx(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+    function rgb(a){return 'rgb('+a[0]+','+a[1]+','+a[2]+')';}
+    function scale(a,f,b){b=b||0;return [Math.max(0,Math.min(255,Math.round(a[0]*f+b))),Math.max(0,Math.min(255,Math.round(a[1]*f+b))),Math.max(0,Math.min(255,Math.round(a[2]*f+b)))];}
+    function mix(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];}
+
+    function silSvg(type,col){
+      if(type==='hiker') return '<svg viewBox="0 0 28 42" width="25" height="38" fill="none" stroke="'+col+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3.4" fill="'+col+'" stroke="none"></circle><path d="M12 9 L12 23"></path><path d="M12 14 L19 19"></path><path d="M12 23 L8 36"></path><path d="M12 23 L16 36"></path><path d="M20 6 L21 38"></path><path d="M9 11 Q4 13 6 20"></path></svg>';
+      if(type==='biker') return '<svg viewBox="0 0 42 32" width="40" height="30" fill="none" stroke="'+col+'" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="23" r="6.5"></circle><circle cx="33" cy="23" r="6.5"></circle><path d="M9 23 L19 23 L26 12 L33 23 M19 23 L23 12"></path><circle cx="25" cy="6.5" r="2.8" fill="'+col+'" stroke="none"></circle><path d="M25 9 L23 14 M23 12 L30 13"></path></svg>';
+      return '<svg viewBox="0 0 52 24" width="46" height="21" fill="none"><path d="M3 14 Q26 24 49 14 Q26 19 3 14 Z" fill="'+col+'"></path><circle cx="26" cy="6" r="3.2" fill="'+col+'"></circle><rect x="24.7" y="8" width="2.6" height="7" rx="1.3" fill="'+col+'"></rect><path d="M15 3 L37 13" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round"></path></svg>';
+    }
+    function silhouettes(cfg){
+      var night=(cfg.tod==='night');
+      var col=night?'rgba(225,232,228,.5)':'rgba(18,30,22,.6)';
+      var out='';
+      cfg.sils.forEach(function(t,i){
+        if(t==='birds'){
+          var flock='';
+          for(var b=0;b<3;b++){ flock+='<span style="display:inline-block;margin:0 5px;animation:pb-bob '+(2.2+b*0.4)+'s ease-in-out '+(b*0.3)+'s infinite"><svg viewBox="0 0 24 12" width="'+(15+b*3)+'" height="'+(8+b)+'" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round"><path d="M1 8 Q6 1 12 7 Q18 1 23 8"></path></svg></span>'; }
+          out+='<div style="position:absolute;top:'+(15+i*7)+'%;left:0;animation:pb-cross '+(50+i*9)+'s linear '+(i*7)+'s infinite">'+flock+'</div>';
+        } else if(t==='raft'||t==='kayak'||t==='canoe'||t==='boat'){
+          var bp=cfg.water?(100-cfg.water.y-3)+'%':'11%';
+          out+='<div style="position:absolute;bottom:'+bp+';left:0;animation:pb-cross 42s linear infinite"><span style="display:inline-block;animation:pb-bobr 3s ease-in-out infinite">'+silSvg('boat',col)+'</span></div>';
+        } else {
+          out+='<div style="position:absolute;bottom:9%;left:0;animation:pb-cross '+(58+i*7)+'s linear '+(i*5)+'s infinite"><span style="display:inline-block;animation:pb-bob 1.8s ease-in-out infinite">'+silSvg(t,col)+'</span></div>';
+        }
+      });
+      return out;
+    }
+    function particles(cfg,night){
+      var type=cfg.particles;
+      if(type==='none') return '';
+      if(night && type!=='snow') return '';
+      if(type==='mist'){
+        var m='';
+        for(var i=0;i<4;i++){ m+='<div style="position:absolute;left:-30%;width:160%;top:'+(40+i*12)+'%;height:14px;border-radius:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);filter:blur(4px);opacity:.5;animation:pb-mist '+(10+i*3)+'s linear '+(i*1.5)+'s infinite"></div>'; }
+        return m;
+      }
+      var conf={pollen:{c:'#ece0b0',rise:true,a:[2,4]},dust:{c:'#d8c9a0',rise:true,a:[1.5,3]},embers:{c:'#e0894a',rise:true,a:[2,3.6]},snow:{c:'#ffffff',rise:false,a:[2.5,5]},leaves:{c:'#c87a32',rise:false,a:[6,11]}}[type];
+      if(!conf) return '';
+      var out='';
+      for(var i=0;i<22;i++){
+        var x=Math.random()*100, sz=conf.a[0]+Math.random()*(conf.a[1]-conf.a[0]), dur=conf.rise?(9+Math.random()*7):(7+Math.random()*8), delay=Math.random()*dur;
+        var shape=(type==='leaves')?'border-radius:45% 55% 50% 50%':'border-radius:50%';
+        var pos=conf.rise?'bottom:-2%':'top:-4%';
+        out+='<span style="position:absolute;left:'+x.toFixed(1)+'%;'+pos+';width:'+sz.toFixed(1)+'px;height:'+sz.toFixed(1)+'px;'+shape+';background:'+conf.c+';opacity:0;animation:'+(conf.rise?'pb-rise':'pb-fall')+' '+dur.toFixed(1)+'s linear '+delay.toFixed(1)+'s infinite"></span>';
+      }
+      return '<div style="position:absolute;inset:0;pointer-events:none">'+out+'</div>';
+    }
+    function buildScene(cfg){
+      var sc=el('livescene'); if(!sc)return;
+      var night=(cfg.tod==='night'), dusk=(cfg.tod==='dusk'), dawn=(cfg.tod==='dawn');
+      var sky=cfg.sky.map(hx);
+      if(dusk) sky=sky.map(function(c){return scale(mix(c,[255,150,90],.28),.9);});
+      else if(dawn) sky=sky.map(function(c){return mix(c,[255,205,160],.16);});
+      else if(night) sky=sky.map(function(c){return mix(scale(c,.3),[18,26,54],.55);});
+      var html='<div style="position:absolute;inset:0;background:linear-gradient(180deg,'+rgb(sky[0])+' 0%,'+rgb(sky[1])+' 50%,'+rgb(sky[2])+' 100%)"></div>';
+      if(night){ var st=''; for(var i=0;i<46;i++){ var sx=Math.random()*100, sy=Math.random()*56, ss=(Math.random()*1.5+0.6).toFixed(1); st+='<span style="position:absolute;left:'+sx.toFixed(1)+'%;top:'+sy.toFixed(1)+'%;width:'+ss+'px;height:'+ss+'px;border-radius:50%;background:#fff;opacity:.5;animation:pb-twinkle '+(2+Math.random()*3).toFixed(1)+'s ease-in-out '+(Math.random()*4).toFixed(1)+'s infinite"></span>'; } html+='<div style="position:absolute;inset:0">'+st+'</div>'; }
+      var sunC=night?'#eef3ff':cfg.sun, sunSz=night?72:150;
+      var sunX=(cfg.arch==='canyon'||cfg.arch==='desert')?'70%':'24%';
+      var sunY=night?'15%':(dusk?'40%':'22%');
+      var glow=night?'radial-gradient(circle,'+sunC+',rgba(238,243,255,0) 66%)':'radial-gradient(circle,'+sunC+',rgba(255,255,255,0) 70%)';
+      html+='<div style="position:absolute;left:'+sunX+';top:'+sunY+';width:'+sunSz+'px;height:'+sunSz+'px;border-radius:50%;background:'+glow+';filter:blur(2px);animation:pb-sun 7s ease-in-out infinite"></div>';
+      var waterH=cfg.water?(100-cfg.water.y):0;
+      var ridges=cfg.ridges, n=ridges.length, cols=cfg.colors.map(hx);
+      for(var r=0;r<n;r++){
+        var col=cols[Math.min(r,cols.length-1)];
+        if(night) col=scale(col,.42); else if(dusk) col=scale(mix(col,[120,70,80],.18),.84);
+        var op=(n===3?[0.74,0.9,1][r]:[0.86,1][r]);
+        var bottom=cfg.water?waterH+'%':'0';
+        var hh=ridges[r].h+(cfg.water?-6:0);
+        html+='<div data-depth="'+((r+1)*8)+'" style="position:absolute;left:-9%;right:-9%;bottom:'+bottom+';height:'+hh+'%;background:'+rgb(col)+';opacity:'+op+';clip-path:polygon('+ridges[r].clip+');will-change:transform"></div>';
+      }
+      if(cfg.snow && !night){ var fc=mix(cols[0],[255,255,255],.55); html+='<div style="position:absolute;left:-9%;right:-9%;bottom:'+(cfg.water?waterH+'%':'0')+';height:'+(ridges[0].h-2)+'%;background:'+rgb(fc)+';opacity:.5;clip-path:polygon('+ridges[0].clip+')"></div>'; }
+      if(cfg.water){
+        var w=cfg.water.colors.map(hx); if(night)w=w.map(function(c){return scale(c,.4);});
+        html+='<div style="position:absolute;left:0;right:0;bottom:0;height:'+waterH+'%;background:linear-gradient(180deg,'+rgb(w[0])+','+rgb(w[1])+')"></div>';
+        for(var k=0;k<4;k++){ html+='<div style="position:absolute;left:6%;right:6%;bottom:'+(waterH-3-k*6)+'%;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);opacity:.5;animation:pb-shimmer '+(4+k)+'s ease-in-out '+(k*.5)+'s infinite"></div>'; }
+      }
+      if(cfg.river){
+        html+='<div style="position:absolute;left:-12%;right:-12%;bottom:12%;height:48px;transform:rotate(-3deg);background:linear-gradient(90deg,transparent,rgba(198,226,232,.5) 20%,rgba(212,236,240,.62),rgba(198,226,232,.5) 80%,transparent);filter:blur(1px)"></div>';
+        html+='<div style="position:absolute;left:6%;right:20%;bottom:14%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);transform:rotate(-3deg);animation:pb-shimmer 4s ease-in-out infinite"></div>';
+      }
+      html+=silhouettes(cfg);
+      html+=particles(cfg,night);
+      var layer=document.createElement('div'); layer.setAttribute('data-scenelayer','1');
+      layer.style.cssText='position:absolute;inset:0;opacity:0;transition:opacity 1s ease';
+      layer.innerHTML=html; sc.appendChild(layer);
+      void layer.offsetWidth;
+      setTimeout(function(){layer.style.opacity='1';},20);
+      var all=sc.querySelectorAll('[data-scenelayer]');
+      for(var z=0;z<all.length-1;z++){ (function(o){setTimeout(function(){if(o.parentNode)o.parentNode.removeChild(o);},1100);})(all[z]); }
+    }
+    document.addEventListener('mousemove',function(e){
+      if(rafFlag)return; rafFlag=true;
+      requestAnimationFrame(function(){
+        var dx=e.clientX/window.innerWidth-.5, dy=e.clientY/window.innerHeight-.5;
+        document.querySelectorAll('#livescene [data-depth]').forEach(function(r){ var d=+r.getAttribute('data-depth'); r.style.transform='translate('+(dx*d)+'px,'+(dy*d*.34)+'px)'; });
+        rafFlag=false;
+      });
+    });
+
+    /* ---------- best-activity hero ---------- */
+    function renderBest(){
+      var A=PB.activities(current), s=A.season;
+      var tag=s.charAt(0).toUpperCase()+s.slice(1)+' · best right now';
+      var lead=A.list[0];
+      el('bestLead').innerHTML=
+        '<div style="font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#e4be78;margin-bottom:11px">'+tag+'</div>'+
+        '<div style="display:flex;align-items:flex-start;gap:16px">'+
+          '<div style="font-size:2.7rem;line-height:1;flex:none">'+lead.ic+'</div>'+
+          '<div><h3 style="font-family:Spectral,serif;font-weight:800;color:#fbf6ea;font-size:1.7rem;line-height:1.05;letter-spacing:-.01em">'+lead.t+'</h3>'+
+          '<p style="color:rgba(251,246,234,.86);font-size:.95rem;line-height:1.55;margin-top:8px;max-width:46ch">'+lead.b+'</p></div>'+
+        '</div>';
+      el('bestRest').innerHTML=A.list.slice(1).map(function(a){
+        return '<div style="flex:1 1 150px;min-width:142px;background:rgba(20,36,28,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px">'+
+          '<div style="font-size:1.5rem;line-height:1">'+a.ic+'</div>'+
+          '<div style="font-family:Spectral,serif;font-weight:700;color:#fbf6ea;font-size:1rem;margin-top:8px">'+a.t+'</div>'+
+          '<div style="color:rgba(251,246,234,.64);font-size:.76rem;line-height:1.42;margin-top:4px">'+a.b+'</div></div>';
+      }).join('');
+      el('terrLabel').textContent=A.label;
+    }
+
+    /* ====================== LIVE DATA ====================== */
+    function offline(msg){
+      ['now'].forEach(function(id){el(id).innerHTML='<span style="'+S.load+'">'+msg+'</span>';});
+      el('fc').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
+      el('alerts').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
+      el('glance').innerHTML='<div style="'+S.gchip+';flex:1 1 100%"><div style="'+S.gk+'">Coverage</div><div style="'+S.gv+';font-size:1rem">Outside NWS area</div><div style="'+S.gs+'">No live weather for this territory</div></div>';
+    }
+    function offlineWeather(){
+      var msg='Live weather appears on the published site.';
+      el('now').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
+      el('fc').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
+      el('glance').innerHTML='<div style="'+S.gchip+';flex:1 1 100%"><div style="'+S.gk+'">Live data</div><div style="'+S.gv+';font-size:1rem">On the published site</div><div style="'+S.gs+'">weather.gov can\u2019t load from a local file</div></div>';
+    }
+    function loadForecast(p){
+      fetch('https://api.weather.gov/points/'+p.lat.toFixed(4)+','+p.lng.toFixed(4),{headers:{Accept:'application/geo+json'}})
+        .then(function(r){if(!r.ok)throw 0;return r.json();})
+        .then(function(d){return fetch(d.properties.forecast,{headers:{Accept:'application/geo+json'}});})
+        .then(function(r){if(!r.ok)throw 0;return r.json();})
+        .then(function(d){
+          var per=d.properties.periods, c=per[0];
+          el('now').innerHTML=WeatherFX.card({text:c.shortForecast,temp:c.temperature,unit:'°',bottom:'Wind '+c.windSpeed+' '+c.windDirection+' · '+c.name,size:'lg'});
+          el('fc').innerHTML=per.slice(0,7).map(function(x){return '<div style="flex:none;width:116px">'+WeatherFX.card({top:x.name,temp:x.temperature,unit:'°',text:x.shortForecast,size:'sm'})+'</div>';}).join('');
+          try{paintHero(c);enhanceLive(p,per);}catch(e){}
+        }).catch(function(){offlineWeather();});
+    }
+    function loadAlerts(p){
+      fetch('https://api.weather.gov/alerts/active?point='+p.lat.toFixed(4)+','+p.lng.toFixed(4),{headers:{Accept:'application/geo+json'}})
+        .then(function(r){if(!r.ok)throw 0;return r.json();})
+        .then(function(d){
+          var fs=d.features||[]; _nws=fs.length; updateHeroAlerts();
+          if(!fs.length){ el('alerts').innerHTML='<div style="'+S.clear+'">✓ No active alerts — all clear right now.</div>'; return; }
+          el('alerts').innerHTML=fs.slice(0,5).map(function(f){var a=f.properties;return alertBlock(a.severity||'Moderate',a.event,a.headline||'','Until '+(a.expires?new Date(a.expires).toLocaleString():'further notice'));}).join('');
+        }).catch(function(){ el('alerts').innerHTML='<span style="'+S.load+'">Alerts appear on the published site.</span>'; });
+    }
+    function alertBlock(sev,ev,hl,tm){
+      var sevHi=(sev==='Severe'||sev==='Extreme'), bd=sevHi?'#bb4636':(sev==='Minor'?'#3f7a34':'#b9823f'), bg=sevHi?'rgba(251,236,235,.85)':(sev==='Minor'?'rgba(238,246,234,.85)':'rgba(253,246,230,.82)');
+      return '<div style="border-left:4px solid '+bd+';background:'+bg+';border-radius:0 12px 12px 0;padding:10px 13px;margin-bottom:9px"><div style="font-weight:700;font-size:.88rem;color:#1a2b21">'+ev+'</div>'+(hl?'<div style="font-size:.78rem;color:#555;margin-top:3px">'+hl+'</div>':'')+(tm?'<div style="font-size:.7rem;color:#8c8473;margin-top:4px">'+tm+'</div>':'')+'</div>';
+    }
+    var _npsCache={};
+    function fetchNPS(name){
+      if(_npsCache[name]) return _npsCache[name];
+      var pr=fetch('/api/nps?name='+encodeURIComponent(name),{headers:{Accept:'application/json'}})
+        .then(function(r){if(!r.ok)throw 0;return r.json();})
+        .then(function(d){if(d&&d.error)throw 0;return d;})
+        .catch(function(e){delete _npsCache[name];throw e;});
+      _npsCache[name]=pr; return pr;
+    }
+    function setBox(id,html){var e=el(id); if(e)e.innerHTML=html;}
+    function loadNPS(p){
+      setBox('nps','<span style="'+S.load+'">Loading official NPS info…</span>');
+      fetchNPS(p.name).then(function(d){
+        var park=d.park||{};
+        if(park.description){ var al=el('aboutlive'); if(al)al.textContent=park.description; }
+        if(park.url){ var nl=el('npslink'); if(nl)nl.href=park.url; }
+        _nps=(d.alerts&&d.alerts.length)||0; updateHeroAlerts();
+        var ab=el('npsalerts');
+        if(ab){ if(d.alerts&&d.alerts.length){ ab.innerHTML=d.alerts.slice(0,8).map(function(a){var sev=(a.category==='Park Closure'||a.category==='Danger')?'Severe':(a.category==='Caution'?'Moderate':'Minor');return alertBlock(sev,(a.category||'Notice')+': '+(a.title||''),a.description||'','');}).join(''); } else { ab.innerHTML='<div style="'+S.clear+'">✓ No official NPS alerts or closures posted.</div>'; } }
+        var box=el('nps');
+        if(box){ var html='', fees=park.entranceFees||[], hours=(park.operatingHours&&park.operatingHours[0]&&park.operatingHours[0].description)||'';
+          html+='<div style="font-size:.88rem;line-height:1.65;color:#3f4636">';
+          if(fees.length) html+='<div><b style="color:#1d4a37">Entrance:</b> '+fees.map(function(f){return ((f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free')+(f.title?(' — '+f.title):'');}).join(' · ')+'</div>';
+          else html+='<div>Entrance fee information isn\u2019t posted for this park.</div>';
+          if(hours) html+='<div style="margin-top:5px"><b style="color:#1d4a37">Hours:</b> '+hours+'</div>';
+          if(park.url) html+='<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Official park page ↗</a></div>';
+          html+='</div>'; box.innerHTML=html;
+        }
+        var td=d.thingsToDo||[];
+        setBox('todo', td.length?td.map(function(t){return '<div style="'+S.td+'">'+(t.image?'<img style="'+S.tdimg+'" src="'+t.image+'" alt="">':'')+'<div><h4 style="'+S.h4+'">'+(t.title||'')+'</h4><p style="'+S.p+'">'+(t.shortDescription||'')+'</p>'+(t.duration?'<div style="'+S.dur+'">⏱ '+t.duration+'</div>':'')+(t.url?' <a href="'+t.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No things-to-do listed for this park.</span>');
+        var acts=park.activities||[];
+        setBox('activities', acts.length?'<div style="display:flex;flex-wrap:wrap;gap:7px">'+acts.map(function(a){return '<span style="'+S.achip+'">'+a+'</span>';}).join('')+'</div>':'<span style="'+S.load+'">No activities listed.</span>');
+        var imgs=park.images||[];
+        setBox('gallery', imgs.length?'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">'+imgs.map(function(i){return '<a href="'+i.url+'" target="_blank" rel="noopener"><img src="'+i.url+'" alt="'+(i.alt||'').replace(/"/g,'')+'" style="width:100%;height:150px;object-fit:cover;border-radius:13px;border:1px solid #e7ddca"></a>';}).join('')+'</div>':'<span style="'+S.load+'">No photos available.</span>');
+        var fees2=park.entranceFees||[], passes=park.entrancePasses||[], fh='';
+        if(fees2.length) fh+=fees2.map(function(f){return '<div style="'+S.fee+'"><div style="'+S.ft+'"><b style="font-size:.9rem;color:#163a2b">'+(f.title||'Entrance')+'</b><span style="'+S.amt+'">'+((f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free')+'</span></div>'+(f.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:3px">'+f.description.slice(0,180)+'</p>':'')+'</div>';}).join('');
+        if(passes.length) fh+=passes.map(function(f){return '<div style="'+S.fee+'"><div style="'+S.ft+'"><b style="font-size:.9rem;color:#163a2b">'+(f.title||'Pass')+'</b><span style="'+S.amt+'">'+((f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free')+'</span></div></div>';}).join('');
+        setBox('fees', fh||'<span style="'+S.load+'">No fee information posted (many parks are free to enter).</span>');
+        var oh=park.operatingHours&&park.operatingHours[0];
+        setBox('hours', oh?'<p style="font-size:.86rem;line-height:1.5;color:#4c5443">'+(oh.description||'')+'</p>':'<span style="'+S.load+'">Hours not listed.</span>');
+        var cg=d.campgrounds||[];
+        setBox('camps', cg.length?cg.map(function(c){return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+(c.name||'')+'</b>'+(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:2px">'+c.description+'</p>':'')+(c.reservationUrl?'<a href="'+c.reservationUrl+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:700">Reserve ↗</a> ':'')+(c.url?'<a href="'+c.url+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div>';}).join(''):'<span style="'+S.load+'">No campgrounds listed.</span>');
+        var vc=d.visitorCenters||[];
+        setBox('vcenters', vc.length?vc.map(function(v){return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+(v.name||'')+'</b>'+(v.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:2px">'+v.description+'</p>':'')+'</div>';}).join(''):'<span style="'+S.load+'">No visitor centers listed.</span>');
+        setBox('directions', park.directionsInfo?'<p style="font-size:.84rem;line-height:1.5;color:#4c5443">'+park.directionsInfo+'</p>'+(park.url?'<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Full directions ↗</a></div>':''):'<span style="'+S.load+'">No directions posted.</span>');
+        var ev=d.events||[];
+        setBox('events', ev.length?ev.map(function(e){return '<div style="'+S.td+'"><div><h4 style="'+S.h4+'">'+(e.title||'')+'</h4><div style="'+S.dur+'">'+[e.date,e.times].filter(Boolean).join(' · ')+(e.location?(' · '+e.location):'')+'</div>'+(e.description?'<p style="'+S.p+'">'+e.description+'</p>':'')+(e.url?' <a href="'+e.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Event info ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No upcoming events listed.</span>');
+        var nw=d.news||[];
+        setBox('news', nw.length?nw.map(function(n){return '<div style="'+S.td+'"><div><h4 style="'+S.h4+'">'+(n.title||'')+'</h4>'+(n.date?'<div style="'+S.dur+'">'+n.date+'</div>':'')+(n.abstract?'<p style="'+S.p+'">'+n.abstract+'</p>':'')+(n.url?' <a href="'+n.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Read more ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No recent news releases.</span>');
+        var pl=d.places||[];
+        setBox('places', pl.length?pl.map(function(x){return '<div style="'+S.td+'">'+(x.image?'<img style="'+S.tdimg+'" src="'+x.image+'" alt="">':'')+'<div><h4 style="'+S.h4+'">'+(x.title||'')+'</h4>'+(x.description?'<p style="'+S.p+'">'+x.description+'</p>':'')+(x.url?' <a href="'+x.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No points of interest listed.</span>');
+      }).catch(function(){
+        var msg='<span style="'+S.load+'">Official NPS content appears once the site is published with an NPS key configured.</span>';
+        ['nps','npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){setBox(id,msg);});
+      });
+    }
+
+    /* ---------- hero status + alerts ---------- */
+    var _nws=0,_nps=0;
+    function resetHero(){ el('heroTemp').textContent='—'; el('stState').textContent='Open'; el('stSub').textContent='Live status'; var bc=el('beacon'); bc.style.background='#46d97f'; bc.style.boxShadow='0 0 10px 1px rgba(70,217,127,.7)'; }
+    function paintHero(c){ el('heroTemp').textContent=c.temperature; el('stSub').textContent=c.shortForecast; }
+    function updateHeroAlerts(checking){
+      var ic=el('abIc'), t=el('abTitle'), bar=el('waalert');
+      if(checking){ ic.textContent='…'; t.textContent='Checking alerts…'; ic.style.background='rgba(63,122,52,.3)'; ic.style.color='#9fe3a6'; bar.style.borderColor='rgba(255,255,255,.16)'; return; }
+      var total=_nws+_nps;
+      if(total>0){ ic.textContent='⚠'; t.textContent=total+' active alert'+(total>1?'s':'')+(_nps>0?' · closures':''); ic.style.background=_nps>0?'rgba(204,74,62,.4)':'rgba(214,124,72,.36)'; ic.style.color=_nps>0?'#ffc9bf':'#ffd6b0'; bar.style.borderColor='rgba(228,165,95,.5)'; }
+      else { ic.textContent='✓'; t.textContent='All clear'; ic.style.background='rgba(63,122,52,.3)'; ic.style.color='#9fe3a6'; bar.style.borderColor='rgba(255,255,255,.16)'; }
+    }
+
+    /* ---------- golden hour + crowd ---------- */
+    function fmtTime(d){ if(!d||isNaN(d))return '—'; return d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); }
+    function sunTimes(lat,lng,date){
+      try{
+        var rad=Math.PI/180, deg=180/Math.PI, start=new Date(date.getFullYear(),0,0), doy=Math.floor((date-start)/86400000), zen=90.833;
+        function calc(isRise){
+          var lngHour=lng/15, t=isRise?doy+((6-lngHour)/24):doy+((18-lngHour)/24), M=(0.9856*t)-3.289;
+          var L=M+(1.916*Math.sin(M*rad))+(0.020*Math.sin(2*M*rad))+282.634; L=(L+360)%360;
+          var RA=deg*Math.atan(0.91764*Math.tan(L*rad)); RA=(RA+360)%360;
+          RA=RA+((Math.floor(L/90)*90)-(Math.floor(RA/90)*90)); RA=RA/15;
+          var sinDec=0.39782*Math.sin(L*rad), cosDec=Math.cos(Math.asin(sinDec));
+          var cosH=(Math.cos(zen*rad)-(sinDec*Math.sin(lat*rad)))/(cosDec*Math.cos(lat*rad));
+          if(cosH>1||cosH<-1)return null;
+          var H=isRise?360-deg*Math.acos(cosH):deg*Math.acos(cosH); H=H/15;
+          var T=H+RA-(0.06571*t)-6.622, UT=(T-lngHour)%24; return (UT+24)%24;
+        }
+        var rUT=calc(true), sUT=calc(false); if(rUT==null||sUT==null)return null;
+        function toLocal(ut){var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0)); d.setUTCMinutes(Math.round(ut*60)); return d;}
+        return {sunrise:toLocal(rUT), sunset:toLocal(sUT)};
+      }catch(e){return null;}
+    }
+    function sunArcHTML(p){
+      var sun=sunTimes(p.lat,p.lng,new Date()), w=240,h=98,cx=w/2,baseY=h-12,r=Math.min(cx-18,baseY-6);
+      var path='M '+(cx-r)+' '+baseY+' A '+r+' '+r+' 0 0 1 '+(cx+r)+' '+baseY;
+      var frac=0.5,riseS='—',setS='—',note='Daylight';
+      if(sun){ riseS=fmtTime(sun.sunrise); setS=fmtTime(sun.sunset);
+        var now=Date.now(), span=sun.sunset.getTime()-sun.sunrise.getTime(); frac=(now-sun.sunrise.getTime())/span;
+        if(frac<0){frac=0;note='Before sunrise';} else if(frac>1){frac=1;note='After sunset · night';}
+        else{var gh=span*0.09; note=(now<=sun.sunrise.getTime()+gh||now>=sun.sunset.getTime()-gh)?'✨ Golden hour right now':'Daylight';}
+      } else { note='Polar day/night'; }
+      var theta=Math.PI*(1-frac), sx=cx+r*Math.cos(theta), sy=baseY-r*Math.sin(theta), arcLen=Math.PI*r;
+      return '<div style="padding-top:4px"><svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block"><defs><linearGradient id="ghg" x1="0" x2="1"><stop offset="0" stop-color="#e4be78"></stop><stop offset="1" stop-color="#c79a4b"></stop></linearGradient></defs>'+
+        '<line x1="'+(cx-r-6)+'" y1="'+baseY+'" x2="'+(cx+r+6)+'" y2="'+baseY+'" stroke="#e3d9c5" stroke-width="1.5"></line>'+
+        '<path d="'+path+'" fill="none" stroke="#e3d9c5" stroke-width="3" stroke-linecap="round"></path>'+
+        '<path d="'+path+'" fill="none" stroke="url(#ghg)" stroke-width="3" stroke-linecap="round" stroke-dasharray="'+arcLen.toFixed(1)+'" stroke-dashoffset="'+(arcLen*(1-frac)).toFixed(1)+'"></path>'+
+        '<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="7" fill="#f6b21e" stroke="#fffdf7" stroke-width="2.5"></circle></svg>'+
+        '<div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:700;color:#1d4a37;margin-top:8px"><span><small style="display:block;font-size:.58rem;color:#8c8473;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1px">Sunrise</small>'+riseS+'</span><span style="text-align:right"><small style="display:block;font-size:.58rem;color:#8c8473;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1px">Sunset</small>'+setS+'</span></div>'+
+        '<div style="font-size:.74rem;color:#6a7160;margin-top:9px;text-align:center;font-weight:600">'+note+'</div></div>';
+    }
+    var ICONIC=new Set([9,21,61,41,25,54,28,30,15,60,37,50,46,5,44]);
+    function crowdGauge(p){
+      var now=new Date(), m=now.getMonth(), dow=now.getDay(), base=ICONIC.has(p.id)?60:36;
+      var seasonAdj=(m>=5&&m<=7)?24:(m===8||m===4)?12:(m>=10||m<=1)?-16:2, weekendAdj=(dow===0||dow===6)?14:(dow===5)?6:0;
+      var score=Math.max(8,Math.min(97,base+seasonAdj+weekendAdj)), level=score>72?'Busy':score>46?'Moderate':'Quiet';
+      var bestSeason=ICONIC.has(p.id)?'late Sept–Oct or May':'spring &amp; fall';
+      el('crowd').innerHTML='<div style="display:flex;flex-direction:column;gap:9px"><div style="font-family:Spectral,serif;font-size:1.5rem;font-weight:700;color:#1d4a37;line-height:1">'+level+' <span style="font-size:.6rem;font-weight:700;color:#8c8473;letter-spacing:.06em;text-transform:uppercase">· est. today</span></div>'+
+        '<div style="position:relative;width:100%;height:9px;border-radius:999px;background:linear-gradient(90deg,#5fae6e,#e4c061 52%,#cf6f54);margin-top:2px"><div style="position:absolute;top:-5px;width:4px;height:19px;border-radius:3px;background:#15241c;box-shadow:0 0 0 3px rgba(255,253,247,.92);transform:translateX(-50%);left:'+score+'%"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:.58rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#8c8473"><span>Quiet</span><span>Packed</span></div>'+
+        '<div style="font-size:.8rem;color:#4c5443;line-height:1.5;margin-top:2px">Go on <b style="color:#1d4a37">weekday mornings</b> — and visit in <b style="color:#1d4a37">'+bestSeason+'</b> for the thinnest crowds.</div></div>';
+    }
+    function enhanceLive(p,per){
+      var day=per.find(function(x){return x.isDaytime;})||per[0], nt=per.find(function(x){return !x.isDaytime;})||per[1]||per[0], sun=sunTimes(p.lat,p.lng,new Date());
+      var chips=[['Now',per[0].temperature+'°',per[0].shortForecast],['High',(day?day.temperature+'°':'—'),day?day.name:''],['Low',(nt?nt.temperature+'°':'—'),nt?nt.name:''],['Wind',(per[0].windSpeed||'—'),per[0].windDirection||''],['Sunrise',sun?fmtTime(sun.sunrise):'—','Local'],['Sunset',sun?fmtTime(sun.sunset):'—','Local']];
+      el('glance').innerHTML=chips.map(function(c){return '<div style="'+S.gchip+'"><div style="'+S.gk+'">'+c[0]+'</div><div style="'+S.gv+'">'+c[1]+'</div><div style="'+S.gs+'">'+(c[2]||'')+'</div></div>';}).join('');
+      el('arc').innerHTML=sunArcHTML(p);
+    }
+
+    /* ---------- reviews ---------- */
+    var SB_URL='https://fsgmwersernbtjugkuhk.supabase.co', SB_KEY='sb_publishable_XWefJHwU9mPJ9frijodnfQ_XBXFEUnn';
+    var SB_HEAD={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'};
+    var BAD=['fuck','shit','bitch','asshole','cunt','nigger','faggot','retard','whore','dick','pussy','bastard'], rvRating=0;
+    function escHtml(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+    function profane(t){var low=(' '+t.toLowerCase()+' ').replace(/[^a-z ]/g,' ');return BAD.some(function(w){return low.indexOf(' '+w+' ')>-1;});}
+    function starStr(n){n=Math.round(n);return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);}
+    function timeAgo(iso){var d=new Date(iso),s=(Date.now()-d)/1000; if(s<3600)return Math.max(1,Math.floor(s/60))+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; if(s<2592000)return Math.floor(s/86400)+'d ago'; return d.toLocaleDateString();}
+    function loadReviews(p){
+      var sum=el('revsummary'), list=el('revlist'); if(sum)sum.textContent='Loading reviews…'; if(list)list.innerHTML='';
+      fetch(SB_URL+'/rest/v1/reviews?park_id=eq.'+p.id+'&order=created_at.desc&select=*',{headers:SB_HEAD})
+        .then(function(r){if(!r.ok)throw 0;return r.json();})
+        .then(function(rows){
+          var sum=el('revsummary'), list=el('revlist'); if(!sum||!list)return;
+          if(!rows.length){ sum.innerHTML='<span style="color:#8c8473;font-size:.9rem">No reviews yet — be the first to share your experience!</span>'; list.innerHTML=''; return; }
+          var avg=rows.reduce(function(a,r){return a+r.rating;},0)/rows.length;
+          sum.innerHTML='<div style="display:flex;align-items:center;gap:10px"><span style="font-family:Spectral,serif;font-size:1.9rem;color:#1d4a37;line-height:1">'+avg.toFixed(1)+'</span><div><div style="color:#c79a4b;font-size:1.05rem;letter-spacing:1px">'+starStr(avg)+'</div><div style="font-size:.78rem;color:#8c8473">'+rows.length+' review'+(rows.length>1?'s':'')+'</div></div></div>';
+          list.innerHTML=rows.map(function(r){return '<div style="padding:13px 0;border-top:1px solid #e7ddca"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:4px"><b style="font-size:.9rem;color:#163a2b">'+escHtml(r.author)+'</b><span style="font-size:.72rem;color:#8c8473">'+timeAgo(r.created_at)+'</span></div><div style="color:#c79a4b;font-size:.9rem;letter-spacing:1px">'+starStr(r.rating)+'</div><p style="font-size:.86rem;line-height:1.55;color:#4c5443;margin-top:4px">'+escHtml(r.body)+'</p></div>';}).join('');
+        }).catch(function(){ var sum=el('revsummary'); if(sum)sum.innerHTML='<span style="color:#8c8473;font-size:.9rem">Reviews couldn\u2019t load right now. Please try again shortly.</span>'; });
+    }
+    (function setupReviewForm(){
+      var stars=el('rv-stars');
+      if(stars) stars.addEventListener('click',function(e){var rect=stars.getBoundingClientRect(), rel=(e.clientX-rect.left)/rect.width; rvRating=Math.max(1,Math.min(5,Math.ceil(rel*5))); stars.textContent='★★★★★'.slice(0,rvRating)+'☆☆☆☆☆'.slice(0,5-rvRating);});
+      var btn=el('rv-submit'); if(btn) btn.onclick=submitReview;
+    })();
+    function submitReview(){
+      var p=PARKS.find(function(x){return x.id===current;}); if(!p)return;
+      var name=(el('rv-name').value||'').trim(), body=(el('rv-body').value||'').trim(), msg=el('rv-msg');
+      var show=function(t,ok){ if(msg){msg.textContent=t;msg.style.color=ok?'#3d7a2a':'#b54a3a';} };
+      if(!name){show('Please add your name.',false);return;}
+      if(rvRating<1){show('Please pick a star rating.',false);return;}
+      if(body.length<3){show('Please write a little more.',false);return;}
+      if(profane(name)||profane(body)){show('Please keep it family-friendly.',false);return;}
+      show('Posting…',true);
+      fetch(SB_URL+'/rest/v1/reviews',{method:'POST',headers:Object.assign({},SB_HEAD,{Prefer:'return=minimal'}),body:JSON.stringify({park_id:p.id,park_name:p.name,author:name,rating:rvRating,body:body})})
+        .then(function(r){if(!r.ok)throw 0; show('Thanks — your review is posted!',true); el('rv-name').value=''; el('rv-body').value=''; rvRating=0; el('rv-stars').textContent='☆☆☆☆☆'; loadReviews(p);})
+        .catch(function(){show('Couldn\u2019t post right now — please try again.',false);});
+    }
+
+    /* ---------- master render ---------- */
+    function render(){
+      var p=PARKS.find(function(x){return x.id===current;});
+      pick.value=current;
+      el('pname').textContent=p.name;
+      el('psub').textContent='· '+p.state+' · '+(REG[p.region]||'');
+      el('pest').textContent='Established '+p.year;
+      el('desc').textContent=p.desc;
+      el('aboutlive').textContent=p.desc;
+      el('about').textContent=SI[p.state]||'';
+      var maps='https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng;
+      var npsSearch='https://www.google.com/search?q='+encodeURIComponent(p.name+' national park nps.gov');
+      el('loc').innerHTML='<div><b style="color:#1d4a37">Coordinates:</b> '+p.lat.toFixed(3)+', '+p.lng.toFixed(3)+'</div><div style="'+S.row+'"><a style="'+S.btn+'" href="'+maps+'" target="_blank" rel="noopener">◎ Get directions</a><a style="'+S.btn+'" href="'+npsSearch+'" target="_blank" rel="noopener">Official NPS info ↗</a></div>';
+      var rec='https://www.recreation.gov/search?q='+encodeURIComponent(p.name+' National Park');
+      el('reserve').innerHTML='<p style="font-size:.86rem;line-height:1.55;color:#525a46;margin-bottom:12px">Some parks require timed-entry or campground reservations, booked on the official government sites — we link you straight there.</p><div style="'+S.row+';margin-top:0"><a style="'+S.btnP+'" href="'+rec+'" target="_blank" rel="noopener">Check reservations on Recreation.gov ↗</a><a style="'+S.btn+'" id="npslink" href="'+npsSearch+'" target="_blank" rel="noopener">Official park page ↗</a></div><p style="font-size:.72rem;color:#8f8b7c;margin-top:10px">Reservations and payment are handled by the official site. Many parks are free or pay-at-gate.</p>';
+
+      buildScene(PB.config(current));
+      renderBest();
+      resetHero();
+      crowdGauge(p);
+      el('arc').innerHTML=sunArcHTML(p);
+      _nws=0;_nps=0; updateHeroAlerts(true);
+      // reset live boxes
+      el('now').innerHTML='<span style="'+S.load+'">Loading live weather…</span>';
+      el('fc').innerHTML='<span style="'+S.load+'">Loading forecast…</span>';
+      el('alerts').innerHTML='<span style="'+S.load+'">Checking for alerts…</span>';
+      el('glance').innerHTML='<span style="'+S.load+'">Loading…</span>';
+      loadNPS(p);
+      loadReviews(p);
+      if(p.region==='territory'){ offline('This U.S. territory is outside the National Weather Service coverage area.'); return; }
+      loadForecast(p); loadAlerts(p);
+    }
+
+    render();
   }
-}
-function todoPreviewHTML(td){
-  if(!td||!td.length)return '<span class="loading">No things to do listed yet.</span>';
-  return td.slice(0,3).map(function(t){return '<div class="tdcard">'+(t.image?'<img src="'+t.image+'" alt="">':'')+'<div><h4>'+(t.title||'')+'</h4>'+(t.shortDescription?'<p style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+t.shortDescription+'</p>':'')+'</div></div>';}).join('');
-}
-function waEntrance(){
-  var tiles=[].slice.call(document.querySelectorAll('#pane-live .wa-tile'));
-  var reduce=false; try{reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
-  if(reduce||!Element.prototype.animate){ tiles.forEach(function(t){t.style.opacity='1';t.style.transform='none';}); return; }
-  var anims=[];
-  tiles.forEach(function(t,i){
-    try{ anims.push(t.animate([{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'translateY(0)'}],{duration:600,delay:60+i*55,easing:'cubic-bezier(.2,.8,.25,1)',fill:'both'})); }catch(e){ t.style.opacity='1'; }
-  });
-  setTimeout(function(){ anims.forEach(function(a){try{a.finish();}catch(e){}}); },1500);
-}
-function wireWaLinks(){
-  document.querySelectorAll('.wa-link').forEach(function(c){
-    c.addEventListener('click',function(){var g=c.getAttribute('data-goto');var b=document.querySelector('.tab[data-tab="'+g+'"]');if(b)b.click();try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){window.scrollTo(0,0);}});
-  });
-  var bar=document.getElementById('waalert');
-  if(bar)bar.addEventListener('click',function(e){e.preventDefault();var el=document.getElementById('npsalerts');if(el){var y=el.getBoundingClientRect().top+window.scrollY-78;try{window.scrollTo({top:y,behavior:'smooth'});}catch(x){window.scrollTo(0,y);}}});
-}
-render();
-updateHeroAlerts(true);
-wireWaLinks();
-waEntrance();
+var tries=0;
+(function wait(){ if(window.PB && window.WeatherFX){ init(); } else if(tries++ < 250){ setTimeout(wait,30); } else { init(); } })();
+})();
