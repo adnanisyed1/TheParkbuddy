@@ -1,11 +1,58 @@
 /* ParkBuddy — live Park Status (terrain + season living scene). Vanilla build for Next.js embed. */
 (function(){
 function init(){
-    
+
     var PB=window.PB, WeatherFX=window.WeatherFX;
     var PARKS=PB.parks, SI=PB.stateInfo;
     var el=function(id){return document.getElementById(id);};
     var rafFlag=false;
+    var pgState={};
+    function toast(msg){
+      var t=document.getElementById('pb-toast');
+      if(!t){ t=document.createElement('div'); t.id='pb-toast'; t.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:120;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fbf6ea;font-size:.84rem;font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 16px 40px -16px rgba(0,0,0,.6);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none'; document.body.appendChild(t); }
+      t.textContent=msg; t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
+      clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; },2200);
+    }
+    function addParkToTrip(){
+      var p=PARKS.find(function(x){return x.id===current;}); if(!p)return;
+      var t={}; try{ t=JSON.parse(localStorage.getItem('pp_trip2')||'{}')||{}; }catch(e){ t={}; }
+      if(!t.s)t.s=[];
+      var exists=t.s.some(function(s){return (s.pid===p.id)||(s.p===p.id);});
+      if(!exists){ t.s.push({pid:p.id,ni:2,lo:''}); try{ localStorage.setItem('pp_trip2',JSON.stringify(t)); }catch(e){} }
+      toast(exists ? p.name+' is already in your trip' : 'Added '+p.name+' to your trip ✓');
+    }
+    function paginatedList(boxId,items,pageSize,renderItem,key){
+      var box=el(boxId); if(!box)return;
+      var pages=Math.ceil(items.length/pageSize), page=pgState[key]||0;
+      if(page>=pages)page=pgState[key]=0;
+      var start=page*pageSize, html=items.slice(start,start+pageSize).map(renderItem).join('');
+      if(pages>1){
+        var bp='border:1px solid #e7ddca;background:#fffdf7;color:#1d4a37;font-size:.78rem;font-weight:700;padding:6px 13px;border-radius:9px;cursor:pointer;font-family:inherit';
+        html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid #e7ddca">'
+          +'<button data-pg="prev" style="'+bp+'">‹ Prev</button>'
+          +'<span style="font-size:.72rem;color:#8c8473;font-weight:700;letter-spacing:.04em">'+(page+1)+' / '+pages+' · '+items.length+' total</span>'
+          +'<button data-pg="next" style="'+bp+'">Next ›</button></div>';
+      }
+      box.innerHTML=html;
+      var pv=box.querySelector('[data-pg=prev]'), nx=box.querySelector('[data-pg=next]');
+      if(pv)pv.onclick=function(){ pgState[key]=(page-1+pages)%pages; paginatedList(boxId,items,pageSize,renderItem,key); };
+      if(nx)nx.onclick=function(){ pgState[key]=(page+1)%pages; paginatedList(boxId,items,pageSize,renderItem,key); };
+      Array.prototype.forEach.call(box.querySelectorAll('.js-addtrip'),function(b){ b.onclick=function(){ addParkToTrip(); }; });
+    }
+    function campItem(c){
+      return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+(c.name||'')+'</b>'
+        +(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:3px">'+c.description+'</p>':'')
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center">'
+        +'<button class="js-addtrip" style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(120deg,#1d4a37,#163a2b);color:#fff;border:none;font-size:.74rem;font-weight:700;padding:6px 12px;border-radius:9px;cursor:pointer;font-family:inherit">+ Add to trip</button>'
+        +(c.reservationUrl?'<a href="'+c.reservationUrl+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:700;text-decoration:none">Reserve ↗</a>':'')
+        +(c.url?'<a href="'+c.url+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:600;text-decoration:none">Details ↗</a>':'')
+        +'</div></div>';
+    }
+    function renderCamps(cg){
+      var box=el('camps'); if(!box)return;
+      if(!cg.length){ box.innerHTML='<span style="'+S.load+'">No campgrounds listed.</span>'; return; }
+      paginatedList('camps',cg,4,campItem,'camps');
+    }
 
     var S={
       td:'display:flex;gap:13px;padding:13px 0;border-top:1px solid #e7ddca',
@@ -69,7 +116,7 @@ function init(){
     }
     function gotoTab(t){ showTab(t); scrollToEl(document.getElementById('seg'),80); }
     document.querySelectorAll('#seg button').forEach(function(b){ b.onclick=function(){ gotoTab(b.getAttribute('data-tab')); }; });
-    var _sbx=el('statusBox'); if(_sbx)_sbx.addEventListener('click',function(){ showTab('now'); scrollToEl((el('now')&&el('now').parentElement)||document.getElementById('seg'),80); });
+    var _sbx=el('statusBox'); if(_sbx)_sbx.addEventListener('click',function(){ showTab('now'); scrollToEl((el('glance')&&el('glance').parentElement)||document.getElementById('seg'),80); });
     el('waalert').addEventListener('click',function(e){ e.preventDefault(); openAlertModal(); });
     function openAlertModal(){
       var body=el('alertModalBody'); if(!body)return;
@@ -82,6 +129,29 @@ function init(){
     var amc=el('alertModalClose'); if(amc)amc.onclick=closeAlertModal;
     var am=el('alertModal'); if(am)am.addEventListener('click',function(e){ if(e.target===am)closeAlertModal(); });
     var cue=el('scrollcue'); if(cue)cue.addEventListener('click',function(){ scrollToEl(document.getElementById('seg'),80); });
+    var nav=el('navfloat');
+    if(nav){
+      var navL=el('navfloatLabel'), navA=el('navfloatArrow');
+      nav.onclick=function(){
+        if(nav.getAttribute('data-dir')==='up'){
+          var sc=getScroller(), start=sc.scrollTop||window.pageYOffset||0, t0=null;
+          (function step(ts){ if(t0===null)t0=ts; var pr=Math.min(1,(ts-t0)/440); var y=start*(1-Math.pow(1-pr,3)); sc.scrollTop=y; window.scrollTo(0,y); if(pr<1)requestAnimationFrame(step); })(performance.now());
+        } else {
+          scrollToEl(document.getElementById('seg'),74);
+        }
+      };
+      var updNav=function(){
+        var y=window.pageYOffset||getScroller().scrollTop||0;
+        var seg=document.getElementById('seg');
+        var segTop=seg?(seg.getBoundingClientRect().top+y):99999;
+        var up=(y > segTop-280);
+        nav.setAttribute('data-dir', up?'up':'down');
+        if(navL)navL.textContent = up?'Back to top':'Live conditions below';
+        if(navA)navA.textContent = up?'↑':'↓';
+      };
+      window.addEventListener('scroll',updNav,{capture:true,passive:true});
+      window.addEventListener('resize',updNav); setTimeout(updNav,60); updNav();
+    }
 
     /* ====================== LIVING SCENE ====================== */
     function hx(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
@@ -194,21 +264,29 @@ function init(){
       return 'hiker';
     }
     function activityBand(act, big){
-      var type=actType(act.t), col='rgba(238,230,208,.55)', H=big?52:30, inner='', i, b, k;
+      var type=actType(act.t), col='rgba(245,237,216,.62)', H=big?66:44, inner='', i, b;
+      // soft layered hills so the scene reads as a landscape vignette, never a progress bar
+      var hill='<svg viewBox="0 0 240 '+H+'" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">'
+        +'<path d="M0 '+H+' L0 '+Math.round(H*0.66)+' C55 '+Math.round(H*0.46)+' 105 '+Math.round(H*0.58)+' 150 '+Math.round(H*0.52)+' C195 '+Math.round(H*0.46)+' 220 '+Math.round(H*0.6)+' 240 '+Math.round(H*0.5)+' L240 '+H+' Z" fill="rgba(255,255,255,.05)"></path>'
+        +'<path d="M0 '+H+' L0 '+Math.round(H*0.8)+' C70 '+Math.round(H*0.66)+' 160 '+Math.round(H*0.8)+' 240 '+Math.round(H*0.66)+' L240 '+H+' Z" fill="rgba(255,255,255,.09)"></path></svg>';
       if(type==='stars'){
-        var ns=big?14:8;
-        for(i=0;i<ns;i++){ inner+='<span style="position:absolute;left:'+(6+i*(86/ns)).toFixed(1)+'%;top:'+(14+(i%3)*26)+'%;width:3px;height:3px;border-radius:50%;background:'+col+';animation:pb-twinkle '+(2+i%3)+'s ease-in-out '+(i*0.2).toFixed(1)+'s infinite"></span>'; }
-      } else if(type==='birds'){
-        for(b=0;b<3;b++){ inner+='<div style="position:absolute;top:'+(14+b*20)+'%;left:0;animation:pb-cross '+(10+b*3)+'s linear '+(b*1.4).toFixed(1)+'s infinite"><svg viewBox="0 0 24 12" width="'+((big?16:13)+b*3)+'" height="'+((big?8:6)+b)+'" fill="none" stroke="'+col+'" stroke-width="1.7" stroke-linecap="round"><path d="M1 8 Q6 1 12 7 Q18 1 23 8"></path></svg></div>'; }
-      } else {
-        var isBoat=(type==='boat'), n=(type==='hiker')?2:1;
-        var sz = isBoat?(big?[44,20]:[32,15]) : (type==='biker'?(big?[40,30]:[28,21]):(big?[24,36]:[16,25]));
-        if(isBoat) inner+='<div style="position:absolute;left:0;right:0;bottom:'+(big?8:5)+'px;height:2px;background:linear-gradient(90deg,transparent,'+col+',transparent);opacity:.55"></div>';
-        for(k=0;k<n;k++){ var dur=(isBoat?13:type==='biker'?9:15)+k*5, bob=isBoat?'pb-bobr':'pb-bob';
-          inner+='<div style="position:absolute;bottom:'+(big?5:3)+'px;left:0;animation:pb-cross '+dur+'s linear '+(k*6)+'s infinite"><span style="display:inline-block;animation:'+bob+' '+(isBoat?3:1.8)+'s ease-in-out infinite">'+silSvg(type,col,sz[0],sz[1])+'</span></div>';
-        }
+        var ns=big?16:9;
+        for(i=0;i<ns;i++){ inner+='<span style="position:absolute;left:'+(6+i*(86/ns)).toFixed(1)+'%;top:'+(12+(i%3)*24)+'%;width:'+(2+(i%2))+'px;height:'+(2+(i%2))+'px;border-radius:50%;background:'+col+';animation:pb-twinkle '+(2+i%3)+'s ease-in-out '+(i*0.22).toFixed(1)+'s infinite"></span>'; }
+        return '<div style="position:relative;height:'+H+'px;margin-top:'+(big?16:10)+'px;overflow:hidden;border-radius:11px;background:linear-gradient(180deg,rgba(20,30,54,.4),rgba(20,30,54,.08))">'+inner+'</div>';
       }
-      return '<div style="position:relative;height:'+H+'px;margin-top:'+(big?16:10)+'px;overflow:hidden;border-radius:9px">'+inner+'</div>';
+      if(type==='birds'){
+        var bx=[20,46,71];
+        for(b=0;b<3;b++){ inner+='<div style="position:absolute;top:'+(20+b*15)+'%;left:'+bx[b]+'%;animation:pb-bob '+(2.2+b*0.5)+'s ease-in-out '+(b*0.4).toFixed(1)+'s infinite"><svg viewBox="0 0 24 12" width="'+((big?20:15)+b*3)+'" height="'+((big?10:7)+b)+'" fill="none" stroke="'+col+'" stroke-width="1.7" stroke-linecap="round"><path d="M1 8 Q6 1 12 7 Q18 1 23 8"></path></svg></div>'; }
+      } else {
+        var isBoat=(type==='boat');
+        var sz = isBoat?(big?[46,21]:[32,15]) : (type==='biker'?(big?[46,34]:[30,22]):(big?[27,41]:[18,27]));
+        if(isBoat){
+          for(i=0;i<3;i++){ inner+='<div style="position:absolute;left:8%;right:8%;bottom:'+(big?(7+i*5):(4+i*4))+'px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);opacity:.5;animation:pb-shimmer '+(3+i)+'s ease-in-out '+(i*0.4)+'s infinite"></div>'; }
+        }
+        var bob=isBoat?'pb-bobr':'pb-bob';
+        inner+='<div style="position:absolute;bottom:'+(big?6:4)+'px;left:50%;transform:translateX(-50%)"><span style="display:inline-block;animation:'+bob+' '+(isBoat?3:2)+'s ease-in-out infinite">'+silSvg(type,col,sz[0],sz[1])+'</span></div>';
+      }
+      return '<div style="position:relative;height:'+H+'px;margin-top:'+(big?16:10)+'px;overflow:hidden;border-radius:11px;background:linear-gradient(180deg,rgba(228,190,120,.05),rgba(228,190,120,.15))">'+hill+inner+'</div>';
     }
     function renderBest(){
       var A=PB.activities(current), s=A.season;
@@ -237,15 +315,11 @@ function init(){
 
     /* ====================== LIVE DATA ====================== */
     function offline(msg){
-      ['now'].forEach(function(id){el(id).innerHTML='<span style="'+S.load+'">'+msg+'</span>';});
-      el('fc').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
       el('alerts').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
       el('glance').innerHTML='<div style="'+S.gchip+';flex:1 1 100%"><div style="'+S.gk+'">Coverage</div><div style="'+S.gv+';font-size:1rem">Outside NWS area</div><div style="'+S.gs+'">No live weather for this territory</div></div>';
     }
     function offlineWeather(){
       var msg='Live weather appears on the published site.';
-      el('now').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
-      el('fc').innerHTML='<span style="'+S.load+'">'+msg+'</span>';
       el('glance').innerHTML='<div style="'+S.gchip+';flex:1 1 100%"><div style="'+S.gk+'">Live data</div><div style="'+S.gv+';font-size:1rem">On the published site</div><div style="'+S.gs+'">weather.gov can\u2019t load from a local file</div></div>';
     }
     function loadForecast(p){
@@ -255,8 +329,6 @@ function init(){
         .then(function(r){if(!r.ok)throw 0;return r.json();})
         .then(function(d){
           var per=d.properties.periods, c=per[0];
-          el('now').innerHTML=WeatherFX.card({text:c.shortForecast,temp:c.temperature,unit:'°',bottom:'Wind '+c.windSpeed+' '+c.windDirection+' · '+c.name,size:'lg'});
-          el('fc').innerHTML=per.slice(0,7).map(function(x){return '<div style="flex:none;width:116px">'+WeatherFX.card({top:x.name,temp:x.temperature,unit:'°',text:x.shortForecast,size:'sm'})+'</div>';}).join('');
           try{paintHero(c);enhanceLive(p,per);}catch(e){}
         }).catch(function(){offlineWeather();});
     }
@@ -288,8 +360,8 @@ function init(){
       fetchNPS(p.name).then(function(d){
         var park=d.park||{};
         var _imgs=park.images||[];
-        var _hp=el('heroPhoto'), _hpc=el('heroPhotoCol');
-        if(_hp && _hpc && _imgs.length){ _hp.src=_imgs[0].url; _hp.alt=_imgs[0].alt||p.name; _hpc.style.display='block'; var _cap=el('heroPhotoCap'); if(_cap)_cap.textContent=_imgs[0].caption||(p.name+' · National Park Service'); }
+        var _hp=el('heroPhoto'), _ph=el('heroPhotoPh');
+        if(_hp && _imgs.length){ _hp.onload=function(){ _hp.style.display='block'; if(_ph)_ph.style.display='none'; }; _hp.src=_imgs[0].url; _hp.alt=_imgs[0].alt||p.name; }
         if(park.description){ var al=el('aboutlive'); if(al)al.textContent=park.description; }
         if(park.url){ var nl=el('npslink'); if(nl)nl.href=park.url; }
         _nps=(d.alerts&&d.alerts.length)||0; updateHeroAlerts();
@@ -317,7 +389,7 @@ function init(){
         var oh=park.operatingHours&&park.operatingHours[0];
         setBox('hours', oh?'<p style="font-size:.86rem;line-height:1.5;color:#4c5443">'+(oh.description||'')+'</p>':'<span style="'+S.load+'">Hours not listed.</span>');
         var cg=d.campgrounds||[];
-        setBox('camps', cg.length?cg.map(function(c){return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+(c.name||'')+'</b>'+(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:2px">'+c.description+'</p>':'')+(c.reservationUrl?'<a href="'+c.reservationUrl+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:700">Reserve ↗</a> ':'')+(c.url?'<a href="'+c.url+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div>';}).join(''):'<span style="'+S.load+'">No campgrounds listed.</span>');
+        renderCamps(cg);
         var vc=d.visitorCenters||[];
         setBox('vcenters', vc.length?vc.map(function(v){return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+(v.name||'')+'</b>'+(v.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:2px">'+v.description+'</p>':'')+'</div>';}).join(''):'<span style="'+S.load+'">No visitor centers listed.</span>');
         setBox('directions', park.directionsInfo?'<p style="font-size:.84rem;line-height:1.5;color:#4c5443">'+park.directionsInfo+'</p>'+(park.url?'<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Full directions ↗</a></div>':''):'<span style="'+S.load+'">No directions posted.</span>');
@@ -395,11 +467,85 @@ function init(){
         '<div style="display:flex;justify-content:space-between;font-size:.58rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#8c8473"><span>Quiet</span><span>Packed</span></div>'+
         '<div style="font-size:.8rem;color:#4c5443;line-height:1.5;margin-top:2px">Go on <b style="color:#1d4a37">weekday mornings</b> — and visit in <b style="color:#1d4a37">'+bestSeason+'</b> for the thinnest crowds.</div></div>';
     }
+    function bigScene(text){
+      return WeatherFX.scene(text,{size:'lg'}).replace('<div class="wfx ','<div style="position:absolute;inset:0;width:100%;height:100%;border-radius:0;box-shadow:none" class="wfx ');
+    }
+    function miniScene(text){
+      return WeatherFX.scene(text,{size:'sm'}).replace('<div class="wfx ','<div style="position:relative;height:34px;min-height:0;border-radius:8px;box-shadow:none" class="wfx ');
+    }
+    function shortDay(x){ try{ return new Date(x.startTime).toLocaleDateString([],{weekday:'short'}); }catch(e){ return (x.name||'').slice(0,3); } }
     function enhanceLive(p,per){
-      var day=per.find(function(x){return x.isDaytime;})||per[0], nt=per.find(function(x){return !x.isDaytime;})||per[1]||per[0], sun=sunTimes(p.lat,p.lng,new Date());
-      var chips=[['Now',per[0].temperature+'°',per[0].shortForecast],['High',(day?day.temperature+'°':'—'),day?day.name:''],['Low',(nt?nt.temperature+'°':'—'),nt?nt.name:''],['Wind',(per[0].windSpeed||'—'),per[0].windDirection||''],['Sunrise',sun?fmtTime(sun.sunrise):'—','Local'],['Sunset',sun?fmtTime(sun.sunset):'—','Local']];
-      el('glance').innerHTML=chips.map(function(c){return '<div style="'+S.gchip+'"><div style="'+S.gk+'">'+c[0]+'</div><div style="'+S.gv+'">'+c[1]+'</div><div style="'+S.gs+'">'+(c[2]||'')+'</div></div>';}).join('');
-      el('arc').innerHTML=sunArcHTML(p);
+      var day=per.find(function(x){return x.isDaytime;})||per[0], nt=per.find(function(x){return !x.isDaytime;})||per[1]||per[0], sun=sunTimes(p.lat,p.lng,new Date()), now0=per[0];
+      var ci=0;
+      function accent(type){
+        if(type==='wind'){
+          return '<span style="position:absolute;top:10px;right:11px;width:24px;height:15px;overflow:hidden;opacity:.9">'
+            +'<i style="position:absolute;top:1px;left:-8px;width:100%;height:2px;border-radius:2px;background:rgba(255,255,255,.85);animation:wfx-gust 2.6s ease-in-out infinite"></i>'
+            +'<i style="position:absolute;top:6px;left:-8px;width:78%;height:2px;border-radius:2px;background:rgba(255,255,255,.7);animation:wfx-gust 3.1s ease-in-out infinite;animation-delay:-1s"></i>'
+            +'<i style="position:absolute;top:11px;left:-8px;width:62%;height:2px;border-radius:2px;background:rgba(255,255,255,.6);animation:wfx-gust 3.7s ease-in-out infinite;animation-delay:-.5s"></i></span>';
+        }
+        if(type==='low'){
+          return '<span style="position:absolute;top:10px;right:11px;width:16px;height:16px;border-radius:50%;box-shadow:inset -5px -3px 0 0 #bcd6ff;animation:pb-sun 4.5s ease-in-out infinite"></span>';
+        }
+        var col={high:'#ffce78',sunrise:'#ffd24a',sunset:'#ff9a5a',golden:'#ffe0a0'}[type]||'#ffce78';
+        return '<span style="position:absolute;top:10px;right:11px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff,'+col+');box-shadow:0 0 12px 2px '+col+';animation:pb-sun 3.6s ease-in-out infinite"></span>';
+      }
+      function chip(label,val,sub,type){
+        var d=(4.2+ci*0.5).toFixed(1), dl=(ci*0.4).toFixed(1); ci++;
+        return '<div style="position:relative;min-width:0;background:rgba(255,255,255,.13);-webkit-backdrop-filter:blur(13px) saturate(1.3);backdrop-filter:blur(13px) saturate(1.3);border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:9px 12px;color:#fff;box-shadow:0 16px 32px -18px rgba(0,0,0,.7);text-shadow:0 1px 4px rgba(0,0,0,.5);animation:pb-bob '+d+'s ease-in-out '+dl+'s infinite">'
+          + accent(type)
+          +'<div style="font-size:.55rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:22px">'+label+'</div>'
+          +'<div style="font-family:Spectral,Georgia,serif;font-weight:700;font-size:1.1rem;line-height:1;margin-top:5px">'+val+'</div>'
+          +'<div style="font-size:.6rem;opacity:.82;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:.74em">'+(sub||'')+'</div>'
+          +'</div>';
+      }
+      var gStart='—', gSub='At dawn &amp; dusk';
+      if(sun){
+        var span=Math.abs(sun.sunset-sun.sunrise), gh=Math.min(span*0.12,90*60000), nowMs=Date.now();
+        var setMs=sun.sunset.getTime(), es=setMs-gh;
+        var gActive=(nowMs>=sun.sunrise.getTime()&&nowMs<=sun.sunrise.getTime()+gh)||(nowMs>=setMs-gh&&nowMs<=setMs);
+        gStart=fmtTime(new Date(Math.min(es,setMs)));
+        gSub=gActive?'✨ Right now':'till '+fmtTime(sun.sunset);
+      }
+      var chips=chip('High'+(day?' · '+day.name:''), day?day.temperature+'°':'—', day?(day.shortForecast||''):'','high')
+        +chip('Low'+(nt?' · '+nt.name:''), nt?nt.temperature+'°':'—', nt?(nt.shortForecast||''):'','low')
+        +chip('Wind', now0.windSpeed||'—', now0.windDirection||'','wind')
+        +chip('Sunrise', sun?fmtTime(sun.sunrise):'—', 'Local','sunrise')
+        +chip('Sunset', sun?fmtTime(sun.sunset):'—', 'Local','sunset')
+        +chip('Golden hour', gStart, gSub,'golden');
+      var fdays=per.filter(function(x){return x.isDaytime;}).slice(0,7);
+      if(fdays.length<5) fdays=per.slice(0,7);
+      var fcells=fdays.map(function(x,i){
+        return '<div style="min-width:0;background:rgba(255,255,255,.13);-webkit-backdrop-filter:blur(13px) saturate(1.3);backdrop-filter:blur(13px) saturate(1.3);border:1px solid rgba(255,255,255,.26);border-radius:13px;padding:9px 6px 10px;text-align:center;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);box-shadow:0 14px 28px -18px rgba(0,0,0,.6)">'
+          +'<div style="font-size:.56rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(i===0?'Today':shortDay(x))+'</div>'
+          +'<div style="margin:5px 0 5px">'+miniScene(x.shortForecast)+'</div>'
+          +'<div style="font-family:Spectral,Georgia,serif;font-weight:700;font-size:1rem;line-height:1">'+x.temperature+'°</div>'
+          +'</div>';
+      }).join('');
+      var html=bigScene(now0.shortForecast)
+        +'<div style="position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(8,18,12,.26) 0%,rgba(8,18,12,.05) 30%,rgba(8,18,12,.2) 60%,rgba(8,18,12,.6) 100%)"></div>'
+        +'<div style="position:relative;z-index:4;display:flex;flex-direction:column;min-height:inherit;padding:14px 18px 16px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
+            +'<div style="font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.95);font-weight:800;text-shadow:0 1px 5px rgba(0,0,0,.5)">◷ Today at a glance</div>'
+            +'<div style="font-size:.62rem;color:rgba(255,255,255,.85);font-weight:700;text-shadow:0 1px 5px rgba(0,0,0,.5)">'+p.name+'</div>'
+          +'</div>'
+          +'<div style="margin-top:11px;display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.55)">'
+            +'<div style="display:flex;align-items:flex-start;gap:4px;line-height:.82">'
+              +'<span style="font-family:Spectral,Georgia,serif;font-weight:700;font-size:clamp(2.5rem,6vw,3.7rem)">'+now0.temperature+'</span>'
+              +'<span style="font-size:1.3rem;margin-top:.16em;opacity:.85">°</span>'
+            +'</div>'
+            +'<div style="padding-bottom:4px">'
+              +'<div style="font-family:Spectral,Georgia,serif;font-size:clamp(1rem,2.2vw,1.2rem);font-weight:600">'+now0.shortForecast+'</div>'
+              +'<div style="font-size:.74rem;font-weight:600;opacity:.9;margin-top:2px">'+now0.name+' · Wind '+now0.windSpeed+' '+now0.windDirection+'</div>'
+            +'</div>'
+          +'</div>'
+          +'<div style="margin-top:13px;display:grid;gap:9px;grid-template-columns:repeat(auto-fit,minmax(116px,1fr))">'+chips+'</div>'
+          +'<div style="margin-top:13px">'
+            +'<div style="font-size:.56rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-bottom:8px;text-shadow:0 1px 4px rgba(0,0,0,.5)">Next 7 days</div>'
+            +'<div style="display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(90px,1fr))">'+fcells+'</div>'
+          +'</div>'
+        +'</div>';
+      el('glance').innerHTML=html;
     }
 
     /* ---------- reviews ---------- */
@@ -457,16 +603,16 @@ function init(){
       var rec='https://www.recreation.gov/search?q='+encodeURIComponent(p.name+' National Park');
       el('reserve').innerHTML='<p style="font-size:.86rem;line-height:1.55;color:#525a46;margin-bottom:12px">Some parks require timed-entry or campground reservations, booked on the official government sites — we link you straight there.</p><div style="'+S.row+';margin-top:0"><a style="'+S.btnP+'" href="'+rec+'" target="_blank" rel="noopener">Check reservations on Recreation.gov ↗</a><a style="'+S.btn+'" id="npslink" href="'+npsSearch+'" target="_blank" rel="noopener">Official park page ↗</a></div><p style="font-size:.72rem;color:#8f8b7c;margin-top:10px">Reservations and payment are handled by the official site. Many parks are free or pay-at-gate.</p>';
 
-      var _hpc0=el('heroPhotoCol'); if(_hpc0)_hpc0.style.display='none';
+      var _hp0=el('heroPhoto'); if(_hp0){ _hp0.style.display='none'; _hp0.removeAttribute('src'); }
+      var _ph0=el('heroPhotoPh'); if(_ph0)_ph0.style.display='flex';
+      var _phl=el('heroPhotoPhLabel'); if(_phl)_phl.textContent='Iconic photo · '+p.name;
       buildScene(PB.config(current));
       renderBest();
       resetHero();
       crowdGauge(p);
-      el('arc').innerHTML=sunArcHTML(p);
       _nws=0;_nps=0; updateHeroAlerts(true);
+      pgState={};
       // reset live boxes
-      el('now').innerHTML='<span style="'+S.load+'">Loading live weather…</span>';
-      el('fc').innerHTML='<span style="'+S.load+'">Loading forecast…</span>';
       el('alerts').innerHTML='<span style="'+S.load+'">Checking for alerts…</span>';
       el('glance').innerHTML='<span style="'+S.load+'">Loading…</span>';
       loadNPS(p);
@@ -476,7 +622,7 @@ function init(){
     }
 
     render();
-  }
+}
 var tries=0;
 (function wait(){ if(window.PB && window.WeatherFX){ init(); } else if(tries++ < 250){ setTimeout(wait,30); } else { init(); } })();
 })();
