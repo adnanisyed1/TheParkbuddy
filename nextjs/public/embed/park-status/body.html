@@ -9,9 +9,26 @@
   </div>
 </header>
 <div class="wrap">
-  <img id="heroimg" alt="" class="heroimg" style="display:none">
-  <div class="hero"><div><h1 id="pname">—</h1><div class="sub" id="psub"></div></div><div id="pest"></div></div>
-  <p class="about intro" id="aboutlive"></p>
+  <section class="wa-hero" id="wahero">
+    <img id="heroimg" alt="">
+    <div class="wa-hero-grad"></div>
+    <div class="wa-hero-inner">
+      <div class="wa-eyebrow"><span id="psub">—</span> <span id="pest"></span></div>
+      <div class="wa-id"><h1 id="pname">—</h1><p class="wa-lead" id="aboutlive"></p></div>
+      <div class="wa-console">
+        <div class="wa-status open" id="wastatus">
+          <span class="beacon"></span>
+          <span class="st-txt"><span class="st-state" id="stState">Open</span><span class="st-sub" id="stSub">Live status</span></span>
+          <span class="st-temp"><span id="heroTemp">—</span><span class="deg">°</span></span>
+        </div>
+        <a class="wa-alertbar" id="waalert" href="#alerts">
+          <span class="ab-ic" id="abIc">…</span>
+          <span class="ab-txt"><b id="abTitle">Checking alerts…</b><span id="abSub">Live from NPS &amp; weather.gov</span></span>
+          <span class="ab-go">View →</span>
+        </a>
+      </div>
+    </div>
+  </section>
   <div class="tabbar">
     <button class="tab on" data-tab="live">● Live</button>
     <button class="tab" data-tab="todo">◈ Things to Do</button>
@@ -23,13 +40,17 @@
   </div>
 
   <div class="tabpane on" id="pane-live">
-    <div class="grid">
-      <div class="card"><h2>● Current Conditions</h2><div id="now" class="loading">Loading live weather…</div></div>
-      <div class="card"><h2>▲ Active Alerts</h2><div id="alerts" class="loading">Checking for alerts…</div></div>
-      <div class="card span2"><h2>⚑ Official NPS Alerts &amp; Closures</h2><div id="npsalerts" class="loading">Loading official alerts…</div></div>
-      <div class="card span2"><h2>7-Period Forecast</h2><div id="fc" class="fc loading">Loading forecast…</div></div>
-      <div class="card"><h2>◎ Location</h2><div id="loc" class="kv"></div></div>
-      <div class="card"><h2>⚐ Quick Facts</h2><p class="desc" id="desc"></p></div>
+    <div class="bento">
+      <div class="card wa-tile b-4"><h2>◷ Today at a glance</h2><div id="glance" class="glance loading">Loading…</div></div>
+      <div class="card wa-tile b-2"><h2>⛅ Weather</h2><div id="now" class="loading">Loading live weather…</div><div id="fc" class="fc loading" style="margin-top:14px">Loading forecast…</div></div>
+      <div class="card wa-tile"><h2>☀ Golden Hour</h2><div id="arc">—</div></div>
+      <div class="card wa-tile"><h2>◴ Best Time to Visit</h2><div id="crowd">—</div></div>
+      <div class="card wa-tile b-2 wa-link" data-goto="todo"><h2>◈ Things to Do</h2><div id="todoPreview" class="loading">Loading things to do…</div><span class="wa-more">See all things to do →</span></div>
+      <div class="card wa-tile b-2 wa-link" data-goto="about"><h2>❦ About this park</h2><div id="aboutPreview" class="loading">Loading…</div><span class="wa-more">Read full overview →</span></div>
+      <div class="card wa-tile b-4"><h2>⚑ Official NPS Alerts &amp; Closures</h2><div id="npsalerts" class="loading">Loading official alerts…</div></div>
+      <div class="card wa-tile b-2"><h2>▲ Active Weather Alerts</h2><div id="alerts" class="loading">Checking for alerts…</div></div>
+      <div class="card wa-tile"><h2>◎ Location</h2><div id="loc" class="kv"></div></div>
+      <div class="card wa-tile"><h2>⚐ Quick Facts</h2><p class="desc" id="desc"></p></div>
     </div>
   </div>
 

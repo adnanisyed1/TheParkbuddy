@@ -6,7 +6,6 @@
   ],
   "scripts": [
     "/weather-fx.js",
-    "/season-fx.js",
     "/embed/park-status/s0.js",
     "/embed/park-status/s1.js",
     "/embed/park-status/s2.js",

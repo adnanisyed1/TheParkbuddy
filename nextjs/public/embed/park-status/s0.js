@@ -36,6 +36,12 @@ function render(){
   document.getElementById('now').className='loading';document.getElementById('now').textContent='Loading live weather…';
   document.getElementById('alerts').className='loading';document.getElementById('alerts').textContent='Checking for alerts…';
   document.getElementById('fc').className='fc loading';document.getElementById('fc').textContent='Loading forecast…';
+  resetHero(p); crowdGauge(p);
+  _nwsAlerts=0;_npsAlerts=0; if(typeof updateHeroAlerts==='function')updateHeroAlerts(true);
+  var _ap=document.getElementById('aboutPreview'); if(_ap){_ap.className='';_ap.innerHTML='<p class="desc" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">'+p.desc+'</p>';}
+  var _tp=document.getElementById('todoPreview'); if(_tp){_tp.className='loading';_tp.textContent='Loading things to do…';}
+  var _gl=document.getElementById('glance'); if(_gl){_gl.className='glance loading';_gl.textContent='Loading…';}
+  var _ar=document.getElementById('arc'); if(_ar){_ar.innerHTML=sunArcHTML(p);}
   loadNPS(p);
   loadReviews(p);
   if(p.region==='territory'){ offline('This U.S. territory is outside the National Weather Service coverage area.'); return; }
@@ -44,6 +50,9 @@ function render(){
 function offline(msg){
   ['now','fc'].forEach(id=>{const e=document.getElementById(id);e.className=id==='fc'?'fc':'';e.innerHTML='<span class="loading">'+msg+'</span>';});
   document.getElementById('alerts').className='';document.getElementById('alerts').innerHTML='<span class="loading">'+msg+'</span>';
+  var gl=document.getElementById('glance'); if(gl){gl.className='glance';gl.innerHTML='<div class="gchip" style="flex:1 1 100%"><div class="gk">Coverage</div><div class="gv" style="font-size:1rem">Outside NWS area</div><div class="gs">No live weather for this territory</div></div>';}
+  var tk=document.getElementById('ticker'); if(tk)tk.textContent='Outside National Weather Service coverage';
+  var hc=document.getElementById('heroCond'); if(hc)hc.textContent='Outside NWS coverage';
 }
 function loadForecast(p){
   fetch(`https://api.weather.gov/points/${p.lat.toFixed(4)},${p.lng.toFixed(4)}`,{headers:{Accept:"application/geo+json"}})
@@ -57,6 +66,7 @@ function loadForecast(p){
        `<div class="temp">${c.temperature}&deg;</div><div><div class="cond">${c.shortForecast}</div><div class="wind">Wind ${c.windSpeed} ${c.windDirection} · ${c.name}</div></div>`;
      const fc=document.getElementById('fc');fc.className='fc';
      fc.innerHTML=per.slice(0,7).map(x=>(window.WeatherFX)?`<div class="d wfxd">`+WeatherFX.card({top:x.name,temp:x.temperature,unit:'°',text:x.shortForecast,size:'sm'})+`</div>`:`<div class="d"><div class="nm">${x.name}</div><div class="t">${x.temperature}&deg;</div><div class="s">${x.shortForecast}</div></div>`).join("");
+     try{paintHero(c);enhanceLive(p,per);}catch(e){}
    })
    .catch(()=>offlineWeather());
 }
@@ -64,6 +74,8 @@ function offlineWeather(){
   const msg='Live weather appears on the published site (it can\'t load from a raw local file).';
   document.getElementById('now').className='';document.getElementById('now').innerHTML='<span class="loading">'+msg+'</span>';
   document.getElementById('fc').className='fc';document.getElementById('fc').innerHTML='<span class="loading">'+msg+'</span>';
+  var gl=document.getElementById('glance'); if(gl){gl.className='glance';gl.innerHTML='<div class="gchip" style="flex:1 1 100%"><div class="gk">Live data</div><div class="gv" style="font-size:1rem">On the published site</div><div class="gs">weather.gov can\'t load from a local file</div></div>';}
+  var tk=document.getElementById('ticker'); if(tk)tk.textContent='Live weather shows on the published site';
 }
 function loadAlerts(p){
   fetch(`https://api.weather.gov/alerts/active?point=${p.lat.toFixed(4)},${p.lng.toFixed(4)}`,{headers:{Accept:"application/geo+json"}})
@@ -71,6 +83,7 @@ function loadAlerts(p){
    .then(d=>{
      const box=document.getElementById('alerts');box.className='';
      const fs=(d.features||[]);
+     _nwsAlerts=fs.length; if(typeof updateHeroAlerts==='function')updateHeroAlerts();
      if(!fs.length){box.innerHTML='<div class="clear">✓ No active alerts — all clear right now.</div>';return;}
      box.innerHTML=fs.slice(0,5).map(f=>{const a=f.properties;
        return `<div class="alert sev-${a.severity||'Moderate'}"><div class="ev">${a.event}</div>`+
@@ -94,16 +107,18 @@ function setBox(id,html){const el=document.getElementById(id);if(el){el.classNam
 function loadNPS(p){
   const box=document.getElementById('nps'); if(box){box.className='loading';box.textContent='Loading official NPS info…';}
   const img=document.getElementById('heroimg'); if(img){img.style.display='none';}
+  var _wh=document.getElementById('wahero'); if(_wh)_wh.classList.remove('has-img');
   fetchNPS(p.name)
    .then(d=>{
      const park=d.park||{};
      const im=document.getElementById('heroimg');
-     if(im && park.images && park.images.length){ im.src=park.images[0].url; im.alt=park.images[0].alt||p.name; im.style.display='block'; }
-     if(park.description){ const al=document.getElementById('aboutlive'); if(al)al.textContent=park.description; }
+     if(im && park.images && park.images.length){ im.src=park.images[0].url; im.alt=park.images[0].alt||p.name; im.style.display='block'; var wh=document.getElementById('wahero'); if(wh)wh.classList.add('has-img'); }
+     if(park.description){ const al=document.getElementById('aboutlive'); if(al)al.textContent=park.description; var abp=document.getElementById('aboutPreview'); if(abp){abp.className='';abp.innerHTML='<p class="desc" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">'+park.description+'</p>';} }
      if(park.url){ const nl=document.getElementById('npslink'); if(nl)nl.href=park.url; }
 
      // --- Live tab: official NPS alerts ---
      const ab=document.getElementById('npsalerts');
+     _npsAlerts=(d.alerts&&d.alerts.length)||0; if(typeof updateHeroAlerts==='function')updateHeroAlerts();
      if(ab){ ab.className='';
        if(d.alerts && d.alerts.length){
          ab.innerHTML=d.alerts.slice(0,8).map(a=>{
@@ -137,6 +152,7 @@ function loadNPS(p){
         (t.url?` <a href="${t.url}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--accent);font-weight:600">Details ↗</a>`:'')+
         `</div></div>`).join('')); }
      else setBox('todo','<span class="loading">No things-to-do listed for this park.</span>');
+     var _tpv=document.getElementById('todoPreview'); if(_tpv){_tpv.className='';_tpv.innerHTML=todoPreviewHTML(td);}
 
      // --- Activities chips ---
      const acts=(park.activities||[]);
@@ -196,7 +212,7 @@ function loadNPS(p){
    })
    .catch(()=>{
      const msg='<span class="loading">Official NPS content appears once the site is published with your NPS key set in the host settings. It won\'t load on Live Server or before the key is configured.</span>';
-     ['nps','npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(id=>setBox(id,msg));
+     ['nps','npsalerts','todo','todoPreview','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(id=>setBox(id,msg));
    });
 }
 document.querySelectorAll('.tab').forEach(btn=>{
@@ -264,5 +280,162 @@ function submitReview(){
    })
    .catch(()=>show("Couldn't post right now — please try again.",false));
 }
+/* ===== creative live extras: hero scene, ticker, golden-hour arc, crowd gauge ===== */
+function setStatusPill(state,label){
+  var el=document.getElementById('statuspill'); if(!el)return;
+  el.classList.toggle('closed',state==='closed');
+  el.innerHTML='<span class="sp-dot"></span>'+(label||(state==='closed'?'Closed':'Open'));
+}
+function resetHero(p){
+  var t=document.getElementById('heroTemp'); if(t)t.textContent='—';
+  var c=document.getElementById('heroCond'); if(c)c.textContent='';
+  var w=document.getElementById('heroWind'); if(w)w.textContent='';
+  var sc=document.getElementById('scene'); if(sc&&window.WeatherFX)sc.innerHTML=WeatherFX.scene('clear',{size:'lg'});
+  var tk=document.getElementById('ticker'); if(tk)tk.textContent='Fetching live conditions…';
+  setStatusPill('open','Open · 24 hrs');
+  var ss=document.getElementById('stState'); if(ss)ss.textContent='Open';
+  var sb=document.getElementById('stSub'); if(sb)sb.textContent='Fetching conditions…';
+  var ws=document.getElementById('wastatus'); if(ws){ws.classList.add('open');ws.classList.remove('closed');}
+}
+function paintHero(c){
+  var sc=document.getElementById('scene'); if(sc&&window.WeatherFX)sc.innerHTML=WeatherFX.scene(c.shortForecast,{size:'lg'});
+  var t=document.getElementById('heroTemp'); if(t)t.textContent=c.temperature;
+  var cond=document.getElementById('heroCond'); if(cond)cond.textContent=c.shortForecast;
+  var wind=document.getElementById('heroWind'); if(wind)wind.textContent='Wind '+c.windSpeed+' '+c.windDirection+' · '+c.name;
+  var sb=document.getElementById('stSub'); if(sb)sb.textContent=c.shortForecast+' · '+c.temperature+'°';
+}
+var _tickN=0,_tickT=null;
+function startTicker(){
+  _tickN=0; if(_tickT)clearInterval(_tickT);
+  var upd=function(){var tk=document.getElementById('ticker'); if(!tk)return; tk.textContent='Live from weather.gov · updated '+(_tickN===0?'just now':_tickN+' min ago');};
+  upd(); _tickT=setInterval(function(){_tickN++;upd();},60000);
+}
+function fmtTime(d){ if(!d||isNaN(d))return '—'; return d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }
+function sunTimes(lat,lng,date){
+  try{
+    var rad=Math.PI/180, deg=180/Math.PI;
+    var start=new Date(date.getFullYear(),0,0); var doy=Math.floor((date-start)/86400000);
+    var zen=90.833;
+    function calc(isRise){
+      var lngHour=lng/15;
+      var t=isRise?doy+((6-lngHour)/24):doy+((18-lngHour)/24);
+      var M=(0.9856*t)-3.289;
+      var L=M+(1.916*Math.sin(M*rad))+(0.020*Math.sin(2*M*rad))+282.634; L=(L+360)%360;
+      var RA=deg*Math.atan(0.91764*Math.tan(L*rad)); RA=(RA+360)%360;
+      RA=RA+((Math.floor(L/90)*90)-(Math.floor(RA/90)*90)); RA=RA/15;
+      var sinDec=0.39782*Math.sin(L*rad); var cosDec=Math.cos(Math.asin(sinDec));
+      var cosH=(Math.cos(zen*rad)-(sinDec*Math.sin(lat*rad)))/(cosDec*Math.cos(lat*rad));
+      if(cosH>1||cosH<-1)return null;
+      var H=isRise?360-deg*Math.acos(cosH):deg*Math.acos(cosH); H=H/15;
+      var T=H+RA-(0.06571*t)-6.622;
+      var UT=(T-lngHour)%24; return (UT+24)%24;
+    }
+    var rUT=calc(true), sUT=calc(false); if(rUT==null||sUT==null)return null;
+    function toLocal(ut){var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0)); d.setUTCMinutes(Math.round(ut*60)); return d;}
+    return {sunrise:toLocal(rUT), sunset:toLocal(sUT)};
+  }catch(e){return null;}
+}
+function sunArcHTML(p){
+  var sun=sunTimes(p.lat,p.lng,new Date());
+  var w=240,h=98,cx=w/2,baseY=h-12,r=Math.min(cx-18,baseY-6);
+  var path='M '+(cx-r)+' '+baseY+' A '+r+' '+r+' 0 0 1 '+(cx+r)+' '+baseY;
+  var frac=0.5,riseS='—',setS='—',note='Daylight';
+  if(sun){
+    riseS=fmtTime(sun.sunrise); setS=fmtTime(sun.sunset);
+    var now=Date.now(), span=sun.sunset.getTime()-sun.sunrise.getTime();
+    frac=(now-sun.sunrise.getTime())/span;
+    if(frac<0){frac=0;note='Before sunrise';}
+    else if(frac>1){frac=1;note='After sunset · night';}
+    else{var gh=span*0.09; note=(now<=sun.sunrise.getTime()+gh||now>=sun.sunset.getTime()-gh)?'✨ Golden hour right now':'Daylight';}
+  } else { note='Polar day/night'; }
+  var theta=Math.PI*(1-frac);
+  var sx=cx+r*Math.cos(theta), sy=baseY-r*Math.sin(theta);
+  var arcLen=Math.PI*r;
+  return '<div class="arc-wrap"><svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+
+    '<defs><linearGradient id="ghg" x1="0" x2="1"><stop offset="0" stop-color="#e4be78"/><stop offset="1" stop-color="#c79a4b"/></linearGradient></defs>'+
+    '<line x1="'+(cx-r-6)+'" y1="'+baseY+'" x2="'+(cx+r+6)+'" y2="'+baseY+'" stroke="#e3d9c5" stroke-width="1.5"/>'+
+    '<path d="'+path+'" fill="none" stroke="#e3d9c5" stroke-width="3" stroke-linecap="round"/>'+
+    '<path d="'+path+'" fill="none" stroke="url(#ghg)" stroke-width="3" stroke-linecap="round" stroke-dasharray="'+arcLen.toFixed(1)+'" stroke-dashoffset="'+(arcLen*(1-frac)).toFixed(1)+'"/>'+
+    '<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="7" fill="#f6b21e" stroke="#fffdf7" stroke-width="2.5"/>'+
+    '</svg>'+
+    '<div class="arc-times"><span><small>Sunrise</small>'+riseS+'</span><span><small>Sunset</small>'+setS+'</span></div>'+
+    '<div class="arc-note">'+note+'</div></div>';
+}
+var ICONIC=new Set([9,21,61,41,25,54,28,30,15,60,37,50,46,5,44]);
+function crowdGauge(p){
+  var el=document.getElementById('crowd'); if(!el)return;
+  var now=new Date(), m=now.getMonth(), dow=now.getDay();
+  var base=ICONIC.has(p.id)?60:36;
+  var seasonAdj=(m>=5&&m<=7)?24:(m===8||m===4)?12:(m>=10||m<=1)?-16:2;
+  var weekendAdj=(dow===0||dow===6)?14:(dow===5)?6:0;
+  var score=Math.max(8,Math.min(97,base+seasonAdj+weekendAdj));
+  var level=score>72?'Busy':score>46?'Moderate':'Quiet';
+  var bestSeason=ICONIC.has(p.id)?'late Sept–Oct or May':'spring &amp; fall';
+  el.innerHTML='<div class="gauge">'+
+    '<div class="lvl">'+level+' <span style="font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">· est. today</span></div>'+
+    '<div class="meter"><div class="pin" style="left:'+score+'%"></div></div>'+
+    '<div class="ends"><span>Quiet</span><span>Packed</span></div>'+
+    '<div class="best">Go on <b>weekday mornings</b> — and visit in <b>'+bestSeason+'</b> for the thinnest crowds.</div>'+
+  '</div>';
+}
+function enhanceLive(p,per){
+  startTicker();
+  var day=per.find(function(x){return x.isDaytime;})||per[0];
+  var night=per.find(function(x){return !x.isDaytime;})||per[1]||per[0];
+  var sun=sunTimes(p.lat,p.lng,new Date());
+  var chips=[
+    ['Now',per[0].temperature+'°',per[0].shortForecast],
+    ['High',(day?day.temperature+'°':'—'),day?day.name:''],
+    ['Low',(night?night.temperature+'°':'—'),night?night.name:''],
+    ['Wind',(per[0].windSpeed||'—'),per[0].windDirection||''],
+    ['Sunrise',sun?fmtTime(sun.sunrise):'—','Local'],
+    ['Sunset',sun?fmtTime(sun.sunset):'—','Local']
+  ];
+  var gl=document.getElementById('glance');
+  if(gl){gl.className='glance'; gl.innerHTML=chips.map(function(c){return '<div class="gchip"><div class="gk">'+c[0]+'</div><div class="gv">'+c[1]+'</div><div class="gs">'+(c[2]||'')+'</div></div>';}).join('');}
+  var ar=document.getElementById('arc'); if(ar)ar.innerHTML=sunArcHTML(p);
+}
 setupReviewForm();
+var _nwsAlerts=0,_npsAlerts=0;
+function updateHeroAlerts(checking){
+  var bar=document.getElementById('waalert'); if(!bar)return;
+  var ic=document.getElementById('abIc'),t=document.getElementById('abTitle'),s=document.getElementById('abSub');
+  bar.classList.remove('active','severe');
+  if(checking){ if(ic)ic.textContent='…'; if(t)t.textContent='Checking alerts…'; if(s)s.textContent='Live from NPS & weather.gov'; return; }
+  var total=_nwsAlerts+_npsAlerts;
+  if(total>0){
+    bar.classList.add(_npsAlerts>0?'severe':'active');
+    if(ic)ic.textContent='⚠';
+    if(t)t.textContent=total+' active alert'+(total>1?'s':'')+(_npsAlerts>0?' · closures':'');
+    if(s)s.textContent='Review before you go';
+  } else {
+    if(ic)ic.textContent='✓';
+    if(t)t.textContent='All clear';
+    if(s)s.textContent='No active alerts or closures';
+  }
+}
+function todoPreviewHTML(td){
+  if(!td||!td.length)return '<span class="loading">No things to do listed yet.</span>';
+  return td.slice(0,3).map(function(t){return '<div class="tdcard">'+(t.image?'<img src="'+t.image+'" alt="">':'')+'<div><h4>'+(t.title||'')+'</h4>'+(t.shortDescription?'<p style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+t.shortDescription+'</p>':'')+'</div></div>';}).join('');
+}
+function waEntrance(){
+  var tiles=[].slice.call(document.querySelectorAll('#pane-live .wa-tile'));
+  var reduce=false; try{reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
+  if(reduce||!Element.prototype.animate){ tiles.forEach(function(t){t.style.opacity='1';t.style.transform='none';}); return; }
+  var anims=[];
+  tiles.forEach(function(t,i){
+    try{ anims.push(t.animate([{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'translateY(0)'}],{duration:600,delay:60+i*55,easing:'cubic-bezier(.2,.8,.25,1)',fill:'both'})); }catch(e){ t.style.opacity='1'; }
+  });
+  setTimeout(function(){ anims.forEach(function(a){try{a.finish();}catch(e){}}); },1500);
+}
+function wireWaLinks(){
+  document.querySelectorAll('.wa-link').forEach(function(c){
+    c.addEventListener('click',function(){var g=c.getAttribute('data-goto');var b=document.querySelector('.tab[data-tab="'+g+'"]');if(b)b.click();try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){window.scrollTo(0,0);}});
+  });
+  var bar=document.getElementById('waalert');
+  if(bar)bar.addEventListener('click',function(e){e.preventDefault();var el=document.getElementById('npsalerts');if(el){var y=el.getBoundingClientRect().top+window.scrollY-78;try{window.scrollTo({top:y,behavior:'smooth'});}catch(x){window.scrollTo(0,y);}}});
+}
 render();
+updateHeroAlerts(true);
+wireWaLinks();
+waEntrance();
