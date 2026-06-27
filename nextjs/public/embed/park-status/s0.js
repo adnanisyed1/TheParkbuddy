@@ -53,7 +53,23 @@ function init(){
       });
       ['now','do','visit','story'].forEach(function(x){ var pane=el('pane-'+x); if(pane) pane.style.display=(x===t?(x==='now'||x==='visit'?'grid':(x==='do'||x==='story'?'grid':'block')):'none'); });
     }
-    document.querySelectorAll('#seg button').forEach(function(b){ b.onclick=function(){ showTab(b.getAttribute('data-tab')); var seg=document.getElementById('seg'); var y=seg.getBoundingClientRect().top+window.scrollY-86; window.scrollTo({top:y,behavior:'smooth'}); }; });
+    function getScroller(){
+      var els=[document.scrollingElement, document.documentElement, document.body];
+      for(var i=0;i<els.length;i++){ var e=els[i]; if(e && e.scrollHeight>e.clientHeight+4) return e; }
+      return document.scrollingElement||document.documentElement||document.body;
+    }
+    function scrollToEl(target, off){
+      if(!target)return; off=(off==null)?80:off;
+      var sc=getScroller(), start=sc.scrollTop||0;
+      var y=Math.max(0, target.getBoundingClientRect().top+start-off);
+      var dist=y-start, t0=null, dur=460;
+      function step(ts){ if(t0===null)t0=ts; var p=Math.min(1,(ts-t0)/dur); sc.scrollTop=start+dist*(1-Math.pow(1-p,3)); if(p<1)requestAnimationFrame(step); }
+      if(window.requestAnimationFrame){ requestAnimationFrame(step); setTimeout(function(){ sc.scrollTop=y; },520); }
+      else { sc.scrollTop=y; }
+    }
+    function gotoTab(t){ showTab(t); scrollToEl(document.getElementById('seg'),80); }
+    document.querySelectorAll('#seg button').forEach(function(b){ b.onclick=function(){ gotoTab(b.getAttribute('data-tab')); }; });
+    var _sbx=el('statusBox'); if(_sbx)_sbx.addEventListener('click',function(){ showTab('now'); scrollToEl((el('now')&&el('now').parentElement)||document.getElementById('seg'),80); });
     el('waalert').addEventListener('click',function(e){ e.preventDefault(); openAlertModal(); });
     function openAlertModal(){
       var body=el('alertModalBody'); if(!body)return;
@@ -65,7 +81,7 @@ function init(){
     function closeAlertModal(){ var m=el('alertModal'); if(m)m.style.display='none'; }
     var amc=el('alertModalClose'); if(amc)amc.onclick=closeAlertModal;
     var am=el('alertModal'); if(am)am.addEventListener('click',function(e){ if(e.target===am)closeAlertModal(); });
-    var cue=el('scrollcue'); if(cue)cue.addEventListener('click',function(){ var seg=document.getElementById('seg'); var y=seg.getBoundingClientRect().top+window.scrollY-86; window.scrollTo({top:y,behavior:'smooth'}); });
+    var cue=el('scrollcue'); if(cue)cue.addEventListener('click',function(){ scrollToEl(document.getElementById('seg'),80); });
 
     /* ====================== LIVING SCENE ====================== */
     function hx(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
@@ -73,10 +89,10 @@ function init(){
     function scale(a,f,b){b=b||0;return [Math.max(0,Math.min(255,Math.round(a[0]*f+b))),Math.max(0,Math.min(255,Math.round(a[1]*f+b))),Math.max(0,Math.min(255,Math.round(a[2]*f+b)))];}
     function mix(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];}
 
-    function silSvg(type,col){
-      if(type==='hiker') return '<svg viewBox="0 0 28 42" width="36" height="54" fill="none" stroke="'+col+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3.4" fill="'+col+'" stroke="none"></circle><path d="M12 9 L12 23"></path><path d="M12 14 L19 19"></path><path d="M12 23 L8 36"></path><path d="M12 23 L16 36"></path><path d="M20 6 L21 38"></path><path d="M9 11 Q4 13 6 20"></path></svg>';
-      if(type==='biker') return '<svg viewBox="0 0 42 32" width="56" height="42" fill="none" stroke="'+col+'" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="23" r="6.5"></circle><circle cx="33" cy="23" r="6.5"></circle><path d="M9 23 L19 23 L26 12 L33 23 M19 23 L23 12"></path><circle cx="25" cy="6.5" r="2.8" fill="'+col+'" stroke="none"></circle><path d="M25 9 L23 14 M23 12 L30 13"></path></svg>';
-      return '<svg viewBox="0 0 52 24" width="66" height="30" fill="none"><path d="M3 14 Q26 24 49 14 Q26 19 3 14 Z" fill="'+col+'"></path><circle cx="26" cy="6" r="3.2" fill="'+col+'"></circle><rect x="24.7" y="8" width="2.6" height="7" rx="1.3" fill="'+col+'"></rect><path d="M15 3 L37 13" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round"></path></svg>';
+    function silSvg(type,col,w,h){
+      if(type==='hiker') return '<svg viewBox="0 0 28 42" width="'+(w||36)+'" height="'+(h||54)+'" fill="none" stroke="'+col+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3.4" fill="'+col+'" stroke="none"></circle><path d="M12 9 L12 23"></path><path d="M12 14 L19 19"></path><path d="M12 23 L8 36"></path><path d="M12 23 L16 36"></path><path d="M20 6 L21 38"></path><path d="M9 11 Q4 13 6 20"></path></svg>';
+      if(type==='biker') return '<svg viewBox="0 0 42 32" width="'+(w||56)+'" height="'+(h||42)+'" fill="none" stroke="'+col+'" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="23" r="6.5"></circle><circle cx="33" cy="23" r="6.5"></circle><path d="M9 23 L19 23 L26 12 L33 23 M19 23 L23 12"></path><circle cx="25" cy="6.5" r="2.8" fill="'+col+'" stroke="none"></circle><path d="M25 9 L23 14 M23 12 L30 13"></path></svg>';
+      return '<svg viewBox="0 0 52 24" width="'+(w||66)+'" height="'+(h||30)+'" fill="none"><path d="M3 14 Q26 24 49 14 Q26 19 3 14 Z" fill="'+col+'"></path><circle cx="26" cy="6" r="3.2" fill="'+col+'"></circle><rect x="24.7" y="8" width="2.6" height="7" rx="1.3" fill="'+col+'"></rect><path d="M15 3 L37 13" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round"></path></svg>';
     }
     function silhouettes(cfg){
       var night=(cfg.tod==='night');
@@ -170,23 +186,52 @@ function init(){
     });
 
     /* ---------- best-activity hero ---------- */
+    function actType(t){ t=(t||'').toLowerCase();
+      if(/bik/.test(t)) return 'biker';
+      if(/raft|kayak|canoe|paddl|snorkel|swim|boat|sail|dive|fish/.test(t)) return 'boat';
+      if(/wildlife|bird|whale|seal/.test(t)) return 'birds';
+      if(/star|aurora/.test(t)) return 'stars';
+      return 'hiker';
+    }
+    function activityBand(act, big){
+      var type=actType(act.t), col='rgba(238,230,208,.55)', H=big?52:30, inner='', i, b, k;
+      if(type==='stars'){
+        var ns=big?14:8;
+        for(i=0;i<ns;i++){ inner+='<span style="position:absolute;left:'+(6+i*(86/ns)).toFixed(1)+'%;top:'+(14+(i%3)*26)+'%;width:3px;height:3px;border-radius:50%;background:'+col+';animation:pb-twinkle '+(2+i%3)+'s ease-in-out '+(i*0.2).toFixed(1)+'s infinite"></span>'; }
+      } else if(type==='birds'){
+        for(b=0;b<3;b++){ inner+='<div style="position:absolute;top:'+(14+b*20)+'%;left:0;animation:pb-cross '+(10+b*3)+'s linear '+(b*1.4).toFixed(1)+'s infinite"><svg viewBox="0 0 24 12" width="'+((big?16:13)+b*3)+'" height="'+((big?8:6)+b)+'" fill="none" stroke="'+col+'" stroke-width="1.7" stroke-linecap="round"><path d="M1 8 Q6 1 12 7 Q18 1 23 8"></path></svg></div>'; }
+      } else {
+        var isBoat=(type==='boat'), n=(type==='hiker')?2:1;
+        var sz = isBoat?(big?[44,20]:[32,15]) : (type==='biker'?(big?[40,30]:[28,21]):(big?[24,36]:[16,25]));
+        if(isBoat) inner+='<div style="position:absolute;left:0;right:0;bottom:'+(big?8:5)+'px;height:2px;background:linear-gradient(90deg,transparent,'+col+',transparent);opacity:.55"></div>';
+        for(k=0;k<n;k++){ var dur=(isBoat?13:type==='biker'?9:15)+k*5, bob=isBoat?'pb-bobr':'pb-bob';
+          inner+='<div style="position:absolute;bottom:'+(big?5:3)+'px;left:0;animation:pb-cross '+dur+'s linear '+(k*6)+'s infinite"><span style="display:inline-block;animation:'+bob+' '+(isBoat?3:1.8)+'s ease-in-out infinite">'+silSvg(type,col,sz[0],sz[1])+'</span></div>';
+        }
+      }
+      return '<div style="position:relative;height:'+H+'px;margin-top:'+(big?16:10)+'px;overflow:hidden;border-radius:9px">'+inner+'</div>';
+    }
     function renderBest(){
       var A=PB.activities(current), s=A.season;
       var tag=s.charAt(0).toUpperCase()+s.slice(1)+' · best right now';
       var lead=A.list[0];
+      el('bestLead').style.cursor='pointer';
       el('bestLead').innerHTML=
         '<div style="font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#e4be78;margin-bottom:11px">'+tag+'</div>'+
         '<div style="display:flex;align-items:flex-start;gap:16px">'+
           '<div style="font-size:2.7rem;line-height:1;flex:none">'+lead.ic+'</div>'+
-          '<div><h3 style="font-family:Spectral,serif;font-weight:800;color:#fbf6ea;font-size:1.7rem;line-height:1.05;letter-spacing:-.01em">'+lead.t+'</h3>'+
+          '<div style="flex:1"><h3 style="font-family:Spectral,serif;font-weight:800;color:#fbf6ea;font-size:1.7rem;line-height:1.05;letter-spacing:-.01em">'+lead.t+'</h3>'+
           '<p style="color:rgba(251,246,234,.86);font-size:.95rem;line-height:1.55;margin-top:8px;max-width:46ch">'+lead.b+'</p></div>'+
-        '</div>';
+        '</div>'+ activityBand(lead,true) +
+        '<div style="margin-top:13px;font-size:.78rem;font-weight:800;letter-spacing:.02em;color:#e4be78">See all things to do →</div>';
       el('bestRest').innerHTML=A.list.slice(1).map(function(a){
-        return '<div style="flex:1 1 150px;min-width:142px;background:rgba(20,36,28,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px">'+
+        return '<div style="cursor:pointer;flex:1 1 150px;min-width:142px;background:rgba(20,36,28,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px;display:flex;flex-direction:column">'+
           '<div style="font-size:1.5rem;line-height:1">'+a.ic+'</div>'+
           '<div style="font-family:Spectral,serif;font-weight:700;color:#fbf6ea;font-size:1rem;margin-top:8px">'+a.t+'</div>'+
-          '<div style="color:rgba(251,246,234,.64);font-size:.76rem;line-height:1.42;margin-top:4px">'+a.b+'</div></div>';
+          '<div style="color:rgba(251,246,234,.64);font-size:.76rem;line-height:1.42;margin-top:4px">'+a.b+'</div>'+
+          activityBand(a,false)+'</div>';
       }).join('');
+      el('bestLead').onclick=function(){ gotoTab('do'); };
+      Array.prototype.forEach.call(el('bestRest').children,function(c){ c.onclick=function(){ gotoTab('do'); }; });
       el('terrLabel').textContent=A.label;
     }
 
