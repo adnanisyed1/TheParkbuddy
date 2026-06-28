@@ -76,6 +76,15 @@ nav a.on{background:var(--cream);color:#15241c}
 .rail h2{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);font-weight:800;margin-bottom:13px;display:flex;align-items:center;gap:9px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
 .rail h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
 .scroller{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 16px}
+.rail .railwrap{position:relative}
+.rail summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:10px;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);font-weight:800;padding:11px 16px;background:rgba(20,36,28,.36);border:1px solid rgba(255,255,255,.16);border-radius:13px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-user-select:none;user-select:none;transition:background .15s}
+.rail summary:hover{background:rgba(20,36,28,.5)}
+.rail summary::-webkit-details-marker{display:none}
+.rail summary .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.rail summary .railhint{text-transform:none;letter-spacing:0;font-weight:600;color:rgba(243,237,224,.62);font-size:.74rem}
+.rail summary .chev{margin-left:2px;font-size:.9rem;transition:transform .25s;color:var(--gold2)}
+.rail details[open] summary .chev{transform:rotate(180deg)}
+.rail details[open] .scroller{margin-top:14px;animation:bt-fade .4s ease both}
 .ic{position:relative;overflow:hidden;flex:none;width:248px;background:rgba(251,246,234,.9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.55);border-radius:20px;padding:17px 18px;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 16px 40px rgba(8,16,12,.34);transition:transform .3s cubic-bezier(.2,.8,.3,1),box-shadow .3s}
 .ic::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(228,190,120,.18) 48%,transparent 66%);transform:translateX(-130%);animation:bt-shim 6s ease-in-out infinite;pointer-events:none}
 .ic:hover{transform:translateY(-7px) scale(1.015);box-shadow:0 28px 60px rgba(8,16,12,.46)}
@@ -106,10 +115,15 @@ nav a.on{background:var(--cream);color:#15241c}
 .stats .s b{display:block;font-family:var(--serif);font-size:1.22rem;font-weight:700;color:var(--gold2);line-height:1}
 .stats .s span{font-size:.56rem;color:rgba(251,246,234,.72);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;display:block;font-weight:700}
 
-.sec{padding:18px 18px;border-top:1px solid var(--border)}
-.lbl{font-size:.78rem;font-weight:800;letter-spacing:.01em;color:var(--head);margin:0 0 12px;display:flex;align-items:center;gap:9px}
-.lbl .stepn{width:24px;height:24px;flex:none;border-radius:50%;background:linear-gradient(145deg,var(--gold2),var(--gold));color:#15241c;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;box-shadow:0 4px 12px -4px rgba(120,90,40,.6)}
-.lbl.sublbl{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+/* steps as a guided "trail" — a dashed spine links teal/gold station badges */
+.sec{position:relative;padding:24px 20px 24px 58px;border-top:1px solid var(--border)}
+.panel.tile{position:relative}
+.panel.tile .sec::before{content:"";position:absolute;left:28px;top:0;bottom:0;width:2px;background:repeating-linear-gradient(180deg,#d8c9a6 0 6px,transparent 6px 15px)}
+.panel.tile:first-child .sec::before{top:16px}
+.col>.panel.tile + .panel.tile::before{content:"";position:absolute;left:28px;top:-20px;height:21px;width:2px;background:repeating-linear-gradient(180deg,#d8c9a6 0 6px,transparent 6px 15px);z-index:1}
+.lbl{font-size:.96rem;font-weight:800;letter-spacing:-.01em;color:var(--head);margin:0 0 14px;display:flex;align-items:center;gap:9px;min-height:38px}
+.lbl .stepn{position:absolute;left:10px;top:20px;width:37px;height:37px;flex:none;border-radius:12px;background:linear-gradient(150deg,#33555f,#1d3941);color:var(--gold2);border:1px solid rgba(228,190,120,.45);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.06rem;font-weight:800;box-shadow:0 8px 18px -8px rgba(8,18,12,.6);z-index:2}
+.lbl.sublbl{position:relative;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;min-height:0}
 .daterange{color:var(--accent);font-weight:700;font-size:.82rem}
 
 /* itinerary stops */

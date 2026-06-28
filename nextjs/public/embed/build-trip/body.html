@@ -36,15 +36,17 @@
 </section>
 
 <section class="rail">
-  <h2><span class="dot"></span>Ready-made itineraries — tap to load</h2>
-  <div class="scroller" id="prebuilt"></div>
+  <details class="railwrap">
+    <summary><span class="dot"></span>Browse ready-made itineraries<span class="railhint">tap to load a full route</span><span class="chev">▾</span></summary>
+    <div class="scroller" id="prebuilt"></div>
+  </details>
 </section>
 
 <div class="sheet">
 <section class="builder">
   <div class="mapcard"><div id="lmap"></div></div>
   <div class="col">
-    <div class="panel">
+    <div class="panel tile">
       <div class="ph">
         <input class="tn" id="tripname" maxlength="60" placeholder="My national-parks trip">
         <div class="stats">
@@ -54,9 +56,8 @@
           <div class="s"><b id="st-cost">$0</b><span>Est. cost</span></div>
         </div>
       </div>
-
       <div class="sec" style="border-top:none">
-        <div class="lbl"><span class="stepn">1</span>Trip basics</div>
+        <div class="lbl"><span class="stepn">1</span>Trip details</div>
         <div class="basics">
           <div class="f"><label>Start date</label><input class="tin" type="date" id="startdate"></div>
           <div class="f"><label>Travelers</label><input class="tin" type="number" id="travelers" min="1" max="12" value="2"></div>
@@ -64,17 +65,16 @@
           <div class="f"><label>End date (auto)</label><input class="tin" id="enddate" readonly placeholder="—"></div>
         </div>
       </div>
+    </div>
 
-      <div class="sec">
+    <div class="panel tile">
+      <div class="sec" style="border-top:none">
         <div class="lbl" style="display:flex;align-items:center;justify-content:space-between">
           <span><span class="stepn">2</span>Your itinerary</span>
           <span style="display:flex;align-items:center;gap:12px"><span id="daterange" class="daterange"></span><label class="toggle"><input type="checkbox" id="showmap" checked> Show on map</label></span>
         </div>
         <div id="stoplist"></div>
-      </div>
-
-      <div class="sec">
-        <div class="lbl"><span class="stepn">3</span>Add national parks</div>
+        <div class="lbl sublbl" style="margin-top:22px">Add national parks</div>
         <div class="rowf"><select id="parksel"><option value="">Choose a park…</option></select><button class="btn p addbtn" id="addpark" title="Add park">＋</button></div>
         <div class="lbl sublbl">Search for an address or place — your home, a hotel, town, forest…</div>
         <div class="searchbox rowf">
@@ -84,9 +84,11 @@
         <div class="lbl sublbl">Or paste exact coordinates</div>
         <div class="rowf"><input class="tin" id="cname" placeholder="Place name" style="flex:1.2"><input class="tin" id="ccoord" placeholder="lat, lng" style="flex:1"><button class="btn p addbtn" id="addcustom" title="Add stop">＋</button></div>
       </div>
+    </div>
 
-      <div class="sec cost">
-        <div class="lbl"><span class="stepn">4</span>Estimated cost <small style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)">— tap any amount to enter your real price</small></div>
+    <div class="panel tile">
+      <div class="sec cost" style="border-top:none">
+        <div class="lbl"><span class="stepn">3</span>Budget <small style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)">— tap any amount to enter your real price</small></div>
         <div id="costlines"></div>
         <div class="total"><span class="lt">Estimated total</span><span class="amt" id="costtotal">$0</span></div>
         <div class="per" id="costper"></div>
@@ -96,9 +98,11 @@
           <div class="a"><label>Food $/day pp</label><input id="food" type="number" step="5" value="40"></div>
         </div>
       </div>
+    </div>
 
-      <div class="sec">
-        <div class="lbl"><span class="stepn">5</span>Navigate &amp; share</div>
+    <div class="panel tile">
+      <div class="sec" style="border-top:none">
+        <div class="lbl"><span class="stepn">4</span>Navigate &amp; share</div>
         <div class="navrow">
           <a class="btn p" id="gmaps" target="_blank" rel="noopener">Google Maps ↗</a>
           <a class="btn g" id="amaps" target="_blank" rel="noopener">Apple Maps ↗</a>

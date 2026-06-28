@@ -213,35 +213,38 @@
       "@keyframes wf-draw{to{stroke-dashoffset:0}}@keyframes wf-flow{to{stroke-dashoffset:-28}}@keyframes wf-conn{from{left:-8px}to{left:100%}}" +
       "@keyframes wf-stamp{0%{opacity:0;transform:scale(1.5) rotate(-8deg)}60%{opacity:1;transform:scale(.96) rotate(-3deg)}100%{transform:scale(1) rotate(-3deg)}}" +
       "@keyframes wf-rise2{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}" +
-      "#ex-bento .exb-wf .wf-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,4vw,48px);margin-top:30px;align-items:start}" +
-      "#ex-bento .wf-stagewrap{position:sticky;top:13vh}" +
-      "#ex-bento .wf-stage{position:relative;aspect-ratio:4/3.3;border-radius:22px;overflow:hidden;background:linear-gradient(165deg,#3a5f6e 0%,#456b61 55%,#2f574c 100%);border:1px solid rgba(228,190,120,.34);box-shadow:0 34px 80px -44px rgba(8,18,12,.6),inset 0 1px 0 rgba(255,255,255,.08)}" +
-      "#ex-bento .wf-tag{position:absolute;top:13px;left:15px;z-index:6;font-family:" + SANS + ";font-size:.6rem;font-weight:800;letter-spacing:.16em;color:#e4be78;display:flex;align-items:center;gap:7px}" +
-      "#ex-bento .wf-tag .wd{width:7px;height:7px;border-radius:50%;background:#46d97f;box-shadow:0 0 8px 1px #46d97f;animation:exb-pulse 1.6s infinite}" +
-      "#ex-bento .wf-scn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.97);transition:opacity .5s ease,transform .5s ease}" +
-      "#ex-bento .wf-scn.live{opacity:1;transform:none}" +
+      "#ex-bento .exb-wf .wf2{position:relative;margin-top:46px}" +
+      "#ex-bento .wf2-spine{position:absolute;left:50%;top:10px;bottom:10px;width:3px;transform:translateX(-50%);background:repeating-linear-gradient(180deg,#d8c9a6 0 7px,transparent 7px 16px);border-radius:3px;z-index:1}" +
+      "#ex-bento .wf2-fill{position:absolute;left:0;top:0;width:100%;height:0;background:linear-gradient(180deg,#e4be78,#c79a4b);border-radius:3px;box-shadow:0 0 12px rgba(228,190,120,.7)}" +
+      "#ex-bento .wf2-marker{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:linear-gradient(150deg,#33555f,#1d3941);border:2px solid #e4be78;display:flex;align-items:center;justify-content:center;font-size:1.15rem;z-index:5;box-shadow:0 8px 20px -6px rgba(0,0,0,.5),0 0 0 7px rgba(228,190,120,.14)}" +
+      "#ex-bento .wf2-stations{position:relative;z-index:2;display:flex;flex-direction:column;gap:clamp(42px,9vh,104px)}" +
+      "#ex-bento .wf2-st{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:clamp(22px,5vw,64px);align-items:center;opacity:.42;filter:saturate(.7);transition:opacity .55s ease,filter .55s ease}" +
+      "#ex-bento .wf2-st.live{opacity:1;filter:none}" +
+      "#ex-bento .wf2-st:nth-child(even) .wf2-visual{order:2}" +
+      "#ex-bento .wf2-node{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #d8c9a6;z-index:3;transition:.4s}" +
+      "#ex-bento .wf2-st.live .wf2-node{border-color:#c79a4b;background:#e4be78;box-shadow:0 0 0 6px rgba(228,190,120,.22)}" +
+      "#ex-bento .wf2-visual{position:relative;aspect-ratio:5/3.5;border-radius:20px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(165deg,#3a5f6e 0%,#456b61 55%,#2f574c 100%);border:1px solid rgba(228,190,120,.32);box-shadow:0 30px 66px -38px rgba(8,18,12,.7),inset 0 1px 0 rgba(255,255,255,.07)}" +
+      "#ex-bento .wf2-tag{position:absolute;top:12px;left:14px;z-index:6;font-family:" + SANS + ";font-size:.58rem;font-weight:800;letter-spacing:.16em;color:#e4be78;display:flex;align-items:center;gap:6px}#ex-bento .wf2-tag .wd{width:7px;height:7px;border-radius:50%;background:#46d97f;box-shadow:0 0 8px 1px #46d97f;animation:exb-pulse 1.6s infinite}" +
+      "#ex-bento .wf2-copy{padding:4px 0}" +
+      "#ex-bento .wf2-badge{display:inline-flex;align-items:center;gap:12px}#ex-bento .wf2-badge .bn{width:46px;height:46px;flex:none;border-radius:13px;background:linear-gradient(150deg,#33555f,#1d3941);color:#e4be78;display:flex;align-items:center;justify-content:center;font-family:" + SERIF + ";font-weight:800;font-size:1.4rem;border:1px solid rgba(228,190,120,.4)}#ex-bento .wf2-badge .bl{font-family:" + SANS + ";font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#a98a4e}" +
+      "#ex-bento .wf2-copy h3{font-family:" + SERIF + ";font-weight:800;font-size:clamp(1.5rem,2.9vw,2.45rem);line-height:1.05;letter-spacing:-.02em;margin-top:15px;color:#1d3941}#ex-bento .wf2-copy h3 em{font-style:italic;color:#2c5562}#ex-bento .wf2-copy p{color:#5b6258;font-size:clamp(.98rem,1.35vw,1.12rem);line-height:1.55;max-width:44ch;margin-top:12px}" +
       "#ex-bento .wf-map{position:absolute;inset:0;background:linear-gradient(135deg,rgba(86,165,156,.16),rgba(15,40,34,.55)),repeating-linear-gradient(0deg,rgba(150,200,190,.07) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,rgba(150,200,190,.07) 0 1px,transparent 1px 36px)}" +
       "#ex-bento .wf-pin{position:absolute;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3cd83,#c79a4b);border:2px solid #fffdf7;box-shadow:0 0 0 2px rgba(28,74,55,.4),0 4px 8px rgba(0,0,0,.5)}" +
       "#ex-bento .wf-pin.dim{width:10px;height:10px;background:radial-gradient(circle at 35% 30%,#9fc0b8,#5d7e76);box-shadow:0 2px 5px rgba(0,0,0,.4);opacity:.7}" +
       "#ex-bento .wf-pin .wf-rad{position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(228,190,120,.6)}" +
-      "#ex-bento .wf-scn.live .wf-pin .wf-rad{animation:wf-radar 2.4s ease-out infinite}#ex-bento .wf-pin .wf-rad.b{animation-delay:1.2s}" +
-      "#ex-bento .wf-card{width:76%;max-width:330px;background:rgba(8,22,18,.5);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:18px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}" +
-      "#ex-bento .wf-sun{width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#fff3c4,#ffd24a 60%,#f6b21e);box-shadow:0 0 24px 5px rgba(255,206,80,.5)}#ex-bento .wf-scn.live .wf-sun{animation:exb-sun 3s ease-in-out infinite}" +
+      "#ex-bento .wf2-st.live .wf-pin .wf-rad{animation:wf-radar 2.4s ease-out infinite}#ex-bento .wf-pin .wf-rad.b{animation-delay:1.2s}" +
+      "#ex-bento .wf-card{width:78%;max-width:330px;background:rgba(8,22,18,.5);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:18px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}" +
+      "#ex-bento .wf-sun{width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#fff3c4,#ffd24a 60%,#f6b21e);box-shadow:0 0 24px 5px rgba(255,206,80,.5)}#ex-bento .wf2-st.live .wf-sun{animation:exb-sun 3s ease-in-out infinite}" +
       "#ex-bento .wf-temp{font-family:" + SERIF + ";font-weight:800;font-size:2.3rem;color:#fff;margin-top:12px;line-height:1}" +
-      "#ex-bento .wf-verdict{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(120deg,#3fae6a,#2f7d4f);color:#06210f;font-weight:800;font-size:.84rem;padding:8px 14px;border-radius:999px;margin-top:12px;transform-origin:left center}#ex-bento .wf-scn.live .wf-verdict{animation:wf-stamp .7s cubic-bezier(.3,1.4,.4,1) .25s both}" +
-      "#ex-bento .wf-chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}#ex-bento .wf-chips span{font-size:.66rem;font-weight:700;color:#dfeae6;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:5px 9px;border-radius:999px;opacity:0}#ex-bento .wf-scn.live .wf-chips span{animation:wf-rise2 .5s ease forwards}#ex-bento .wf-scn.live .wf-chips span:nth-child(1){animation-delay:.5s}#ex-bento .wf-scn.live .wf-chips span:nth-child(2){animation-delay:.62s}#ex-bento .wf-scn.live .wf-chips span:nth-child(3){animation-delay:.74s}" +
-      "#ex-bento .wf-route{position:absolute;inset:0;background:linear-gradient(135deg,rgba(86,165,156,.14),rgba(15,40,34,.5)),repeating-linear-gradient(0deg,rgba(150,200,190,.06) 0 1px,transparent 1px 38px),repeating-linear-gradient(90deg,rgba(150,200,190,.06) 0 1px,transparent 1px 38px)}#ex-bento .wf-route svg{position:absolute;inset:0;width:100%;height:100%}#ex-bento .wf-scn.live .wf-path{animation:wf-draw 2.2s ease .3s forwards,wf-flow 1s linear 2.5s infinite}" +
-      "#ex-bento .wf-rstop{position:absolute;transform:translate(-50%,-50%);opacity:0}#ex-bento .wf-scn.live .wf-rstop{animation:wf-rise2 .5s ease forwards}#ex-bento .wf-scn.live .wf-rstop:nth-child(2){animation-delay:.2s}#ex-bento .wf-scn.live .wf-rstop:nth-child(3){animation-delay:1s}#ex-bento .wf-scn.live .wf-rstop:nth-child(4){animation-delay:1.7s}" +
+      "#ex-bento .wf-verdict{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(120deg,#3fae6a,#2f7d4f);color:#06210f;font-weight:800;font-size:.84rem;padding:8px 14px;border-radius:999px;margin-top:12px;transform-origin:left center}#ex-bento .wf2-st.live .wf-verdict{animation:wf-stamp .7s cubic-bezier(.3,1.4,.4,1) .25s both}" +
+      "#ex-bento .wf-chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}#ex-bento .wf-chips span{font-size:.66rem;font-weight:700;color:#dfeae6;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:5px 9px;border-radius:999px;opacity:0}#ex-bento .wf2-st.live .wf-chips span{animation:wf-rise2 .5s ease forwards}#ex-bento .wf2-st.live .wf-chips span:nth-child(1){animation-delay:.5s}#ex-bento .wf2-st.live .wf-chips span:nth-child(2){animation-delay:.62s}#ex-bento .wf2-st.live .wf-chips span:nth-child(3){animation-delay:.74s}" +
+      "#ex-bento .wf-route{position:absolute;inset:0;background:linear-gradient(135deg,rgba(86,165,156,.14),rgba(15,40,34,.5)),repeating-linear-gradient(0deg,rgba(150,200,190,.06) 0 1px,transparent 1px 38px),repeating-linear-gradient(90deg,rgba(150,200,190,.06) 0 1px,transparent 1px 38px)}#ex-bento .wf-route svg{position:absolute;inset:0;width:100%;height:100%}#ex-bento .wf2-st.live .wf-path{animation:wf-draw 2.2s ease .3s forwards,wf-flow 1s linear 2.5s infinite}" +
+      "#ex-bento .wf-rstop{position:absolute;transform:translate(-50%,-50%);opacity:0}#ex-bento .wf2-st.live .wf-rstop{animation:wf-rise2 .5s ease forwards}#ex-bento .wf2-st.live .wf-rstop:nth-child(2){animation-delay:.2s}#ex-bento .wf2-st.live .wf-rstop:nth-child(3){animation-delay:1s}#ex-bento .wf2-st.live .wf-rstop:nth-child(4){animation-delay:1.7s}" +
       "#ex-bento .wf-dot{width:24px;height:24px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:linear-gradient(135deg,#33555f,#16303a);border:2px solid #e4be78;box-shadow:0 4px 9px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}#ex-bento .wf-dot b{transform:rotate(-45deg);font-size:.7rem;font-weight:800;color:#fff}" +
-      "#ex-bento .wf-rstats{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);display:flex;gap:16px;opacity:0}#ex-bento .wf-scn.live .wf-rstats{animation:wf-rise2 .5s ease 2.2s forwards}#ex-bento .wf-rstats div{text-align:center}#ex-bento .wf-rstats b{display:block;font-family:" + SERIF + ";font-size:1.2rem;color:#e4be78}#ex-bento .wf-rstats span{font-size:.54rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,241,239,.6)}" +
-      "#ex-bento .wf-pack{display:flex;flex-direction:column;align-items:center;gap:11px;width:82%}#ex-bento .wf-gchip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:11px;padding:9px 13px;font-size:.8rem;font-weight:700;color:#eaf1ef;opacity:0}#ex-bento .wf-scn.live .wf-gchip{animation:wf-rise2 .5s ease forwards}#ex-bento .wf-scn.live .wf-gchip:nth-child(1){animation-delay:.15s}#ex-bento .wf-scn.live .wf-gchip:nth-child(2){animation-delay:.3s}#ex-bento .wf-scn.live .wf-gchip:nth-child(3){animation-delay:.45s}" +
-      "#ex-bento .wf-ready{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,#3fae6a,#2f7d4f);color:#06210f;font-weight:800;font-size:.9rem;padding:10px 18px;border-radius:999px;margin-top:4px;opacity:0}#ex-bento .wf-scn.live .wf-ready{animation:wf-stamp .7s cubic-bezier(.3,1.4,.4,1) .7s both}" +
-      "#ex-bento .wf-spine{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);display:flex;align-items:center;z-index:6}#ex-bento .wf-node{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.3);transition:.4s}#ex-bento .wf-node.on{background:#e4be78;border-color:#c79a4b;box-shadow:0 0 12px 2px rgba(228,190,120,.7)}" +
-      "#ex-bento .wf-conn{width:34px;height:2px;position:relative;overflow:hidden;background:rgba(255,255,255,.16)}#ex-bento .wf-conn i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,#c79a4b,#e4be78);transition:width .5s ease}#ex-bento .wf-conn.fill i{width:100%}#ex-bento .wf-conn .wf-pulse{position:absolute;top:-1px;width:8px;height:4px;border-radius:4px;background:#fff;opacity:0}#ex-bento .wf-conn.fill .wf-pulse{opacity:.9;animation:wf-conn 1.4s linear infinite}" +
-      "#ex-bento .wf-acts{display:flex;flex-direction:column}#ex-bento .wf-act{min-height:68vh;display:flex;flex-direction:column;justify-content:center;padding:6px 0}" +
-      "#ex-bento .wf-step{font-family:" + SANS + ";font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#a98a4e;display:flex;align-items:center;gap:10px}#ex-bento .wf-step .wf-n{width:32px;height:32px;border-radius:9px;border:1px solid rgba(199,154,75,.4);display:flex;align-items:center;justify-content:center;font-family:" + SERIF + ";font-weight:800;font-size:.95rem;color:#a98a4e;background:rgba(199,154,75,.08)}" +
-      "#ex-bento .wf-act h3{font-family:" + SERIF + ";font-weight:800;font-size:clamp(1.5rem,3vw,2.4rem);line-height:1.06;letter-spacing:-.02em;margin-top:16px;color:#1d3941}#ex-bento .wf-act h3 em{font-style:italic;color:#2c5562}#ex-bento .wf-act p{color:#5b6258;font-size:clamp(.98rem,1.4vw,1.12rem);line-height:1.55;max-width:42ch;margin-top:12px}" +
-      "@media(max-width:760px){#ex-bento .exb-wf .wf-grid{grid-template-columns:1fr;gap:0}#ex-bento .wf-stagewrap{position:sticky;top:8vh;z-index:3;margin-bottom:6px}#ex-bento .wf-stage{aspect-ratio:auto;height:40vh;max-width:460px;margin:0 auto}#ex-bento .wf-acts{position:relative;z-index:2}#ex-bento .wf-act{min-height:60vh;justify-content:flex-start;padding:5vh 2px 0}#ex-bento .wf-act:last-child{min-height:46vh}}" +
+      "#ex-bento .wf-rstats{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:16px;opacity:0}#ex-bento .wf2-st.live .wf-rstats{animation:wf-rise2 .5s ease 2.2s forwards}#ex-bento .wf-rstats div{text-align:center}#ex-bento .wf-rstats b{display:block;font-family:" + SERIF + ";font-size:1.2rem;color:#e4be78}#ex-bento .wf-rstats span{font-size:.54rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,241,239,.6)}" +
+      "#ex-bento .wf-pack{display:flex;flex-direction:column;align-items:center;gap:11px;width:82%}#ex-bento .wf-gchip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:11px;padding:9px 13px;font-size:.8rem;font-weight:700;color:#eaf1ef;opacity:0}#ex-bento .wf2-st.live .wf-gchip{animation:wf-rise2 .5s ease forwards}#ex-bento .wf2-st.live .wf-gchip:nth-child(1){animation-delay:.15s}#ex-bento .wf2-st.live .wf-gchip:nth-child(2){animation-delay:.3s}#ex-bento .wf2-st.live .wf-gchip:nth-child(3){animation-delay:.45s}" +
+      "#ex-bento .wf-ready{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,#3fae6a,#2f7d4f);color:#06210f;font-weight:800;font-size:.9rem;padding:10px 18px;border-radius:999px;margin-top:4px;opacity:0}#ex-bento .wf2-st.live .wf-ready{animation:wf-stamp .7s cubic-bezier(.3,1.4,.4,1) .7s both}" +
+      "@media(max-width:760px){#ex-bento .wf2-spine{left:20px}#ex-bento .wf2-marker{left:20px}#ex-bento .wf2-st{grid-template-columns:1fr;gap:15px;padding-left:48px}#ex-bento .wf2-st:nth-child(even) .wf2-visual{order:0}#ex-bento .wf2-node{left:20px;top:30px;transform:translate(-50%,-50%)}#ex-bento .wf2-visual{aspect-ratio:5/3.2}}" +
       "@media(prefers-reduced-motion:reduce){#ex-bento .exb-rv{opacity:1!important;transform:none!important}}";
     document.head.appendChild(s);
   }
@@ -445,21 +448,26 @@
       '</div></section>' +
       '<section class="exb-band cream exb-wf"><div class="exb-w">' +
         '<div class="exb-kick exb-rv">How it works</div>' +
-        '<p class="exb-lead exb-rv">From &ldquo;should we go?&rdquo; to <em>packed and gone.</em></p>' +
-        '<div class="wf-grid">' +
-          '<div class="wf-stagewrap"><div class="wf-stage">' +
-            '<div class="wf-tag"><span class="wd"></span><span id="wf-tag">01 &middot; DISCOVER</span></div>' +
-            '<div class="wf-scn live" data-wf="0"><div class="wf-map"><span class="wf-pin dim" style="left:24%;top:34%"></span><span class="wf-pin dim" style="left:70%;top:26%"></span><span class="wf-pin dim" style="left:78%;top:64%"></span><span class="wf-pin" style="left:50%;top:48%"><span class="wf-rad"></span><span class="wf-rad b"></span></span></div></div>' +
-            '<div class="wf-scn" data-wf="1"><div class="wf-card"><div class="wf-sun"></div><div class="wf-temp">74&deg;</div><div class="wf-verdict">&#10003; Good day to go</div><div class="wf-chips"><span>&#9728;&#65039; Clear</span><span>&#9788;&#65039; UV high</span><span>&#128167; Muddy</span></div></div></div>' +
-            '<div class="wf-scn" data-wf="2"><div class="wf-route"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path class="wf-path" d="M22,32 C40,20 54,52 70,28 C82,40 60,66 78,72" fill="none" stroke="#e4be78" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="3 3" pathLength="100" stroke-dashoffset="100"></path></svg><div class="wf-rstop" style="left:22%;top:32%"><span class="wf-dot"><b>1</b></span></div><div class="wf-rstop" style="left:70%;top:28%"><span class="wf-dot"><b>2</b></span></div><div class="wf-rstop" style="left:78%;top:72%"><span class="wf-dot"><b>3</b></span></div><div class="wf-rstats"><div><b>612</b><span>mi</span></div><div><b>9</b><span>days</span></div><div><b>$1.8k</b><span>est</span></div></div></div></div>' +
-            '<div class="wf-scn" data-wf="3"><div class="wf-pack"><span class="wf-gchip">&#129509; Down jacket</span><span class="wf-gchip">&#129406; WP boots</span><span class="wf-gchip">&#127966;&#65039; Zion Lodge</span><span class="wf-ready">&#10003; Packed &amp; booked</span></div></div>' +
-            '<div class="wf-spine" id="wf-spine"><span class="wf-node on"></span><span class="wf-conn"><i></i><span class="wf-pulse"></span></span><span class="wf-node"></span><span class="wf-conn"><i></i><span class="wf-pulse"></span></span><span class="wf-node"></span><span class="wf-conn"><i></i><span class="wf-pulse"></span></span><span class="wf-node"></span></div>' +
-          '</div></div>' +
-          '<div class="wf-acts">' +
-            '<div class="wf-act" data-wfact="0"><div class="wf-step"><span class="wf-n">01</span>Discover</div><h3>Find a park <em>worth the drive.</em></h3><p>Every U.S. national park on one live map &mdash; pins coloured by today&rsquo;s go / no-go call, so the good days jump out.</p></div>' +
-            '<div class="wf-act" data-wfact="1"><div class="wf-step"><span class="wf-n">02</span>Read the conditions</div><h3>One honest <em>go / no-go</em> call.</h3><p>Real weather, alerts and official closures &mdash; distilled into a plain-language verdict and the conditions behind it.</p></div>' +
-            '<div class="wf-act" data-wfact="2"><div class="wf-step"><span class="wf-n">03</span>Build the trip</div><h3>A route on <em>real roads.</em></h3><p>Chain parks into a road trip with drive times, dates and a transparent cost &mdash; each stop carrying its own live conditions.</p></div>' +
-            '<div class="wf-act" data-wfact="3"><div class="wf-step"><span class="wf-n">04</span>Pack &amp; go</div><h3>Exactly <em>what to bring</em> &mdash; and where to stay.</h3><p>Gear and stays tuned to the forecast at every stop. Book it, pack it, go.</p></div>' +
+        '<p class="exb-lead exb-rv">The trail from &ldquo;should we go?&rdquo; to <em>packed &amp; gone.</em></p>' +
+        '<div class="wf2">' +
+          '<div class="wf2-spine"><div class="wf2-fill" id="wf2-fill"></div><div class="wf2-marker" id="wf2-marker">\uD83E\uDDED</div></div>' +
+          '<div class="wf2-stations">' +
+            '<div class="wf2-st" data-wf="0"><div class="wf2-node"></div>' +
+              '<div class="wf2-visual"><div class="wf2-tag"><span class="wd"></span>LIVE MAP</div><div class="wf-map"><span class="wf-pin dim" style="left:24%;top:34%"></span><span class="wf-pin dim" style="left:70%;top:26%"></span><span class="wf-pin dim" style="left:78%;top:64%"></span><span class="wf-pin" style="left:50%;top:48%"><span class="wf-rad"></span><span class="wf-rad b"></span></span></div></div>' +
+              '<div class="wf2-copy"><div class="wf2-badge"><span class="bn">01</span><span class="bl">Discover</span></div><h3>Find a park <em>worth the drive.</em></h3><p>Every U.S. national park on one live map &mdash; pins coloured by today&rsquo;s go / no-go call, so the good days jump out.</p></div>' +
+            '</div>' +
+            '<div class="wf2-st" data-wf="1"><div class="wf2-node"></div>' +
+              '<div class="wf2-visual"><div class="wf2-tag"><span class="wd"></span>CONDITIONS</div><div class="wf-card"><div class="wf-sun"></div><div class="wf-temp">74&deg;</div><div class="wf-verdict">&#10003; Good day to go</div><div class="wf-chips"><span>&#9728;&#65039; Clear</span><span>&#9788;&#65039; UV high</span><span>&#128167; Muddy</span></div></div></div>' +
+              '<div class="wf2-copy"><div class="wf2-badge"><span class="bn">02</span><span class="bl">Read the conditions</span></div><h3>One honest <em>go / no-go</em> call.</h3><p>Real weather, alerts and official closures &mdash; distilled into a plain-language verdict and the conditions behind it.</p></div>' +
+            '</div>' +
+            '<div class="wf2-st" data-wf="2"><div class="wf2-node"></div>' +
+              '<div class="wf2-visual"><div class="wf2-tag"><span class="wd"></span>ROUTE</div><div class="wf-route"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path class="wf-path" d="M22,32 C40,20 54,52 70,28 C82,40 60,66 78,72" fill="none" stroke="#e4be78" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="3 3" pathLength="100" stroke-dashoffset="100"></path></svg><div class="wf-rstop" style="left:22%;top:32%"><span class="wf-dot"><b>1</b></span></div><div class="wf-rstop" style="left:70%;top:28%"><span class="wf-dot"><b>2</b></span></div><div class="wf-rstop" style="left:78%;top:72%"><span class="wf-dot"><b>3</b></span></div><div class="wf-rstats"><div><b>612</b><span>mi</span></div><div><b>9</b><span>days</span></div><div><b>$1.8k</b><span>est</span></div></div></div></div>' +
+              '<div class="wf2-copy"><div class="wf2-badge"><span class="bn">03</span><span class="bl">Build the trip</span></div><h3>A route on <em>real roads.</em></h3><p>Chain parks into a road trip with drive times, dates and a transparent cost &mdash; each stop carrying its own live conditions.</p></div>' +
+            '</div>' +
+            '<div class="wf2-st" data-wf="3"><div class="wf2-node"></div>' +
+              '<div class="wf2-visual"><div class="wf2-tag"><span class="wd"></span>PACK &amp; GO</div><div class="wf-pack"><span class="wf-gchip">&#129509; Down jacket</span><span class="wf-gchip">&#129406; WP boots</span><span class="wf-gchip">&#127966;&#65039; Zion Lodge</span><span class="wf-ready">&#10003; Packed &amp; booked</span></div></div>' +
+              '<div class="wf2-copy"><div class="wf2-badge"><span class="bn">04</span><span class="bl">Pack &amp; go</span></div><h3>Exactly <em>what to bring</em> &mdash; and where to stay.</h3><p>Gear and stays tuned to the forecast at every stop. Then our checklist packs you &mdash; voice it, generate it, and walk your trip in Start Mode.</p></div>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div></section>' +
@@ -638,28 +646,22 @@
       check();
     })();
 
-    // scroll-driven "how it works" workflow (uses the cover's own scroll)
+    // scroll-driven "trail" workflow — a compass marker hikes the path (cover's own scroll)
     (function () {
-      var acts = [].slice.call(ov.querySelectorAll('.wf-act'));
-      if (!acts.length) return;
-      var scns = [].slice.call(ov.querySelectorAll('.wf-scn'));
-      var spine = ov.querySelector('#wf-spine');
-      var nodes = spine ? [].slice.call(spine.querySelectorAll('.wf-node')) : [];
-      var conns = spine ? [].slice.call(spine.querySelectorAll('.wf-conn')) : [];
-      var tagEl = ov.querySelector('#wf-tag');
-      var labels = ['01 \u00b7 DISCOVER', '02 \u00b7 CONDITIONS', '03 \u00b7 BUILD', '04 \u00b7 PACK & GO'];
+      var wf = ov.querySelector('.wf2'); if (!wf) return;
+      var sts = [].slice.call(wf.querySelectorAll('.wf2-st'));
+      var fill = ov.querySelector('#wf2-fill'), marker = ov.querySelector('#wf2-marker');
       var cur = -1;
-      function set(i) {
-        if (i === cur) return; cur = i;
-        scns.forEach(function (s, n) { s.classList.toggle('live', n === i); });
-        nodes.forEach(function (nd, n) { nd.classList.toggle('on', n <= i); });
-        conns.forEach(function (c, n) { c.classList.toggle('fill', n < i); });
-        if (tagEl) tagEl.textContent = labels[i];
-      }
       function drive() {
-        var mid = ov.getBoundingClientRect().top + ov.clientHeight * 0.5, best = 0, bd = 1e9;
-        acts.forEach(function (a, n) { var r = a.getBoundingClientRect(), c = r.top + r.height / 2, d = Math.abs(c - mid); if (d < bd) { bd = d; best = n; } });
-        set(best);
+        var wr = wf.getBoundingClientRect();
+        var mid = ov.getBoundingClientRect().top + ov.clientHeight * 0.5;
+        var prog = (mid - wr.top) / Math.max(wr.height, 1);
+        prog = Math.max(0, Math.min(1, prog));
+        if (fill) fill.style.height = (prog * 100) + '%';
+        if (marker) marker.style.top = (prog * 100) + '%';
+        var best = 0, bd = 1e9;
+        sts.forEach(function (s, n) { var r = s.getBoundingClientRect(), c = r.top + r.height / 2, d = Math.abs(c - mid); if (d < bd) { bd = d; best = n; } });
+        if (best !== cur) { cur = best; sts.forEach(function (s, n) { s.classList.toggle('live', n <= best); }); }
       }
       ov.addEventListener('scroll', drive, { passive: true });
       drive();
