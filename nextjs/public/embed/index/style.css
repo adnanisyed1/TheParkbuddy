@@ -177,7 +177,7 @@ select{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:
 .vlegend .vl-t{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#b07d3a;margin-right:1px}
 .vlegend .vl{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;color:#3c4a3a}
 .vlegend .vl i{width:11px;height:11px;border-radius:50%;border:1.5px solid #fffdf7;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
-@media(max-width:560px){.vlegend{left:10px;bottom:84px;gap:8px;padding:7px 10px}.vlegend .vl-t{width:100%}}
+@media(max-width:560px){.vlegend{display:none}}
 @media(max-width:560px){
   .topbar .srch{width:150px}
   .topbar select{width:94px}
@@ -315,4 +315,4 @@ body.ppb-pinned-pad{padding-right:380px}
   #ex-locate .pin{width:9px;height:9px;border-radius:50%;background:#e4be78;box-shadow:0 0 0 0 rgba(228,190,120,.6);animation:exlocpulse 2s infinite}
 }
 @keyframes exlocpulse{0%{box-shadow:0 0 0 0 rgba(228,190,120,.55)}70%{box-shadow:0 0 0 10px rgba(228,190,120,0)}100%{box-shadow:0 0 0 0 rgba(228,190,120,0)}}
-@media(max-width:860px){ #ex-locate{position:fixed;left:50%;transform:translateX(-50%);bottom:74px;z-index:1499;display:flex;align-items:center;gap:8px;background:#163a2b;color:#fbf6ea;border:1px solid var(--gold);border-radius:999px;padding:11px 18px;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;box-shadow:0 12px 28px -8px rgba(0,0,0,.5)} #ex-locate .pin{width:8px;height:8px;border-radius:50%;background:#e4be78} }
+@media(max-width:860px){ #ex-locate{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:1499;display:flex;align-items:center;gap:8px;background:#163a2b;color:#fbf6ea;border:1px solid var(--gold);border-radius:999px;padding:11px 18px;font-family:inherit;font-weight:700;font-size:.82rem;cursor:pointer;box-shadow:0 12px 28px -8px rgba(0,0,0,.5)} #ex-locate .pin{width:8px;height:8px;border-radius:50%;background:#e4be78} #ppb-fab{bottom:78px;right:14px;width:52px;height:52px;font-size:1.3rem} }

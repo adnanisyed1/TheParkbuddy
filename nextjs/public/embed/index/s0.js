@@ -415,8 +415,8 @@ function initMap(){
   var mob=window.matchMedia('(max-width:560px)').matches;
   gmap=new google.maps.Map(document.getElementById('lmap'),{
     center:{lat:39.5,lng:-98.35},zoom:4,mapTypeId:'terrain',
-    mapTypeControl:true,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid'],position:google.maps.ControlPosition.BOTTOM_LEFT,style:mob?google.maps.MapTypeControlStyle.DROPDOWN_MENU:google.maps.MapTypeControlStyle.HORIZONTAL_BAR},
-    streetViewControl:false,fullscreenControl:false,zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_BOTTOM},gestureHandling:'greedy',
+    mapTypeControl:!mob,mapTypeControlOptions:{mapTypeIds:['roadmap','terrain','satellite','hybrid'],position:google.maps.ControlPosition.BOTTOM_LEFT,style:mob?google.maps.MapTypeControlStyle.DROPDOWN_MENU:google.maps.MapTypeControlStyle.HORIZONTAL_BAR},
+    streetViewControl:false,fullscreenControl:false,zoomControl:!mob,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_BOTTOM},gestureHandling:'greedy',
     styles: window.PARKBUDDY_MAP_STYLE || [{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'off'}]}]
   });
   PARKS.forEach(function(p){
