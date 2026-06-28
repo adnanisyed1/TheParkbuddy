@@ -107,5 +107,5 @@ footer{padding:34px;text-align:center;color:rgba(251,246,234,.6);font-size:.8rem
   .trio{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(2,1fr);gap:30px}
   .showcase{grid-template-columns:1fr;gap:34px}
-  .navlinks a:not(.cta){display:none}
+  .navlinks a{padding:8px 11px;font-size:.8rem}
 }

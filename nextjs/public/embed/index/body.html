@@ -7,21 +7,18 @@
 </div>
 
 <header>
-  <a href="/" class="brand" style="text-decoration:none;color:inherit"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg>
-    <h1>Explore</h1></a>
-  <div style="display:flex;align-items:center;gap:12px">
-    <a href="/build-trip" style="color:#163a2b;text-decoration:none;font-size:.82rem;font-weight:700;background:var(--gold);padding:7px 14px;border-radius:999px">Build a Trip</a>
-    <button id="bantoggle" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--onDark);font-size:.74rem;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer">About ▴</button>
-    <div class="count" id="count">63 parks</div>
+  <div class="hrow">
+    <a href="/" class="brand" style="text-decoration:none;color:inherit">
+      <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg></span>
+      <div><b>ParkBuddy</b><small>live status · every U.S. national park</small></div>
+    </a>
+    <nav>
+      <a href="/explore" class="on">Map</a>
+      <a href="/plan">Plan a Trip</a>
+      <a href="/build-trip">Build a Trip</a>
+    </nav>
   </div>
 </header>
-<div class="banner open" id="banner">
-  <div class="bcol"><p class="bk">ParkBuddy</p><h2>Explore the wild</h2><p class="btag">Live conditions · Real-road trips · Trip Passport</p></div>
-  <div class="bfeat"><span>🗺️</span><div><b>Interactive Map</b><p>All 63 parks on a live terrain map — pan, zoom, and click any marker.</p></div></div>
-  <div class="bfeat"><span>📡</span><div><b>Live Park Data</b><p>Real-time weather, the forecast, and active alerts per park.</p></div></div>
-  <div class="bfeat"><span>🛂</span><div><b>Trip Passport</b><p>Collect a stamp for every park and keep your trips as cards.</p></div></div>
-  <div class="bfeat"><span>🧭</span><div><b>Trip Planner</b><p>Build a road trip on real roads with dates &amp; costs.</p></div></div>
-</div>
 <div class="body">
   <div class="mid">
     <aside class="info" id="info">
