@@ -9,7 +9,10 @@
   var SERIF = "'Spectral',Georgia,serif";
   var SANS = "'Hanken Grotesk',system-ui,sans-serif";
 
+  var navigating = false;
   function go(href) {
+    if (navigating) return; // bug 3: block double-navigation / double transition
+    navigating = true;
     if (window.__ppTrans && window.__ppTrans.go) window.__ppTrans.go(href);
     else location.href = href;
   }
@@ -63,7 +66,7 @@
       "#ex-bento .exb-tile.big .exb-go{background:rgba(228,190,120,.2);color:#e4be78}" +
       "#ex-bento .exb-tile.big:hover .exb-go{background:#e4be78;color:#15241c}" +
       "#ex-bento .exb-shim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(228,190,120,.16) 48%,transparent 64%);transform:translateX(-130%);animation:exb-shim 6s ease-in-out infinite}" +
-      "#ex-home{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:8500;display:none;align-items:center;gap:8px;background:rgba(16,32,23,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(228,190,120,.5);color:#fbf6ea;border-radius:999px;padding:8px 16px 8px 10px;font-family:" + SANS + ";font-weight:800;font-size:.82rem;cursor:pointer;box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}" +
+      "#ex-home{position:fixed;left:16px;bottom:64px;top:auto;transform:none;z-index:8500;display:none;align-items:center;gap:8px;background:rgba(16,32,23,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(228,190,120,.5);color:#fbf6ea;border-radius:999px;padding:8px 16px 8px 10px;font-family:" + SANS + ";font-weight:800;font-size:.82rem;cursor:pointer;box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}" +
       "#ex-home .hm{width:26px;height:26px;border-radius:8px;background:linear-gradient(145deg,#e4be78,#c79a4b);display:flex;align-items:center;justify-content:center}" +
       "#ex-bento .exb-flip{perspective:1000px;background:none!important;border:none!important;box-shadow:none!important;padding:0!important;overflow:visible}" +
       "#ex-bento .exb-flip:hover{transform:none}" +
@@ -118,6 +121,15 @@
     return b;
   }
 
+  // bug 1: map-page chrome (planner FAB/panel sit above the cover at z-9998) must
+  // not float over the bento landing — hide it while the cover is up.
+  function setMapChrome(show) {
+    ['ppb-fab', 'ppb-panel'].forEach(function (id) {
+      var e = document.getElementById(id);
+      if (e) e.style.visibility = show ? '' : 'hidden';
+    });
+  }
+
   var ov = null;
   function showCover() {
     if (!ov) return;
@@ -126,6 +138,7 @@
     ov.style.pointerEvents = 'auto';
     ov.querySelectorAll('.exb-flip.flipped').forEach(function (f) { f.classList.remove('flipped'); });
     var hb = document.getElementById('ex-home'); if (hb) hb.style.display = 'none';
+    setMapChrome(false);
   }
   function hideCover() {
     if (!ov) return;
@@ -133,6 +146,7 @@
     ov.style.opacity = '0';
     ov.style.pointerEvents = 'none';
     var hb = homeBtn(); hb.style.display = 'flex';
+    setMapChrome(true);
   }
 
   function act(t) {
@@ -216,7 +230,7 @@
 
     ov = document.createElement('div');
     ov.id = 'ex-bento';
-    ov.style.cssText = "position:fixed;inset:0;z-index:9000;overflow-y:auto;color:#fbf6ea;" +
+    ov.style.cssText = "position:fixed;inset:0;z-index:9000;overflow-y:auto;color:#fbf6ea;background:#0f2c20;" +
       "display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;" +
       "transition:transform 1s cubic-bezier(.76,0,.24,1),opacity .55s ease .3s;will-change:transform";
 
@@ -268,6 +282,13 @@
     (document.body || document.documentElement).appendChild(ov);
     homeBtn();
     var pre = document.getElementById('ex-preload'); if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
+    setMapChrome(false); // cover is up on first paint — keep map chrome hidden (bug 1)
+
+    // bug 4: /explore is the live map itself (reached from the Build page's "Map" tab),
+    // so open straight onto the map instead of the bento landing.
+    var path = (location.pathname || '').replace(/\/+$/, '');
+    var directMap = /\bview=map\b/.test(location.search || '') || /\/explore$/.test(path);
+    if (directMap) { ov.style.transition = 'none'; hideCover(); requestAnimationFrame(function () { ov.style.transition = ''; }); }
 
     var si = ov.querySelector('#ex-signin');
     if (si) si.addEventListener('click', function (e) { e.stopPropagation(); openSignin(); });

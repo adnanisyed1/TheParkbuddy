@@ -4,7 +4,8 @@
    Loaded on every page. Respects new-tab/modifier clicks, downloads, and anchors. */
 (function () {
   if (window.__ppTrans) return;
-  var DUR = 720;
+  var DUR = 460;
+  var covering = false;
 
   function make() {
     var d = document.getElementById("pp-trans");
@@ -40,6 +41,8 @@
   }
 
   function cover(x, y, cb) {
+    if (covering) return; // bug 3: ignore repeat triggers mid-transition
+    covering = true;
     var d = make();
     var mk = d.querySelector("#pp-trans-mk");
     var px = (x == null ? 50 : (x / innerWidth * 100));

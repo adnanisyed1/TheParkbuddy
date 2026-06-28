@@ -75,6 +75,7 @@ export default function EmbeddedSite({ page }) {
     })();
 
     return () => {
+      booted.current = false; // allow a clean re-boot (React strict-mode remount) instead of leaving a torn-down page
       added.forEach((el) => el.parentNode && el.parentNode.removeChild(el));
     };
   }, [page]);
