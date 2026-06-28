@@ -103,7 +103,7 @@
       "#ex-bento #ex-signin:hover{background:rgba(251,246,234,.22)}" +
       "#ex-bento #ex-signin .si-av{width:20px;height:20px;border-radius:50%;background:linear-gradient(145deg,#e4be78,#c79a4b);display:flex;align-items:center;justify-content:center;color:#15241c;font-size:.7rem;font-weight:900}" +
       "@media(max-width:560px){#ex-about .ab-grid{grid-template-columns:1fr}}" +
-      "@media(max-width:760px){#ex-bento{padding:30px 16px}#ex-bento .exb-grid{grid-template-columns:repeat(2,1fr)}#ex-bento .exb-tile.big{grid-column:span 2;grid-row:span 1;min-height:120px}#ex-bento .exb-tile{min-height:96px;padding:14px 15px}#ex-bento .exb-tile h3{font-size:1rem}#ex-bento .exb-tile.big h3{font-size:1.3rem}#ex-bento .exb-tile p{font-size:.74rem}}" +
+      "@media(max-width:760px){#ex-bento{padding:0}#ex-bento .exb-grid{grid-template-columns:repeat(2,1fr)}#ex-bento .exb-tile.big{grid-column:span 2;grid-row:span 1;min-height:120px}#ex-bento .exb-tile{min-height:96px;padding:14px 15px}#ex-bento .exb-tile h3{font-size:1rem}#ex-bento .exb-tile.big h3{font-size:1.3rem}#ex-bento .exb-tile p{font-size:.74rem}}" +
       "@media(max-width:430px){#ex-bento .exb-grid{grid-template-columns:1fr}#ex-bento .exb-tile.big{grid-column:span 1}#ex-bento .exb-flip-inner{min-height:96px}}" +
       "@media(max-width:760px){#ex-bento .exb-grid{grid-template-columns:repeat(2,1fr)}#ex-bento .exb-tile.big{grid-column:span 2;grid-row:span 1}}" +
       "@media(prefers-reduced-motion:reduce){#ex-bento *{animation:none!important}}" +
@@ -156,6 +156,34 @@
       "#ex-bento .exb-quick a{color:rgba(251,246,234,.92);text-decoration:none;font-weight:600;border-bottom:1px solid rgba(228,190,120,.45);padding-bottom:1px;cursor:pointer;transition:.15s}" +
       "#ex-bento .exb-quick a:hover{color:#fff;border-bottom-color:#e4be78}" +
       "#ex-bento .exb-quick .sep{opacity:.35}" +
+      "@keyframes exb-birds{0%{transform:translate(0,0)}50%{transform:translate(26px,-12px)}100%{transform:translate(54px,4px)}}" +
+      "#ex-bento .exb-scene{position:absolute;inset:0;z-index:0;overflow:hidden}" +
+      "#ex-bento .exb-sky{position:absolute;inset:0;background:linear-gradient(172deg,#0e2417 0%,#163a2b 26%,#1d4a37 48%,#2c6258 68%,#6f9a78 100%)}" +
+      "#ex-bento .exb-sun{position:absolute;top:-9%;right:7%;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(255,238,190,.95),rgba(228,190,120,.5) 38%,transparent 70%);filter:blur(4px);animation:exb-sun 6s ease-in-out infinite}" +
+      "#ex-bento .exb-cloud{position:absolute;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,253,247,.5),rgba(255,253,247,.12) 60%,transparent 75%);filter:blur(8px);opacity:.7}" +
+      "#ex-bento .exb-cloud.c1{top:13%;left:0;width:240px;height:70px;animation:exb-drift 46s linear infinite}" +
+      "#ex-bento .exb-cloud.c2{top:23%;left:0;width:170px;height:54px;opacity:.5;animation:exb-drift 64s linear infinite;animation-delay:-20s}" +
+      "#ex-bento .exb-cloud.c3{top:7%;left:0;width:300px;height:84px;opacity:.4;animation:exb-drift 82s linear infinite;animation-delay:-50s}" +
+      "#ex-bento .exb-ridge{position:absolute;left:-6%;right:-6%;bottom:0;will-change:transform;transition:transform .25s ease-out}" +
+      "#ex-bento .exb-ridge.r3{height:54vh;background:linear-gradient(180deg,#2c5d52,#234c45);opacity:.55;clip-path:polygon(0 64%,18% 40%,34% 56%,52% 30%,68% 52%,84% 34%,100% 50%,100% 100%,0 100%)}" +
+      "#ex-bento .exb-ridge.r2{height:44vh;background:linear-gradient(180deg,#173f30,#123022);opacity:.85;clip-path:polygon(0 72%,14% 54%,30% 68%,46% 44%,62% 64%,80% 46%,100% 62%,100% 100%,0 100%)}" +
+      "#ex-bento .exb-ridge.r1{height:36vh;background:linear-gradient(180deg,#0f2c20,#0a2016);clip-path:polygon(0 78%,12% 62%,28% 76%,44% 56%,60% 74%,78% 58%,100% 72%,100% 100%,0 100%)}" +
+      "#ex-bento .exb-birds{position:absolute;top:14%;left:60%;color:rgba(251,246,234,.5);font-size:.95rem;letter-spacing:4px;animation:exb-birds 9s ease-in-out infinite}" +
+      "#ex-bento .exb-veil{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 6%,transparent 42%,rgba(8,18,12,.5) 100%),linear-gradient(100deg,rgba(7,18,12,.45) 0%,rgba(8,20,14,.16) 52%,transparent 80%)}" +
+      "#ex-bento .exb-grain{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")}" +
+      "#ex-bento .exb-story{position:relative;z-index:2;background:#fbf6ea;border-radius:34px 34px 0 0;margin-top:-32px;box-shadow:0 -26px 70px -34px rgba(8,18,12,.7)}" +
+      "#ex-bento .exb-story .exb-band:first-child{border-radius:34px 34px 0 0}" +
+      "#ex-bento .exb-btn{transition:transform .12s ease,box-shadow .12s ease,background .14s}" +
+      "#ex-bento .exb-btn.gold{box-shadow:0 4px 0 #9c7330,0 12px 22px -8px rgba(120,90,40,.5)}" +
+      "#ex-bento .exb-btn.gold:hover{transform:translateY(-1px);box-shadow:0 5px 0 #9c7330,0 16px 28px -8px rgba(120,90,40,.55)}" +
+      "#ex-bento .exb-btn.gold:active{transform:translateY(3px);box-shadow:0 1px 0 #9c7330}" +
+      "#ex-bento .exb-btn.ghost{background:rgba(251,246,234,.08);border:1px solid rgba(251,246,234,.42);color:#fbf6ea;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}" +
+      "#ex-bento .exb-btn.ghost:hover{background:rgba(251,246,234,.18);border-color:#e4be78;transform:translateY(-1px)}" +
+      "#ex-bento .exb-feat{transition:transform .3s cubic-bezier(.2,.8,.3,1),box-shadow .3s}" +
+      "#ex-bento .exb-feat::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 32%,rgba(228,190,120,.14) 48%,transparent 64%);transform:translateX(-130%);animation:exb-shim 6s ease-in-out infinite;pointer-events:none}" +
+      "#ex-bento .exb-feat:hover{transform:translateY(-7px);box-shadow:0 28px 60px rgba(8,16,12,.4)}" +
+      "#ex-bento .exb-pass{transition:transform .4s cubic-bezier(.2,.8,.3,1),box-shadow .4s}" +
+      "#ex-bento .exb-pass:hover{transform:translateY(-6px) rotate(-.6deg);box-shadow:0 40px 90px rgba(8,16,12,.5)}" +
       "@media(prefers-reduced-motion:reduce){#ex-bento .exb-rv{opacity:1!important;transform:none!important}}";
     document.head.appendChild(s);
   }
@@ -349,10 +377,10 @@
         '<div class="exb-kick exb-rv">The mission</div>' +
         '<p class="exb-lead exb-rv">Get more people <em>outside</em> &mdash; more often.</p>' +
         '<div class="exb-stats">' +
-          '<div class="exb-stat exb-rv"><b>63</b><span>National parks</span></div>' +
-          '<div class="exb-stat exb-rv"><b>400+</b><span>Protected places</span></div>' +
-          '<div class="exb-stat exb-rv"><b>100%</b><span>Live official data</span></div>' +
-          '<div class="exb-stat exb-rv"><b>1 app</b><span>For every adventure</span></div>' +
+          '<div class="exb-stat exb-rv"><b data-count="63">0</b><span>National parks</span></div>' +
+          '<div class="exb-stat exb-rv"><b data-count="400" data-suffix="+">0</b><span>Protected places</span></div>' +
+          '<div class="exb-stat exb-rv"><b data-count="100" data-suffix="%">0</b><span>Live official data</span></div>' +
+          '<div class="exb-stat exb-rv"><b data-count="1" data-suffix=" app">0</b><span>For every adventure</span></div>' +
         '</div>' +
       '</div></section>' +
       '<section class="exb-band greenb exb-cta"><div class="exb-w">' +
@@ -365,12 +393,19 @@
       '<button id="ex-signin"><span class="si-av">\u25CF</span>Sign in</button>' +
       '<section class="exb-hero" style="position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px 78px;overflow:hidden">' +
       // living scene
-      '<div style="position:absolute;inset:0;z-index:0;background:linear-gradient(172deg,#0e2417 0%,#163a2b 26%,#1d4a37 48%,#2c6258 70%,#6f9a78 100%)"></div>' +
-      '<div style="position:absolute;z-index:0;top:-6%;right:9%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,238,190,.9),rgba(228,190,120,.4) 40%,transparent 70%);filter:blur(4px);animation:exb-sun 6s ease-in-out infinite"></div>' +
-      '<div style="position:absolute;z-index:0;top:15%;width:230px;height:62px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,253,247,.4),transparent 72%);filter:blur(8px);animation:exb-drift 56s linear infinite"></div>' +
-      '<div style="position:absolute;z-index:0;left:-5%;right:-5%;bottom:0;height:40%;background:linear-gradient(180deg,#173f30,#123022);opacity:.85;clip-path:polygon(0 72%,14% 54%,30% 68%,46% 44%,62% 64%,80% 46%,100% 62%,100% 100%,0 100%)"></div>' +
-      '<div style="position:absolute;z-index:0;left:-5%;right:-5%;bottom:0;height:28%;background:linear-gradient(180deg,#0f2c20,#0a2016);clip-path:polygon(0 78%,12% 62%,28% 76%,44% 56%,60% 74%,78% 58%,100% 72%,100% 100%,0 100%)"></div>' +
-      '<div style="position:absolute;z-index:0;inset:0;background:radial-gradient(120% 80% at 50% 12%,transparent 44%,rgba(8,18,12,.5) 100%)"></div>' +
+      '<div class="exb-scene">' +
+        '<div class="exb-sky"></div>' +
+        '<div class="exb-sun"></div>' +
+        '<div class="exb-cloud c1"></div>' +
+        '<div class="exb-cloud c2"></div>' +
+        '<div class="exb-cloud c3"></div>' +
+        '<div class="exb-ridge r3" data-depth="9"></div>' +
+        '<div class="exb-ridge r2" data-depth="18"></div>' +
+        '<div class="exb-ridge r1" data-depth="30"></div>' +
+        '<div class="exb-birds">\u2303\u00a0\u00a0\u2303</div>' +
+        '<div class="exb-veil"></div>' +
+        '<div class="exb-grain"></div>' +
+      '</div>' +
       // content
       '<div style="position:relative;z-index:2;width:100%;max-width:1040px;margin:0 auto;text-align:left">' +
         '<div style="display:inline-flex;align-items:center;gap:9px;background:rgba(20,36,28,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 15px;font-family:' + SANS + ';font-size:.72rem;font-weight:800;letter-spacing:.08em;margin-bottom:22px;animation:exb-rise .6s ease both">' +
@@ -389,7 +424,7 @@
       '</div>' +
       '<button class="exb-scroll" data-scroll="1"><span>New here? Discover ParkBuddy</span><span class="ar">&darr;</span></button>' +
       '</section>' +
-      aboutHtml;
+      '<div class="exb-story">' + aboutHtml + '</div>';
 
     (document.body || document.documentElement).appendChild(ov);
     homeBtn();
@@ -457,6 +492,19 @@
       });
     });
 
+    // count-up animation for stats
+    function animateCount(b) {
+      if (b.__ran) return; b.__ran = true;
+      var target = +b.getAttribute('data-count'), suf = b.getAttribute('data-suffix') || '', t0 = null, dur = 1100;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        b.textContent = Math.round(target * e) + suf;
+        if (p < 1) requestAnimationFrame(step); else b.textContent = target + suf;
+      }
+      requestAnimationFrame(step);
+    }
+
     // reveal story sections as they scroll into view (scroll-based; robust without IO)
     (function () {
       var els = [].slice.call(ov.querySelectorAll('.exb-rv'));
@@ -465,12 +513,31 @@
         var vh = ov.clientHeight, ovTop = ov.getBoundingClientRect().top;
         els = els.filter(function (el) {
           var r = el.getBoundingClientRect();
-          if (r.top < ovTop + vh * 0.88 && r.bottom > ovTop + 40) { el.classList.add('in'); return false; }
+          if (r.top < ovTop + vh * 0.88 && r.bottom > ovTop + 40) {
+            el.classList.add('in');
+            [].slice.call(el.querySelectorAll('[data-count]')).forEach(animateCount);
+            return false;
+          }
           return true;
         });
       }
       ov.addEventListener('scroll', check, { passive: true });
       check();
+    })();
+
+    // gentle parallax on the hero mountains (desktop pointer only)
+    (function () {
+      var scene = ov.querySelector('.exb-scene'), heroEl = ov.querySelector('.exb-hero');
+      if (!scene || !heroEl || window.matchMedia('(max-width:760px)').matches) return;
+      var ridges = [].slice.call(scene.querySelectorAll('.exb-ridge[data-depth]')), raf = null;
+      heroEl.addEventListener('mousemove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          var dx = (e.clientX / window.innerWidth - .5), dy = (e.clientY / window.innerHeight - .5);
+          ridges.forEach(function (l) { var d = +l.getAttribute('data-depth'); l.style.transform = 'translate(' + (dx * d).toFixed(1) + 'px,' + (dy * d * .35).toFixed(1) + 'px)'; });
+          raf = null;
+        });
+      });
     })();
 
     // live conditions counter
