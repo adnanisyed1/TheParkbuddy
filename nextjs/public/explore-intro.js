@@ -230,7 +230,7 @@
 
     ov = document.createElement('div');
     ov.id = 'ex-bento';
-    ov.style.cssText = "position:fixed;inset:0;z-index:9000;overflow-y:auto;color:#fbf6ea;background:#0f2c20;" +
+    ov.style.cssText = "position:fixed;inset:0;z-index:9000;overflow-y:auto;overscroll-behavior:contain;color:#fbf6ea;background:#0f2c20;" +
       "display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;" +
       "transition:transform 1s cubic-bezier(.76,0,.24,1),opacity .55s ease .3s;will-change:transform";
 

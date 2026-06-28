@@ -21,9 +21,10 @@ header .count{color:rgba(243,237,224,.55);font-size:.75rem;letter-spacing:.08em}
 .banner .bfeat b{font-size:.78rem;display:block;margin-bottom:3px}
 .banner .bfeat p{font-size:.7rem;line-height:1.4;color:rgba(243,237,224,.6)}
 @media(max-width:860px){
-  .banner{grid-template-columns:1fr}
-  .banner.open{max-height:560px}
-  .banner>div{border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}
+  /* The feature banner is a desktop-hidden legacy block; on phones it stacked
+     353px tall and crushed the map into a sliver. The bento landing already
+     carries this intro, so hide it on mobile too and let the map fill. */
+  .banner{display:none!important}
 }
 /* slim top filter bar — single bezelless glass pill, one line */
 .topbar{position:absolute;top:14px;left:14px;z-index:500;display:inline-flex;align-items:center;gap:0;flex-wrap:nowrap;max-width:calc(100% - 28px);background:rgba(255,253,247,.8);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(255,255,255,.6);border-radius:999px;box-shadow:0 12px 30px -14px rgba(28,46,34,.5),0 1px 0 rgba(255,255,255,.6) inset;padding:0;overflow:hidden}
