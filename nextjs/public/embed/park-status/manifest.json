@@ -9,6 +9,7 @@
     "/parkbuddy-data.js",
     "/pb-verdict.js",
     "/embed/park-status/s0.js",
+    "/commerce.js",
     "/auth.js",
     "/transition.js"
   ]

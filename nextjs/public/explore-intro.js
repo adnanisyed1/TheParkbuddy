@@ -207,6 +207,7 @@
       "#ex-bento .exb-statopt .oi{font-size:1.5rem;flex:none}" +
       "#ex-bento .exb-statopt .ot b{display:block;font-family:" + SERIF + ";font-weight:700;font-size:1.02rem;color:#234851}" +
       "#ex-bento .exb-statopt .ot small{display:block;font-size:.74rem;color:#8c8473;margin-top:1px}" +
+      "#ex-bento .exb-flipfront .ff-flip{position:absolute;top:13px;right:13px;z-index:2;font-family:" + SANS + ";font-size:.6rem;font-weight:800;letter-spacing:.06em;color:#e4be78;background:rgba(228,190,120,.16);border:1px solid rgba(228,190,120,.45);padding:5px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}" +
       "@media(max-width:760px){#ex-bento .exb-flipcard{max-width:none;margin:0}}" +
       "@keyframes wf-radar{0%{transform:scale(.3);opacity:.8}100%{transform:scale(2.6);opacity:0}}" +
       "@keyframes wf-draw{to{stroke-dashoffset:0}}@keyframes wf-flow{to{stroke-dashoffset:-28}}@keyframes wf-conn{from{left:-8px}to{left:100%}}" +
@@ -240,7 +241,7 @@
       "#ex-bento .wf-acts{display:flex;flex-direction:column}#ex-bento .wf-act{min-height:68vh;display:flex;flex-direction:column;justify-content:center;padding:6px 0}" +
       "#ex-bento .wf-step{font-family:" + SANS + ";font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#a98a4e;display:flex;align-items:center;gap:10px}#ex-bento .wf-step .wf-n{width:32px;height:32px;border-radius:9px;border:1px solid rgba(199,154,75,.4);display:flex;align-items:center;justify-content:center;font-family:" + SERIF + ";font-weight:800;font-size:.95rem;color:#a98a4e;background:rgba(199,154,75,.08)}" +
       "#ex-bento .wf-act h3{font-family:" + SERIF + ";font-weight:800;font-size:clamp(1.5rem,3vw,2.4rem);line-height:1.06;letter-spacing:-.02em;margin-top:16px;color:#1d3941}#ex-bento .wf-act h3 em{font-style:italic;color:#2c5562}#ex-bento .wf-act p{color:#5b6258;font-size:clamp(.98rem,1.4vw,1.12rem);line-height:1.55;max-width:42ch;margin-top:12px}" +
-      "@media(max-width:760px){#ex-bento .exb-wf .wf-grid{grid-template-columns:1fr;gap:0}#ex-bento .wf-stagewrap{top:10vh;margin-bottom:18px}#ex-bento .wf-stage{aspect-ratio:4/3;max-width:420px;margin:0 auto}#ex-bento .wf-act{min-height:auto;padding:22px 0}}" +
+      "@media(max-width:760px){#ex-bento .exb-wf .wf-grid{grid-template-columns:1fr;gap:0}#ex-bento .wf-stagewrap{position:sticky;top:8vh;z-index:3;margin-bottom:6px}#ex-bento .wf-stage{aspect-ratio:auto;height:40vh;max-width:460px;margin:0 auto}#ex-bento .wf-acts{position:relative;z-index:2}#ex-bento .wf-act{min-height:60vh;justify-content:flex-start;padding:5vh 2px 0}#ex-bento .wf-act:last-child{min-height:46vh}}" +
       "@media(prefers-reduced-motion:reduce){#ex-bento .exb-rv{opacity:1!important;transform:none!important}}";
     document.head.appendChild(s);
   }
@@ -422,6 +423,7 @@
         '<div class="exb-rv"><div class="exb-flipcard" id="exb-statuscard"><div class="exb-flipcard-inner">' +
           '<button class="exb-flipface exb-flipfront" type="button">' +
             '<div class="shim"></div>' +
+            '<span class="ff-flip">&#8635; Flip me</span>' +
             '<div class="ff-top"><span class="ff-dot"></span>LIVE &middot; sample park</div>' +
             '<div class="ff-name">Zion</div>' +
             '<div class="ff-sub">Utah &middot; today</div>' +
@@ -512,7 +514,8 @@
           '<a data-hero="status">Park status</a><span class="sep">\u00b7</span>' +
           '<a data-hero="near">Parks near me</a><span class="sep">\u00b7</span>' +
           '<a data-hero="/build-trip">Build a trip</a><span class="sep">\u00b7</span>' +
-          '<a data-hero="passport">Trip passport</a></div>' +
+          '<a data-hero="passport">Trip passport</a><span class="sep">\u00b7</span>' +
+          '<a data-hero="/shop.html">Shop gear &amp; stays</a></div>' +
       '</div>' +
       '<button class="exb-scroll" data-scroll="1"><span>New here? Discover ParkBuddy</span><span class="ar">&darr;</span></button>' +
       '</section>' +
