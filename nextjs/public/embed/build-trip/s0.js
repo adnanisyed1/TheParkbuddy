@@ -73,12 +73,53 @@ function renderStops(){
     var dayLabel=nights>=1?('Day '+day+(nights>1?'–'+(day+nights-1):'')):('Day '+day+' · stop');
     day+=Math.max(nights,1);
     visN++;
+    var condHtml = s.pid ? '<div class="cond" id="cond-'+i+'" data-pid="'+s.pid+'" style="margin-top:9px;padding-top:9px;border-top:1px dashed #e7ddca"><span style="font-size:.74rem;color:#8c8473;font-weight:600">⛅ Checking live conditions…</span></div>' : '';
     html+='<div class="stop" draggable="true" data-i="'+i+'"><span class="grip">⠿</span><span class="num">'+visN+'</span><div class="si"><div class="day">'+dayLabel+'</div><b>'+stopName(s)+'</b><div class="sub">'+stopSub(s)+'</div>'+
       '<div class="srow"><label>🌙 <input class="mini nightsin" data-i="'+i+'" type="number" min="0" max="14" value="'+nights+'"> nights</label>'+
       '<input class="lodge lodgein" data-i="'+i+'" placeholder="🏨 Where you\'re staying" value="'+(s.lodge||'').replace(/"/g,'&quot;')+'"></div>'+
+      condHtml+
       '</div><button class="eye" data-i="'+i+'" title="Hide from map">👁</button><button class="rm" data-i="'+i+'" title="Remove">×</button></div>';
   });
   el.innerHTML=html;
+  // date-aware conditions: a near trip shows the forecast for THAT day; a far-future
+  // trip shows seasonal guidance (no misleading "today" verdict); no date = live now.
+  (function renderConds(){
+    var startD = trip.startDate ? new Date(trip.startDate+'T00:00') : null;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var acc=0;
+    function seasonOf(m){ return (m<=1||m===11)?'winter':(m<=4)?'spring':(m<=7)?'summer':'fall'; }
+    function sameDay(a,b){ return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+    function linkFor(pid){ return '<a href="/park-status?park='+pid+'" onclick="event.stopPropagation()" style="margin-left:auto;font-size:.76rem;font-weight:800;color:#1d4a37;text-decoration:none;white-space:nowrap">Live status →</a>'; }
+    function wrap(inner){ return '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">'+inner+'</div>'; }
+    function pill(R){ return '<span style="display:inline-flex;align-items:center;gap:7px;background:'+R.ring+';color:'+R.c+';font-size:.76rem;font-weight:800;padding:5px 11px;border-radius:999px"><span style="width:8px;height:8px;border-radius:50%;background:'+R.c+'"></span>'+R.word+'</span>'; }
+    trip.stops.forEach(function(s,i){
+      if(s.hidden) return;
+      var nights=s.nights!=null?s.nights:defNights(s);
+      var arrival = startD ? new Date(startD.getTime()+acc*86400000) : null;
+      acc += Math.max(nights,1);
+      if(!s.pid||!window.PBVerdict) return;
+      var p=byId[s.pid]; if(!p||typeof p.lat!=='number') return;
+      var box=document.getElementById('cond-'+i); if(!box||box.getAttribute('data-pid')!==String(s.pid)) return;
+      var daysOut = arrival ? Math.round((arrival-today)/86400000) : null;
+      // beyond the forecast window — honest seasonal guidance, no fake verdict
+      if(daysOut!==null && daysOut>7){
+        var mo=arrival.toLocaleDateString(undefined,{month:'long'});
+        box.innerHTML=wrap('<span style="display:inline-flex;align-items:center;gap:7px;background:rgba(176,125,58,.13);color:#9a6f2e;font-size:.76rem;font-weight:800;padding:5px 11px;border-radius:999px">📅 '+mo+' · typical '+seasonOf(arrival.getMonth())+'</span><span style="font-size:.74rem;color:#8c8473;font-weight:600">Go / no-go unlocks ~7 days before you go</span>'+linkFor(s.pid));
+        return;
+      }
+      PBVerdict.fetchPeriods(p.lat,p.lng,function(periods){
+        var box=document.getElementById('cond-'+i); if(!box||box.getAttribute('data-pid')!==String(s.pid)) return;
+        if(!periods){ box.innerHTML=wrap('<span style="font-size:.74rem;color:#8c8473;font-weight:600">Live conditions unavailable</span>'+linkFor(s.pid)); return; }
+        var per0=null, label;
+        if(arrival && daysOut>=0){ per0=periods.find(function(x){return x.isDaytime && sameDay(new Date(x.startTime),arrival);}); }
+        if(per0){ label=(daysOut===0?'Today':arrival.toLocaleDateString(undefined,{weekday:'short'}))+' forecast'; }
+        else { per0=periods[0]; label=arrival?'Forecast':'Live now'; }
+        var R=PBVerdict.evaluate([per0],0,0);
+        if(!R){ box.innerHTML=wrap('<span style="font-size:.74rem;color:#8c8473;font-weight:600">Live conditions unavailable</span>'+linkFor(s.pid)); return; }
+        box.innerHTML=wrap(pill(R)+'<span style="font-size:.76rem;color:#6a7160;font-weight:600">'+label+' · '+R.temp+'\u00b0'+(R.sky?' · '+R.sky:'')+'</span>'+linkFor(s.pid));
+      });
+    });
+  })();
   el.querySelectorAll('.rm').forEach(function(b){b.onclick=function(e){e.stopPropagation();trip.stops.splice(+b.getAttribute('data-i'),1);render(true);};});
   el.querySelectorAll('.eye').forEach(function(b){b.onclick=function(e){e.stopPropagation();var s=trip.stops[+b.getAttribute('data-i')];s.hidden=!s.hidden;render(true);};});
   el.querySelectorAll('.nightsin').forEach(function(inp){inp.onclick=function(e){e.stopPropagation();};inp.onchange=function(){trip.stops[+inp.getAttribute('data-i')].nights=Math.max(0,parseInt(inp.value)||0);renderStops();renderStats();renderCost();save();};});

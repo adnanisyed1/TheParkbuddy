@@ -5,9 +5,9 @@
     var r=document.getElementById('ridge'); if(!r)return;
     r.style.height='52%';
     r.innerHTML=
-      '<div style="position:absolute;left:-6%;right:-6%;bottom:0;height:70%;background:#b5562f;opacity:.92;clip-path:polygon(0 60%,18% 44%,34% 56%,52% 38%,70% 54%,86% 42%,100% 56%,100% 100%,0 100%)"></div>'+
-      '<div style="position:absolute;left:-6%;right:-6%;bottom:0;height:50%;background:#8a3d24;opacity:.9;clip-path:polygon(0 70%,22% 58%,44% 70%,64% 56%,82% 66%,100% 58%,100% 100%,0 100%)"></div>'+
-      '<div style="position:absolute;left:-6%;right:-6%;bottom:0;height:34%;background:#5e2c1c;clip-path:polygon(0 60%,30% 50%,60% 60%,100% 50%,100% 100%,0 100%)"></div>';
+      '<div style="position:absolute;left:-6%;right:-6%;bottom:0;height:70%;background:#2c5d52;opacity:.55;clip-path:polygon(0 60%,18% 44%,34% 56%,52% 38%,70% 54%,86% 42%,100% 56%,100% 100%,0 100%)"></div>'+
+      '<div style="position:absolute;left:-6%;right:-6%;bottom:0;height:50%;background:#173f30;opacity:.9;clip-path:polygon(0 70%,22% 58%,44% 70%,64% 56%,82% 66%,100% 58%,100% 100%,0 100%)"></div>'+
+      '<div style="position:absolute;left:-6%;right:-6%;bottom:0;height:34%;background:#0f2c20;clip-path:polygon(0 60%,30% 50%,60% 60%,100% 50%,100% 100%,0 100%)"></div>';
   }
 
   function reveal(){

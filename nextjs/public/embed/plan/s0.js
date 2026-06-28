@@ -62,12 +62,14 @@ function finish(){
     const regionLabel=(answers.region||'across the US').split(' — ')[0];
     const regionStr=regionLabel.startsWith('Open')?'across the U.S.':`in the ${regionLabel}`;
     result.className='';
+    const buildURL='/build-trip?trip='+encodeURIComponent(JSON.stringify({n:'My planned trip',s:picks.map(p=>({p:p.id}))}));
     result.innerHTML=`<div class="summary">Here's your personalized itinerary — <b>${picks.length} parks ${regionStr}</b>, tuned to your ${(answers.experience||'adventure').toLowerCase()} focus and ${(answers.duration||'trip')} timeline.\n\nTap any park to see its live weather, alerts, and official info.</div>`+
       `<div class="grid">`+picks.map((p,i)=>`<div class="pcard"><div class="n"><span class="num">${i+1}</span><h3>${p.name}</h3></div>`+
         `<div class="st">${p.state} · est. ${p.year}</div><p>${p.desc}</p>`+
         `<a href="/park-status?park=${p.id}">View live status →</a></div>`).join('')+`</div>`+
-      `<div class="actions"><button class="primary" onclick="window.print()">Save / print itinerary</button>`+
+      `<div class="actions"><a class="primary" href="${buildURL}">Build this trip →</a>`+
       `<a class="ghost" href="/explore">Explore on the map</a>`+
+      `<button class="ghost" onclick="window.print()">Save / print</button>`+
       `<button class="ghost" onclick="restart()">Start over</button></div>`+
       `<div class="booking"><h2>🧭 Book your trip <span class="soon">Coming soon</span></h2>`+
       `<p>Soon, your assistant will turn this itinerary into a booked trip — finding flights, a rental car, and places to stay near each park, all in one place.</p>`+

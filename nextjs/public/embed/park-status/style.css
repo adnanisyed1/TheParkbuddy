@@ -15,4 +15,10 @@ body{font-family:'Hanken Grotesk',system-ui,-apple-system,sans-serif;-webkit-fon
 @keyframes pb-pulse{0%{box-shadow:0 0 0 0 rgba(70,217,127,.55)}70%{box-shadow:0 0 0 9px rgba(70,217,127,0)}100%{box-shadow:0 0 0 0 rgba(70,217,127,0)}}
 @keyframes pb-fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes pb-bounce{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(6px);opacity:1}}
+@keyframes pb-vpop{from{transform:translateY(14px) scale(.99)}to{transform:none}}
+@keyframes pb-vsweep{0%,55%{transform:translateX(-130%)}80%,100%{transform:translateX(130%)}}
+@keyframes pb-vglow{0%,100%{transform:scale(1);opacity:.45}50%{transform:scale(1.16);opacity:.85}}
+@keyframes pb-vicon{from{transform:scale(.7)}to{transform:scale(1)}}
+@keyframes pb-vrise{from{transform:translateY(8px)}to{transform:none}}
+@keyframes pb-vchip{from{transform:translateY(8px)}to{transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}

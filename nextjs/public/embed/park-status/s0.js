@@ -496,8 +496,8 @@ function init(){
     }
 
     /* ---------- hero status + alerts ---------- */
-    var _nws=0,_nps=0;
-    function resetHero(){ el('heroTemp').textContent='—'; el('stState').textContent='Open'; el('stSub').textContent='Live status'; var bc=el('beacon'); bc.style.background='#46d97f'; bc.style.boxShadow='0 0 10px 1px rgba(70,217,127,.7)'; }
+    var _nws=0,_nps=0,_wxPer=null,_wxP=null;
+    function resetHero(){ el('heroTemp').textContent='—'; el('stState').textContent='Open'; el('stSub').textContent='Live status'; var bc=el('beacon'); bc.style.background='#46d97f'; bc.style.boxShadow='0 0 10px 1px rgba(70,217,127,.7)'; _wxPer=null; var vd=el('verdict'); if(vd){ vd.style.display='none'; vd.innerHTML=''; } }
     function paintHero(c){ el('heroTemp').textContent=c.temperature; el('stSub').textContent=c.shortForecast; }
     function paintHeroWeather(text){
       var box=el('heroWxBox'); if(!box||!window.WeatherFX)return;
@@ -511,6 +511,51 @@ function init(){
       var total=_nws+_nps;
       if(total>0){ ic.textContent='⚠'; t.textContent=total+' active alert'+(total>1?'s':'')+(_nps>0?' · closures':''); ic.style.background=_nps>0?'rgba(204,74,62,.4)':'rgba(214,124,72,.36)'; ic.style.color=_nps>0?'#ffc9bf':'#ffd6b0'; bar.style.borderColor='rgba(228,165,95,.5)'; }
       else { ic.textContent='✓'; t.textContent='All clear'; ic.style.background='rgba(63,122,52,.3)'; ic.style.color='#9fe3a6'; bar.style.borderColor='rgba(255,255,255,.16)'; }
+      try{renderVerdict();}catch(e){}
+    }
+
+    /* ---------- go / no-go verdict (the hero call) ---------- */
+    function _vnum(s){ if(typeof s==='number')return s; var m=String(s||'').match(/-?\d+/g); return m?Math.max.apply(null,m.map(Number)):null; }
+    function renderVerdict(){
+      var box=el('verdict'); if(!box) return;
+      var per=_wxPer; if(!per||!per.length){ box.style.display='none'; return; }
+      var T=(window.PBVerdict&&PBVerdict.evaluate(per,_nws,_nps));
+      if(!T){ box.style.display='none'; return; }
+      var chips=T.chips;
+      var chipHtml=chips.map(function(c,ci){
+        return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;padding:6px 12px;border-radius:999px;animation:pb-vchip .45s ease both;animation-delay:'+(0.25+ci*0.08).toFixed(2)+'s;'
+          +(c.pos?'background:rgba(47,125,79,.12);color:#2f7d4f;border:1px solid rgba(47,125,79,.22)':'background:rgba(176,90,45,.12);color:#b0552d;border:1px solid rgba(176,90,45,.22)')+'">'
+          +'<span style="width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7"></span>'+c.t+'</span>';
+      }).join('');
+      box.style.display='block';
+      var C=(2*Math.PI*38), Coff=(C*(1-(T.score||0)/100));
+      box.innerHTML=
+        '<div style="position:relative;overflow:hidden;border-radius:24px;background:#fffdf7;border:1px solid #ece2cd;box-shadow:0 26px 64px -30px rgba(0,0,0,.72),0 0 0 4px '+T.ring+';animation:pb-vpop .5s cubic-bezier(.2,.8,.3,1) both">'
+        +'<div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.4) 48%,transparent 62%);transform:translateX(-130%);animation:pb-vsweep 5s ease-in-out 0.7s infinite"></div>'
+        +'<div style="height:6px;background:'+T.grad+'"></div>'
+        +'<div style="position:relative;display:flex;gap:20px;align-items:center;padding:22px 24px 18px;flex-wrap:wrap">'
+          +'<div style="position:relative;flex:none;width:90px;height:90px">'
+            +'<div style="position:absolute;top:11px;left:11px;right:11px;bottom:11px;border-radius:50%;background:'+T.ring+';filter:blur(7px);animation:pb-vglow 2.6s ease-in-out infinite"></div>'
+            +'<div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;border-radius:50%;background:'+T.orb+';box-shadow:inset 0 2px 6px rgba(255,255,255,.6)"></div>'
+            +'<svg width="90" height="90" viewBox="0 0 90 90" style="position:absolute;top:0;left:0;transform:rotate(-90deg)">'
+              +'<circle cx="45" cy="45" r="38" fill="none" stroke="rgba(20,40,30,.08)" stroke-width="7"></circle>'
+              +'<circle class="pb-vring" cx="45" cy="45" r="38" fill="none" stroke="'+T.c+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+C.toFixed(1)+'" style="transition:stroke-dashoffset 1.1s cubic-bezier(.3,.8,.3,1)"></circle>'
+            +'</svg>'
+            +'<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;line-height:1;color:'+T.c+';font-weight:800;animation:pb-vicon .6s cubic-bezier(.2,1.5,.4,1) .15s both">'+T.ic+'</div>'
+          +'</div>'
+          +'<div style="flex:1;min-width:230px">'
+            +'<div style="display:flex;align-items:center;gap:8px;font-size:.64rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#b07d3a;margin-bottom:6px">'
+              +'<span style="width:7px;height:7px;border-radius:50%;background:#46d97f;box-shadow:0 0 0 3px rgba(70,217,127,.22);animation:pb-pulse 2s infinite"></span>'
+              +'Today\u2019s call \u00b7 should you go?'
+            +'</div>'
+            +'<div style="font-family:Spectral,Georgia,serif;font-weight:800;font-size:clamp(1.8rem,4.2vw,2.5rem);line-height:1.02;letter-spacing:-.01em;color:'+T.c+';animation:pb-vrise .55s cubic-bezier(.2,.8,.3,1) .08s both">'+T.word+'</div>'
+            +'<div style="font-size:.94rem;line-height:1.5;color:#5b5848;margin-top:7px;max-width:54ch">'+T.sub+'</div>'
+          +'</div>'
+        +'</div>'
+        +(chipHtml?'<div style="position:relative;display:flex;flex-wrap:wrap;gap:8px;padding:0 24px 22px">'+chipHtml+'</div>':'')
+        +'</div>';
+      var _ring=box.querySelector('.pb-vring');
+      if(_ring){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ _ring.style.strokeDashoffset=Coff.toFixed(1); }); }); }
     }
 
     /* ---------- golden hour + crowd ---------- */
@@ -571,6 +616,7 @@ function init(){
     }
     function shortDay(x){ try{ return new Date(x.startTime).toLocaleDateString([],{weekday:'short'}); }catch(e){ return (x.name||'').slice(0,3); } }
     function enhanceLive(p,per){
+      _wxPer=per; _wxP=p;
       var day=per.find(function(x){return x.isDaytime;})||per[0], nt=per.find(function(x){return !x.isDaytime;})||per[1]||per[0], sun=sunTimes(p.lat,p.lng,new Date()), now0=per[0];
       var ci=0;
       function accent(type){
@@ -642,6 +688,7 @@ function init(){
           +'</div>'
         +'</div>';
       el('glance').innerHTML=html;
+      try{renderVerdict();}catch(e){}
     }
 
     /* ---------- reviews ---------- */

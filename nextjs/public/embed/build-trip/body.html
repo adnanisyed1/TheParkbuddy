@@ -1,9 +1,24 @@
 
+<div id="scene">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="ridge r3"></div>
+  <div class="ridge r2"></div>
+  <div class="ridge r1"></div>
+  <div class="birds">︿  ︿</div>
+</div>
+<div id="veil"></div>
+<div id="grain"></div>
+
+<div class="shell">
+
 <header>
   <div class="hrow">
     <a href="/" class="brand" style="text-decoration:none;color:inherit">
       <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg></span>
-      <div><b>ParkBuddy</b><small>LIVE NATIONAL PARK STATUS &amp; TRIP PLANNING</small></div>
+      <div><b>ParkBuddy</b><small>live status · every U.S. national park</small></div>
     </a>
     <nav>
       <a href="/explore">Map</a>
@@ -14,15 +29,17 @@
 </header>
 
 <section class="hero">
-  <h1>Build your national-parks road trip</h1>
-  <p>Load a ready-made route or build your own. Add parks, forests, state parks, towns, hotels &amp; food, set your dates and rental car, and get a day-by-day plan that follows real roads — with real drive times and a cost estimate. Then share it or open it in your maps app.</p>
+  <div class="kicker"><span class="kdot"></span>Trip builder · live conditions baked in</div>
+  <h1>Build your <em>national-parks</em> road trip</h1>
+  <p>Load a ready-made route or build your own. Add parks, set your dates and rental car, and get a day-by-day plan that follows real roads — each stop carrying today's live go / no-go call. Then share it or open it in your maps app.</p>
 </section>
 
 <section class="rail">
-  <h2>◆ Ready-made itineraries — tap to load</h2>
+  <h2><span class="dot"></span>Ready-made itineraries — tap to load</h2>
   <div class="scroller" id="prebuilt"></div>
 </section>
 
+<div class="sheet">
 <section class="builder">
   <div class="mapcard"><div id="lmap"></div></div>
   <div class="col">
@@ -38,7 +55,7 @@
       </div>
 
       <div class="sec" style="border-top:none">
-        <div class="lbl">Trip basics</div>
+        <div class="lbl"><span class="stepn">1</span>Trip basics</div>
         <div class="basics">
           <div class="f"><label>Start date</label><input class="tin" type="date" id="startdate"></div>
           <div class="f"><label>Travelers</label><input class="tin" type="number" id="travelers" min="1" max="12" value="2"></div>
@@ -49,32 +66,26 @@
 
       <div class="sec">
         <div class="lbl" style="display:flex;align-items:center;justify-content:space-between">
-          <span>Your itinerary</span>
-          <span style="display:flex;align-items:center;gap:12px"><span id="daterange" style="color:var(--accent);font-weight:600;text-transform:none;letter-spacing:0"></span><label class="toggle"><input type="checkbox" id="showmap" checked> Show on map</label></span>
+          <span><span class="stepn">2</span>Your itinerary</span>
+          <span style="display:flex;align-items:center;gap:12px"><span id="daterange" class="daterange"></span><label class="toggle"><input type="checkbox" id="showmap" checked> Show on map</label></span>
         </div>
         <div id="stoplist"></div>
       </div>
 
       <div class="sec">
-        <div class="lbl">Add national parks</div>
+        <div class="lbl"><span class="stepn">3</span>Add national parks</div>
         <div class="rowf"><select id="parksel"><option value="">Choose a park…</option></select><button class="btn p addbtn" id="addpark" title="Add park">＋</button></div>
-      </div>
-
-      <div class="sec">
-        <div class="lbl">Search for an address or place — your home, a hotel, town, forest…</div>
+        <div class="lbl sublbl">Search for an address or place — your home, a hotel, town, forest…</div>
         <div class="searchbox rowf">
           <input class="tin" id="placeq" placeholder="Type a full address (incl. apt/unit), or a place name" autocomplete="off">
           <div class="results" id="results"></div>
         </div>
-      </div>
-
-      <div class="sec">
-        <div class="lbl">Or paste exact coordinates</div>
+        <div class="lbl sublbl">Or paste exact coordinates</div>
         <div class="rowf"><input class="tin" id="cname" placeholder="Place name" style="flex:1.2"><input class="tin" id="ccoord" placeholder="lat, lng" style="flex:1"><button class="btn p addbtn" id="addcustom" title="Add stop">＋</button></div>
       </div>
 
       <div class="sec cost">
-        <div class="lbl">Estimated cost <small style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)">— tap any amount to enter your real price</small></div>
+        <div class="lbl"><span class="stepn">4</span>Estimated cost <small style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)">— tap any amount to enter your real price</small></div>
         <div id="costlines"></div>
         <div class="total"><span class="lt">Estimated total</span><span class="amt" id="costtotal">$0</span></div>
         <div class="per" id="costper"></div>
@@ -86,12 +97,11 @@
       </div>
 
       <div class="sec">
-        <div class="lbl">Navigate this route</div>
+        <div class="lbl"><span class="stepn">5</span>Navigate &amp; share</div>
         <div class="navrow">
           <a class="btn p" id="gmaps" target="_blank" rel="noopener">Google Maps ↗</a>
           <a class="btn g" id="amaps" target="_blank" rel="noopener">Apple Maps ↗</a>
         </div>
-        <div class="lbl">Share &amp; make a group</div>
         <div class="sharerow">
           <a class="btn wa" id="sh-wa" target="_blank" rel="noopener">WhatsApp</a>
           <a class="btn sms" id="sh-sms">Text / iMessage</a>
@@ -103,7 +113,7 @@
       </div>
     </div>
 
-    <div class="panel"><div class="sec" style="border-top:none">
+    <div class="panel soonpanel"><div class="sec" style="border-top:none">
       <div class="soon">
         <span class="st">Coming soon</span>
         <h4>📎 Reservations &amp; live trip tracking</h4>
@@ -114,8 +124,10 @@
   </div>
 </section>
 
-<div class="mjump" id="mjump"><button data-t="map" class="on">🗺 Map</button><button data-t="plan">📋 Itinerary</button></div>
 <footer>Drive times &amp; costs are planning estimates · live weather &amp; official info on each park's status page · ParkBuddy</footer>
+</div>
+
+</div>
+
+<div class="mjump" id="mjump"><button data-t="map" class="on">🗺 Map</button><button data-t="plan">📋 Itinerary</button></div>
 <div id="toast"></div>
-
-

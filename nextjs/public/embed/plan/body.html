@@ -1,9 +1,21 @@
 
+<div id="scene">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="ridge r2"></div>
+  <div class="ridge r1"></div>
+</div>
+<div id="veil"></div>
+<div id="grain"></div>
+
+<div class="shell">
+
 <header>
   <div class="hrow">
     <a href="/" class="brand" style="text-decoration:none;color:inherit">
       <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l5 9h-3l5 9H5l5-9H7z"/><rect x="11" y="18" width="2" height="4"/></svg></span>
-      <div><b>ParkBuddy</b><small>LIVE NATIONAL PARK STATUS &amp; TRIP PLANNING</small></div>
+      <div><b>ParkBuddy</b><small>live status · every U.S. national park</small></div>
     </a>
     <nav>
       <a href="/explore">Map</a>
@@ -13,20 +25,23 @@
   </div>
 </header>
 
-<section class="hero"><div class="in">
-  <span class="pill"><span class="dot"></span> Planning assistant</span>
-  <h1>Plan your national-parks trip</h1>
-  <p>Answer a few questions and I'll build a personalized itinerary — then check live conditions on every park.</p>
-</div></section>
+<section class="hero">
+  <div class="kicker"><span class="dot"></span>Guided planning assistant</div>
+  <h1>Not sure where to go? <em>Let&rsquo;s find it.</em></h1>
+  <p>Answer a few quick questions and we&rsquo;ll match you to the right national parks — then check today&rsquo;s conditions and turn it into a real road trip.</p>
+</section>
 
-<main><div class="wrap">
-  <div class="prog"><span class="lbl" id="proglbl">Question 1 of 8</span><div class="bar"><div id="barfill"></div></div></div>
-  <div id="thread"></div>
-  <div id="optwrap" class="opts"></div>
-  <div id="result" class="hidden"></div>
-</div></main>
+<div class="sheet">
+  <div class="wrap">
+    <div class="prog"><span class="lbl" id="proglbl">Question 1 of 8</span><div class="bar"><div id="barfill"></div></div></div>
+    <div id="thread"></div>
+    <div id="optwrap" class="opts"></div>
+    <div id="result" class="hidden"></div>
+  </div>
+</div>
 
-<footer>This planner builds recommendations from your answers · live weather &amp; official info load on each park's status page · ParkBuddy</footer>
+<footer>This planner builds recommendations from your answers · live weather &amp; official info load on each park&rsquo;s status page · ParkBuddy</footer>
+</div>
 
 
 <!-- ParkPulse Planner Bubble (self-contained, drop on any page) -->
@@ -43,4 +58,3 @@
 </div>
 
 <!-- /ParkPulse Planner Bubble -->
-
