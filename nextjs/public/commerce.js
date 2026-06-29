@@ -59,7 +59,7 @@
   }
 
   function gearCard(g) {
-    return '<article class="pbc-card" data-eng="gear" data-partner="' + g.partner + '" data-sku="' + g.sku + '">' +
+    return '<article class="pbc-card" data-eng="gear" data-partner="' + g.partner + '" data-sku="' + g.sku + '" data-url="' + (g.url || '') + '">' +
       '<div class="pbc-ph"><span class="l">' + g.ph + '</span></div>' +
       '<div class="pbc-b"><div class="br">' + g.br + '</div><h4>' + g.nm + '</h4>' +
       '<div class="pbc-why">' + g.why + '</div>' +
@@ -67,7 +67,7 @@
       '<div class="pbc-via">' + g.via + '</div></div></article>';
   }
   function stayCard(s) {
-    return '<article class="pbc-card" data-eng="lodging" data-partner="' + s.partner + '" data-sku="' + s.sku + '">' +
+    return '<article class="pbc-card" data-eng="lodging" data-partner="' + s.partner + '" data-sku="' + s.sku + '" data-url="' + (s.url || '') + '">' +
       '<div class="pbc-ph"><span class="bg' + (s.inpark ? ' in' : '') + '">' + s.tag + '</span><span class="l">' + s.ph + '</span></div>' +
       '<div class="pbc-b"><div class="tr"><h4>' + s.nm + '</h4></div><div class="pbc-meta">' + s.meta + '</div>' +
       '<div class="pbc-why">' + s.why + '</div>' +
@@ -111,9 +111,10 @@
   }
   function wire(root) {
     [].slice.call(root.querySelectorAll('.pbc-card')).forEach(function (c) {
-      var eng = c.getAttribute('data-eng'), p = c.getAttribute('data-partner'), s = c.getAttribute('data-sku');
+      var eng = c.getAttribute('data-eng'), p = c.getAttribute('data-partner'), s = c.getAttribute('data-sku'), url = c.getAttribute('data-url');
       [].slice.call(c.querySelectorAll('.pbc-buy')).forEach(function (b) {
-        b.addEventListener('click', function (e) { e.preventDefault(); track(eng, p, s); });
+        if (url) { b.setAttribute('href', url); b.setAttribute('target', '_blank'); b.setAttribute('rel', 'noopener sponsored'); }
+        b.addEventListener('click', function (e) { track(eng, p, s); if (!url) { e.preventDefault(); } });
       });
     });
   }
@@ -161,9 +162,10 @@
   }
 
   function boot() { return inject() || injectBuildTrip(); }
-  if (!boot()) {
-    document.addEventListener('DOMContentLoaded', boot);
-    window.addEventListener('load', boot);
-    setTimeout(boot, 1200);
-  }
+  (function start() {
+    var done = false; function go() { if (done) return; done = true; boot(); }
+    function apply(d) { if (d) { if (d.gear && d.gear.length) GEAR = d.gear; if (d.stays && d.stays.length) STAYS = d.stays; } go(); }
+    try { fetch('/products.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(apply, function () { go(); }); } catch (e) { go(); }
+    setTimeout(go, 2000);
+  })();
 })();

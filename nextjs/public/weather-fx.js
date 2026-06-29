@@ -7,8 +7,8 @@ var CSS = `
 .wfx{position:relative;overflow:hidden;border-radius:13px;isolation:isolate;color:#fff;box-shadow:0 10px 22px -12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.25);perspective:600px}
 .wfx-lg{min-height:132px}.wfx-md{min-height:108px}.wfx-sm{min-height:96px;border-radius:11px}
 .wfx-sky{position:absolute;inset:0;z-index:0}
-.wfx-grad{position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(0,0,0,.04) 0%,rgba(0,0,0,0) 40%,rgba(0,0,0,.32) 100%);pointer-events:none}
-.wfx-info{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-height:inherit;padding:12px 14px;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+.wfx-grad{position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.46) 76%,rgba(0,0,0,.64) 100%);pointer-events:none}
+.wfx-info{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-height:inherit;padding:12px 14px;text-shadow:0 1px 5px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.4)}
 .wfx-sm .wfx-info{padding:8px 9px;align-items:center;text-align:center}
 .wfx-top{font-size:.66rem;font-weight:700;letter-spacing:.04em;opacity:.92;margin-bottom:auto}
 .wfx-sm .wfx-top{margin-bottom:4px;font-size:.6rem}
