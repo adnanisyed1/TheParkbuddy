@@ -446,7 +446,8 @@ function init(){
     }
     function setBox(id,html){var e=el(id); if(e)e.innerHTML=html;}
     function loadNPS(p){
-      setBox('nps','<span style="'+S.load+'">Loading official NPS info…</span>');
+      var _m=(window.PB_NPS_MAP&&window.PB_NPS_MAP(p.name))||'';
+      setBox('nps',(_m?'<div style="'+S.row+'"><a style="'+S.btn+'" href="'+_m+'" target="_blank" rel="noopener">\uD83D\uDDFA Official park map \u2197</a></div>':'')+'<span style="'+S.load+'">Loading official NPS info…</span>');
       fetchNPS(p.name).then(function(d){
         var park=d.park||{};
         var _imgs=park.images||[];
@@ -491,7 +492,9 @@ function init(){
         setBox('places', pl.length?pl.map(function(x){return '<div style="'+S.td+'">'+(x.image?'<img style="'+S.tdimg+'" src="'+x.image+'" alt="">':'')+'<div><h4 style="'+S.h4+'">'+(x.title||'')+'</h4>'+(x.description?'<p style="'+S.p+'">'+x.description+'</p>':'')+(x.url?' <a href="'+x.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No points of interest listed.</span>');
       }).catch(function(){
         var msg='<span style="'+S.load+'">Official NPS content appears once the site is published with an NPS key configured.</span>';
-        ['nps','npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){setBox(id,msg);});
+        ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){setBox(id,msg);});
+        var _m=(window.PB_NPS_MAP&&window.PB_NPS_MAP(p.name))||'';
+        setBox('nps',(_m?'<div style="'+S.row+'"><a style="'+S.btn+'" href="'+_m+'" target="_blank" rel="noopener">\uD83D\uDDFA Official park map \u2197</a></div>':'')+msg);
       });
     }
 
