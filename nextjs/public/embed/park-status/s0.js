@@ -453,16 +453,7 @@ function init(){
         var _hp=el('heroPhoto'), _ph=el('heroPhotoPh');
         if(_hp && _imgs.length){ _hp.onload=function(){ _hp.style.display='block'; if(_ph)_ph.style.display='none'; }; _hp.src=_imgs[0].url; _hp.alt=_imgs[0].alt||p.name; }
         if(park.description){ var al=el('aboutlive'); if(al)al.textContent=park.description; }
-        if(park.url){ var nl=el('npslink'); if(nl)nl.href=park.url;
-          // A: official park map — derive the NPS maps page from the park url, add a link beside the NPS link
-          try{
-            var base=park.url.replace(/index\.htm.*$/i,'').replace(/\/+$/,'');
-            var mapUrl=base+'/planyourvisit/maps.htm';
-            var nl2=el('npsmap');
-            if(!nl2 && nl){ nl2=document.createElement('a'); nl2.id='npsmap'; nl2.target='_blank'; nl2.rel='noopener'; nl2.textContent='\uD83D\uDDFA Official park map'; if(nl.getAttribute('style'))nl2.setAttribute('style',nl.getAttribute('style')); nl2.className=nl.className; nl.parentNode.insertBefore(nl2, nl.nextSibling); }
-            if(nl2) nl2.href=mapUrl;
-          }catch(e){}
-        }
+        if(park.url){ var nl=el('npslink'); if(nl)nl.href=park.url; }
         _nps=(d.alerts&&d.alerts.length)||0; updateHeroAlerts();
         var ab=el('npsalerts');
         if(ab){ if(d.alerts&&d.alerts.length){ ab.innerHTML=d.alerts.slice(0,8).map(function(a){var sev=(a.category==='Park Closure'||a.category==='Danger')?'Severe':(a.category==='Caution'?'Moderate':'Minor');return alertBlock(sev,(a.category||'Notice')+': '+(a.title||''),a.description||'','');}).join(''); } else { ab.innerHTML='<div style="'+S.clear+'">✓ No official NPS alerts or closures posted.</div>'; } }
@@ -472,7 +463,7 @@ function init(){
           if(fees.length) html+='<div><b style="color:#1d4a37">Entrance:</b> '+fees.map(function(f){return ((f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free')+(f.title?(' — '+f.title):'');}).join(' · ')+'</div>';
           else html+='<div>Entrance fee information isn\u2019t posted for this park.</div>';
           if(hours) html+='<div style="margin-top:5px"><b style="color:#1d4a37">Hours:</b> '+hours+'</div>';
-          if(park.url) html+='<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Official park page ↗</a></div>';
+          if(park.url){ var _mbase=park.url.replace(/index\.htm.*$/i,'').replace(/\/+$/,''); html+='<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Official park page ↗</a><a style="'+S.btn+'" href="'+_mbase+'/planyourvisit/maps.htm" target="_blank" rel="noopener">🗺 Official park map ↗</a></div>'; }
           html+='</div>'; box.innerHTML=html;
         }
         var td=d.thingsToDo||[];
