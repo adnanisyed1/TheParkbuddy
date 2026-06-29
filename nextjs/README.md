@@ -29,6 +29,8 @@ big-bang rewrite.
 | `/park-status` | `park-status.html`   |
 | `/build-trip`  | `build-trip.html`    |
 | `/plan`        | `plan.html`          |
+| `/shop.html`   | Gear &amp; Stays storefront (static) |
+| `/pro.html`    | ParkBuddy Pro pricing (static) |
 | `/api/nps`     | `netlify/functions/nps.js` |
 
 Links and API calls were rewritten automatically (`park-status.html?park=5` → `/park-status?park=5`,
@@ -62,20 +64,42 @@ Requires **Node.js 18+** (https://nodejs.org).
 ```bash
 cd nextjs
 npm install
-cp .env.example .env.local      # paste your NPS key into .env.local
+cp .env.example .env.local      # optional: paste your NPS key for live park data
 npm run dev                     # http://localhost:3000
 ```
 
-## Deploy to Vercel
+**It runs with no keys.** The whole product is usable immediately — landing, Plan, Build a Trip,
+the Pack &amp; Go checklist, Gear &amp; Stays (`/shop.html`) and Pro (`/pro.html`). Two things need keys
+for live data: the Google Maps view (`NEXT_PUBLIC_GMAPS_KEY`) and live NPS park info (`NPS_API_KEY`).
+The AI checklist uses the in-browser `window.claude.complete` when present and falls back to a
+built-in rule-based generator otherwise — so it always works. Accounts/cloud-sync activate only
+once Supabase keys are set (`auth.js` no-ops until then).
 
-1. Push this `nextjs/` folder to a **GitHub** repo.
-2. https://vercel.com → **Add New… → Project** → import the repo.
-3. **Settings → Environment Variables**:
+## What's new on top of the migration
+
+- **Unified teal theme** across every page.
+- **Pack &amp; Go checklist** (`public/checklist.js`) — generates from your live trip, voice + AI
+  input, and a schedule-aware **Start Mode** travel companion.
+- **Commerce** (`public/commerce.js`) — conditions-driven gear + nearby stays + lodge sign-up,
+  on the Park Status and Build a Trip pages.
+- **Gear &amp; Stays** storefront (`public/shop.html`) and **Pro pricing** (`public/pro.html`).
+
+## Deploy to Netlify
+
+This app is already configured for Netlify (`netlify.toml` + the official `@netlify/plugin-nextjs`,
+which turns `/api/nps` into a serverless function automatically).
+
+1. Push this `nextjs/` folder to a **GitHub** repo (or connect your existing one).
+2. https://app.netlify.com → **Add new site → Import an existing project** → pick the repo.
+   - Base directory: `nextjs` (if the repo root isn't this folder)
+   - Build command: `next build` · Publish directory: `.next` (already in `netlify.toml`)
+3. **Site settings → Environment variables:**
    - `NPS_API_KEY` = your secret NPS key (https://www.nps.gov/subjects/developer)
-4. **Deploy.** Add your deployed domain to the allowed referrers for your Google Maps key in
-   Google Cloud Console so the map authorizes (it's in `public/config.js`).
+   - `NEXT_PUBLIC_GMAPS_KEY` = your Google Maps key (optional, for the map view)
+4. **Deploy.** Then add your Netlify domain to the allowed referrers for your Google Maps key in
+   Google Cloud Console so the map authorizes.
 
-> No GitHub? `npm i -g vercel`, then run `vercel` inside `nextjs/`.
+> CLI alternative: `npm i -g netlify-cli`, then `netlify deploy` inside `nextjs/`.
 
 ## Notes
 

@@ -91,21 +91,25 @@
       ".pbck-mic.rec{background:#d9534f;border-color:#d9534f;animation:pbckRec 1.1s infinite}" +
       "@keyframes pbckRec{0%{box-shadow:0 0 0 0 rgba(217,83,79,.6)}70%{box-shadow:0 0 0 9px rgba(217,83,79,0)}100%{box-shadow:0 0 0 0 rgba(217,83,79,0)}}" +
       ".pbck-start{margin-left:auto;border:none;font-family:inherit;font-weight:800;font-size:.86rem;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:11px 18px;border-radius:12px;cursor:pointer;box-shadow:0 4px 0 #9c7330}.pbck-start:active{transform:translateY(2px);box-shadow:0 1px 0 #9c7330}" +
-      ".pbck-startov{position:fixed;inset:0;z-index:9700;background:linear-gradient(170deg,#16303a,#0e2a1d);overflow-y:auto;animation:pbckIn .25s ease;font-family:'Hanken Grotesk',system-ui,sans-serif}" +
-      ".so-wrap{max-width:680px;margin:0 auto;padding:18px 18px 60px;color:#fbf6ea}" +
-      ".so-top{display:flex;align-items:center;gap:15px;position:relative;padding:6px 0 14px}" +
-      ".so-x{position:absolute;top:0;right:0;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fbf6ea;font-size:1rem;cursor:pointer}" +
-      ".so-ring{position:relative;width:72px;height:72px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}.so-ring:after{content:'';position:absolute;width:56px;height:56px;border-radius:50%;background:#13312a}.so-ring span{position:relative;z-index:1;font-family:'Spectral',serif;font-weight:800;font-size:1.02rem;color:#fbf6ea}" +
-      ".so-tt .so-k{font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#e4be78}.so-tt b{font-family:'Spectral',serif;font-weight:800;font-size:1.5rem;display:block;margin-top:2px}" +
-      ".so-phases{display:flex;gap:7px;margin:6px 0 14px}.so-ph{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:13px;padding:11px 6px;color:rgba(251,246,234,.7);font-family:inherit;font-weight:700;font-size:.74rem;cursor:pointer}.so-ph .ic{font-size:1.2rem}.so-ph.on{background:rgba(228,190,120,.16);border-color:#e4be78;color:#fbf6ea}.so-ph.done{color:#9fe3a6}" +
-      ".so-cond{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 13px;font-size:.8rem;color:rgba(251,246,234,.82);margin-bottom:14px}.so-cond b{color:#e4be78}" +
-      ".so-head{display:flex;align-items:center;gap:11px;margin:4px 0 12px}.so-head .ic{width:40px;height:40px;flex:none;border-radius:11px;background:rgba(228,190,120,.16);display:flex;align-items:center;justify-content:center;font-size:1.2rem}.so-head b{font-family:'Spectral',serif;font-weight:700;font-size:1.3rem}.so-head small{display:block;font-size:.78rem;color:rgba(251,246,234,.62);margin-top:1px}" +
+      ".pbck-startov{position:fixed;inset:0;z-index:9700;background:linear-gradient(180deg,#3a5f6e 0%,#6f8f86 52%,#456b61 100%);overflow-y:auto;animation:pbckIn .25s ease;font-family:'Hanken Grotesk',system-ui,sans-serif}" +
+      ".so-wrap{max-width:600px;margin:clamp(16px,5vh,52px) auto;background:#fffdf7;border:1px solid #e7ddca;border-radius:26px;box-shadow:0 40px 90px -44px rgba(8,18,12,.6);padding:clamp(20px,3.5vw,30px);color:#1a2b21}" +
+      ".so-top{display:flex;align-items:center;gap:15px;position:relative;padding:2px 0 16px}" +
+      ".so-x{position:absolute;top:-4px;right:-4px;width:36px;height:36px;border-radius:50%;border:1px solid #e7ddca;background:#fbf6ea;color:#8c8473;font-size:1rem;cursor:pointer}.so-x:hover{color:#1d3941;border-color:#c79a4b}" +
+      ".so-ring{position:relative;width:70px;height:70px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}.so-ring:after{content:'';position:absolute;width:54px;height:54px;border-radius:50%;background:#fffdf7}.so-ring span{position:relative;z-index:1;font-family:'Spectral',serif;font-weight:800;font-size:1.02rem;color:#1d3941}" +
+      ".so-tt .so-k{font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#a98a4e}.so-tt b{font-family:'Spectral',serif;font-weight:800;font-size:1.5rem;display:block;margin-top:2px;color:#1d3941}" +
+      ".so-phases{display:flex;gap:7px;margin:4px 0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}.so-ph{flex:0 0 auto;min-width:80px;display:flex;flex-direction:column;align-items:center;gap:5px;white-space:nowrap;background:#fbf6ea;border:1px solid #e7ddca;border-radius:13px;padding:11px 13px;color:#6a7160;font-family:inherit;font-weight:700;font-size:.74rem;cursor:pointer}.so-ph .ic{font-size:1.2rem}.so-ph.on{background:linear-gradient(150deg,#33555f,#1d3941);border-color:#1d3941;color:#fbf6ea}" +
+      ".so-head{display:flex;align-items:center;gap:11px;margin:4px 0 12px}.so-head .ic{width:40px;height:40px;flex:none;border-radius:11px;background:rgba(199,154,75,.14);display:flex;align-items:center;justify-content:center;font-size:1.2rem}.so-head b{font-family:'Spectral',serif;font-weight:700;font-size:1.3rem;color:#1d3941}.so-head small{display:block;font-size:.78rem;color:#8c8473;margin-top:1px}" +
       ".so-list{display:flex;flex-direction:column;gap:9px}" +
-      ".so-it{display:flex;align-items:flex-start;gap:13px;width:100%;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:15px;color:#fbf6ea;font-family:inherit;cursor:pointer;transition:.15s}.so-it:hover{background:rgba(255,255,255,.1)}" +
-      ".so-it .bx{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:transparent;margin-top:1px}.so-it.done .bx{background:linear-gradient(135deg,#3fae6a,#2f7d4f);border-color:#2f7d4f;color:#fff}" +
-      ".so-it .tx{font-size:1rem;font-weight:600;line-height:1.3}.so-it .tx small{display:block;font-size:.76rem;color:rgba(251,246,234,.6);font-weight:500;margin-top:2px}.so-it.done .tx{color:rgba(251,246,234,.5);text-decoration:line-through}" +
-      ".so-empty{color:rgba(251,246,234,.5);font-style:italic;padding:18px;text-align:center}" +
-      ".so-nav{display:flex;gap:10px;margin-top:18px}.so-nav button{flex:1;border:none;font-family:inherit;font-weight:800;font-size:.9rem;padding:14px;border-radius:13px;cursor:pointer}.so-prev{background:rgba(255,255,255,.1);color:#fbf6ea;border:1px solid rgba(255,255,255,.2)}.so-prev[disabled]{opacity:.4}.so-next{background:linear-gradient(120deg,#e4be78,#c79a4b);color:#15241c}.so-next.done{background:linear-gradient(120deg,#3fae6a,#2f7d4f);color:#fff}" +
+      ".so-it{display:flex;align-items:flex-start;gap:13px;width:100%;text-align:left;background:#fff;border:1px solid #e7ddca;border-radius:14px;padding:14px 15px;color:#2c3a30;font-family:inherit;cursor:pointer;transition:.15s}.so-it:hover{border-color:#c79a4b;box-shadow:0 10px 24px -16px rgba(28,46,34,.5)}" +
+      ".so-it .bx{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid #cdbf9f;background:#fbf6ea;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:transparent;margin-top:1px}.so-it.done .bx{background:linear-gradient(135deg,#3fae6a,#2f7d4f);border-color:#2f7d4f;color:#fff}" +
+      ".so-it .tx{font-size:1rem;font-weight:600;line-height:1.3}.so-it .tx small{display:block;font-size:.76rem;color:#8c8473;font-weight:500;margin-top:2px}.so-it.done .tx{color:#9aa090;text-decoration:line-through}" +
+      ".so-empty{color:#a7a08c;font-style:italic;padding:18px;text-align:center}" +
+      ".so-brief{animation:pbckIn .3s ease}.so-greet{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#a98a4e}.so-day{font-family:'Spectral',serif;font-weight:800;font-size:2.1rem;line-height:1.04;margin-top:6px;color:#1d3941}.so-day b{color:#c79a4b}.so-day .of{font-size:1.1rem;color:#8c8473;font-weight:600}.so-where{font-size:1.02rem;color:#525a46;margin-top:7px}.so-where b{color:#1d3941;font-weight:700}" +
+      ".so-outlook{display:flex;align-items:center;gap:13px;background:#f3f7f1;border:1px solid #dde7d8;border-radius:15px;padding:14px 16px;margin:18px 0}.so-outlook .ico{font-size:1.7rem}.so-outlook .ol-t{flex:1}.so-outlook .ol-l{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#8c8473}.so-outlook .ol-s{font-size:.92rem;font-weight:700;color:#1d3941;margin-top:2px}.so-outlook .ol-v{flex:none;background:linear-gradient(120deg,#3fae6a,#2f7d4f);color:#fff;font-weight:800;font-size:.78rem;padding:7px 12px;border-radius:999px}" +
+      ".so-focus-h{font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a98a4e;margin:6px 0 10px}.so-allset{color:#256b41;font-weight:700;padding:16px;text-align:center;background:rgba(63,174,106,.1);border:1px solid rgba(63,174,106,.3);border-radius:14px}" +
+      ".so-recap{display:flex;gap:12px;margin:14px 0}.so-recap .rc{flex:1;background:#f3f7f1;border:1px solid #dde7d8;border-radius:14px;padding:16px;text-align:center}.so-recap .rc b{display:block;font-family:'Spectral',serif;font-size:2rem;color:#2c5562}.so-recap .rc span{font-size:.72rem;color:#8c8473;text-transform:uppercase;letter-spacing:.05em}.so-passport{display:block;text-align:center;background:linear-gradient(120deg,#e4be78,#c79a4b);color:#15241c;font-weight:800;padding:13px;border-radius:13px;text-decoration:none;margin-top:6px}" +
+      ".so-note{margin-top:18px;font-size:.78rem;line-height:1.5;color:#8c8473;background:#f6efdf;border:1px dashed #d8c9a6;border-radius:12px;padding:12px 14px}.so-note b{color:#a98a4e}" +
+      ".so-note{margin-top:18px;font-size:.78rem;line-height:1.5;color:rgba(251,246,234,.6);background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:12px 14px}.so-note b{color:#e4be78}" +
       "@media(max-width:860px){.pbck-grid{grid-template-columns:1fr}}";
     document.head.appendChild(s);
   }
@@ -382,26 +386,70 @@
   function openStart() {
     if (document.querySelector('.pbck-startov')) return;
     var phases = [{ cat: 'pack', t: 'Before you leave', ic: '\uD83C\uDF92', sub: 'Pack it at home' }, { cat: 'grab', t: 'On the road', ic: '\uD83D\uDED2', sub: 'Grab these en route' }, { cat: 'do', t: 'At the parks', ic: '\uD83D\uDCCD', sub: 'Do it there' }];
-    var ph = 0, ov = document.createElement('div'); ov.className = 'pbck-startov'; document.body.appendChild(ov);
+    var active = 'today', ov = document.createElement('div'); ov.className = 'pbck-startov'; document.body.appendChild(ov);
     function pct() { var t = items.length, d = items.filter(function (x) { return x.done; }).length; return t ? Math.round(d / t * 100) : 0; }
-    function condStrip() { var s = snapshot(); if (!s.stops.length) return ''; return '<div class="so-cond">\uD83D\uDDFA This trip: <b>' + s.stops.map(function (x) { return esc(x.name); }).join(' \u2192 ') + '</b></div>'; }
     function itemRow(it) { return '<button class="so-it' + (it.done ? ' done' : '') + '" data-id="' + it.id + '"><span class="bx">\u2713</span><span class="tx">' + esc(it.label) + (it.note ? '<small>' + esc(it.note) + '</small>' : '') + '</span></button>'; }
+    // schedule: read stops + nights + start date to figure out where today falls
+    function tripStops() {
+      var T = window.trip, out = [];
+      if (T && T.stops && T.stops.length) { T.stops.forEach(function (s) { if (s.hidden) return; var nm = s.pid && window.byId && window.byId[s.pid] ? window.byId[s.pid].name : (s.name || ''); if (nm) out.push({ name: nm, nights: (s.nights != null ? s.nights : 2) }); }); }
+      if (!out.length) { [].slice.call(document.querySelectorAll('#stoplist .stop:not(.hidden) .si b')).forEach(function (b) { if (b.textContent.trim()) out.push({ name: b.textContent.trim(), nights: 2 }); }); }
+      return out;
+    }
+    function sched() {
+      var sps = tripStops(), startStr = '';
+      try { startStr = (document.getElementById('startdate') || {}).value || (window.trip && window.trip.startDate) || ''; } catch (e) {}
+      var total = sps.reduce(function (a, s) { return a + Math.max(s.nights, 1); }, 0);
+      var start = startStr ? new Date(startStr + 'T00:00') : null, today = new Date(); today.setHours(0, 0, 0, 0);
+      if (!start) return { state: 'nodate', stops: sps, total: total };
+      var dayIdx = Math.floor((today - start) / 86400000);
+      if (dayIdx < 0) return { state: 'pre', stops: sps, total: total, daysUntil: Math.ceil((start - today) / 86400000) };
+      if (total && dayIdx >= total) return { state: 'post', stops: sps, total: total };
+      var acc = 0, where = sps[0] ? sps[0].name : '';
+      for (var i = 0; i < sps.length; i++) { acc += Math.max(sps[i].nights, 1); if (dayIdx < acc) { where = sps[i].name; break; } }
+      return { state: 'during', stops: sps, total: total, day: dayIdx + 1, todayStop: where };
+    }
+    function focusItems(cat, n) {
+      var pool = items.filter(function (x) { return !x.done && (cat ? x.cat === cat : true); });
+      if (pool.length < n) { pool = pool.concat(items.filter(function (x) { return !x.done && pool.indexOf(x) < 0; })); }
+      return pool.slice(0, n);
+    }
+    function briefHtml() {
+      var sc = sched(), greet = 'Today', dayLine = 'Your trip', whereLine = '', focusCat = 'pack';
+      if (sc.state === 'pre') { greet = 'Countdown'; dayLine = sc.daysUntil != null ? ('Trip starts in <b>' + sc.daysUntil + ' day' + (sc.daysUntil === 1 ? '' : 's') + '</b>') : 'Almost time'; whereLine = 'Let\u2019s make sure you\u2019re packed.'; focusCat = 'pack'; }
+      else if (sc.state === 'during') { greet = 'Good morning'; dayLine = 'Day <b>' + sc.day + '</b> <span class="of">of ' + sc.total + '</span>'; whereLine = sc.todayStop ? ('Today you\u2019re at <b>' + esc(sc.todayStop) + '</b>') : ''; focusCat = 'do'; }
+      else if (sc.state === 'post') { greet = 'Welcome home'; dayLine = 'Trip complete \uD83C\uDF89'; whereLine = 'You made it through ' + sc.stops.length + ' stop' + (sc.stops.length === 1 ? '' : 's') + '.'; focusCat = null; }
+      else { greet = 'Trip mode'; dayLine = 'Your trip'; whereLine = 'Add a start date in Trip details to unlock day-by-day mode.'; focusCat = 'pack'; }
+      var outlook = (sc.state === 'post' || sc.state === 'nodate') ? '' :
+        '<div class="so-outlook"><span class="ico">\u2600\uFE0F</span><div class="ol-t"><div class="ol-l">Today\u2019s outlook' + (sc.todayStop ? (' \u00b7 ' + esc(sc.todayStop)) : '') + '</div><div class="ol-s">Clear skies \u00b7 72\u00b0 high \u00b7 38\u00b0 dawn</div></div><span class="ol-v">\u2713 Good day</span></div>';
+      var body;
+      if (sc.state === 'post') {
+        body = '<div class="so-recap"><div class="rc"><b>' + items.filter(function (x) { return x.done; }).length + '</b><span>things done</span></div><div class="rc"><b>' + sc.stops.length + '</b><span>stops</span></div></div><a class="so-passport" href="#">\uD83D\uDEC2 Relive it in your Trip Passport</a>';
+      } else {
+        var fi = focusCat ? focusItems(focusCat, 3) : [];
+        body = fi.length ? ('<div class="so-focus-h">' + (sc.state === 'pre' ? 'Finish packing' : 'Today\u2019s focus') + '</div><div class="so-list">' + fi.map(itemRow).join('') + '</div>') : '<div class="so-allset">\u2713 You\u2019re all set \u2014 nothing left for now.</div>';
+      }
+      return '<div class="so-brief"><div class="so-greet">' + greet + '</div><div class="so-day">' + dayLine + '</div>' + (whereLine ? '<div class="so-where">' + whereLine + '</div>' : '') + outlook + body +
+        '<div class="so-note">\uD83D\uDCF2 Turn on reminders to get this brief each morning \u2014 <b>sign in soon</b> to sync across your phone.</div></div>';
+    }
     function render() {
-      var P = phases[ph], its = items.filter(function (x) { return x.cat === P.cat; }), done = its.filter(function (x) { return x.done; }).length, p = pct();
-      ov.innerHTML = '<div class="so-wrap"><div class="so-top"><button class="so-x" title="Close">\u2715</button>' +
-        '<div class="so-ring" style="background:conic-gradient(#e4be78 ' + (p * 3.6) + 'deg,rgba(255,255,255,.16) 0)"><span>' + p + '%</span></div>' +
-        '<div class="so-tt"><div class="so-k">Trip mode</div><b>' + (esc(tripName()) || 'Your trip') + '</b></div></div>' +
-        '<div class="so-phases">' + phases.map(function (x, i) { return '<button class="so-ph' + (i === ph ? ' on' : '') + (i < ph ? ' done' : '') + '" data-ph="' + i + '"><span class="ic">' + x.ic + '</span>' + x.t + '</button>'; }).join('') + '</div>' +
-        condStrip() +
-        '<div class="so-head"><span class="ic">' + P.ic + '</span><div><b>' + P.t + '</b><small>' + done + '/' + its.length + ' done \u00b7 ' + P.sub + '</small></div></div>' +
-        '<div class="so-list">' + (its.length ? its.map(itemRow).join('') : '<div class="so-empty">Nothing in this phase yet.</div>') + '</div>' +
-        '<div class="so-nav"><button class="so-prev"' + (ph === 0 ? ' disabled' : '') + '>\u2190 Back</button>' + (ph < phases.length - 1 ? '<button class="so-next">Next \u2192</button>' : '<button class="so-next done">\u2713 All set</button>') + '</div></div>';
+      var p = pct();
+      var head = '<div class="so-top"><button class="so-x" title="Close">\u2715</button>' +
+        '<div class="so-ring" style="background:conic-gradient(#e4be78 ' + (p * 3.6) + 'deg,#ece3d0 0)"><span>' + p + '%</span></div>' +
+        '<div class="so-tt"><div class="so-k">Trip mode</div><b>' + (esc(tripName()) || 'Your trip') + '</b></div></div>';
+      var tabsHtml = '<div class="so-phases"><button class="so-ph' + (active === 'today' ? ' on' : '') + '" data-tab="today"><span class="ic">\u2600\uFE0F</span>Today</button>' +
+        phases.map(function (x, i) { return '<button class="so-ph' + (active === ('ph' + i) ? ' on' : '') + '" data-tab="ph' + i + '"><span class="ic">' + x.ic + '</span>' + x.t + '</button>'; }).join('') + '</div>';
+      var body;
+      if (active === 'today') { body = briefHtml(); }
+      else { var pi = +active.slice(2), P = phases[pi], its = items.filter(function (x) { return x.cat === P.cat; }), done = its.filter(function (x) { return x.done; }).length;
+        body = '<div class="so-head"><span class="ic">' + P.ic + '</span><div><b>' + P.t + '</b><small>' + done + '/' + its.length + ' done \u00b7 ' + P.sub + '</small></div></div>' +
+          '<div class="so-list">' + (its.length ? its.map(itemRow).join('') : '<div class="so-empty">Nothing in this phase yet.</div>') + '</div>'; }
+      ov.innerHTML = '<div class="so-wrap">' + head + tabsHtml + body + '</div>';
     }
     ov.addEventListener('click', function (e) {
       if (e.target.closest('.so-x')) { ov.remove(); return; }
-      var phb = e.target.closest('.so-ph'); if (phb) { ph = +phb.getAttribute('data-ph'); render(); return; }
-      if (e.target.closest('.so-prev')) { if (ph > 0) { ph--; render(); } return; }
-      if (e.target.closest('.so-next')) { if (ph < phases.length - 1) { ph++; render(); } else { ov.remove(); } return; }
+      var tb = e.target.closest('.so-ph'); if (tb) { active = tb.getAttribute('data-tab'); render(); return; }
+      if (e.target.closest('.so-passport')) { e.preventDefault(); if (window.__ppPassport && window.__ppPassport.open) { try { window.__ppPassport.open(); } catch (x) {} } return; }
       var it = e.target.closest('.so-it'); if (it) { var idx = find(it.getAttribute('data-id')); if (idx > -1) { items[idx].done = !items[idx].done; save(); renderLists(); render(); } }
     });
     render();

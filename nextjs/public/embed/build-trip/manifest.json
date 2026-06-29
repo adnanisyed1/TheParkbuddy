@@ -10,6 +10,7 @@
     "/season-fx.js",
     "/pb-verdict.js",
     "/embed/build-trip/s0.js",
+    "/itinerary-pdf.js",
     "/commerce.js",
     "/checklist.js",
     "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",

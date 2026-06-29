@@ -394,7 +394,9 @@ function boot(){
         cost:costTotal(),
         parkIds:parkIds
       });
-    } else { toast('Passport loads in a moment…'); }
+    }
+    if(window.__ppItinerary){ window.__ppItinerary.download(); }
+    else { toast('Passport loads in a moment…'); }
   };
   document.getElementById('addpark').onclick=function(){var v=document.getElementById('parksel').value;if(!v)return;trip.stops.push({pid:+v,nights:NIGHTS[+v]||1,lodge:''});document.getElementById('parksel').value='';render(true);};
   document.getElementById('addcustom').onclick=function(){
