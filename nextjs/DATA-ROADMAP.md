@@ -9,6 +9,11 @@ format: { name, type, location, conditions, alerts, thingsToDo, source }. The ag
 and park pages all read from that one layer — so adding a new source later is a data task,
 not a redesign. (Same pattern as products.json.)
 
+✅ STARTED: /api/explore aggregates places + water + trails + conditions into ONE
+de-duplicated, source-stamped payload (dedupe by name + 250m proximity; each record carries
+{source, fetchedAt}). Next: run the same reconciliation on a SCHEDULE into a database for
+full offline coverage + add state-park / USFS camping + user "report a spot" corrections.
+
 ---
 
 ## Phase 1 — Go deep on what we already touch (free, biggest value-per-effort)

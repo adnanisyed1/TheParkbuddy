@@ -531,10 +531,10 @@ function paintTrees(){ paintMarkers(); }
 
 /* ----- Nearby places layer (Recreation.gov / RIDB) ----- */
 var _placeMarkers=[], _placeIW=null;
-var _layerOn={places:true,hiking:true,offroad:true,ski:true};
+var _layerOn={places:true,hiking:true,offroad:true,ski:true,water:true};
 function _vis(on){ return on?gmap:null; }
 function applyLayers(){
-  _placeMarkers.forEach(function(m){ m.setMap(_layerOn.places?gmap:null); });
+  _placeMarkers.forEach(function(m){ m.setMap((m._layer==='water'?_layerOn.water:_layerOn.places)?gmap:null); });
   _trailLines.forEach(function(l){ l.setMap(_layerOn[l._layer]?gmap:null); });
 }
 function clearMapPlaces(){ _placeMarkers.forEach(function(m){ m.setMap(null); }); _placeMarkers=[]; if(_placeIW)_placeIW.close(); clearMapTrails(); }
@@ -553,12 +553,26 @@ function loadMapTrails(p){
     draw(d.hiking,'#3f7a34','hiking'); draw(d.offroad,'#a15a2a','offroad'); draw(d.ski,'#2a6f9e','ski');
   }).catch(function(){});
 }
+function loadMapWater(p){
+  if(!window.gmap||!p||typeof p.lat!=='number')return;
+  fetch('/api/water?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=35').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(!d||!d.lakes||(selected&&selected.id!==p.id))return;
+    if(!_placeIW&&window.google)_placeIW=new google.maps.InfoWindow();
+    d.lakes.forEach(function(x){ if(typeof x.lat!=='number')return;
+      var mk=new google.maps.Marker({position:{lat:x.lat,lng:x.lng},map:(_layerOn.water?gmap:null),zIndex:45,title:x.name,
+        icon:{path:google.maps.SymbolPath.CIRCLE,scale:5,fillColor:'#3a8fc4',fillOpacity:.95,strokeColor:'#fffdf7',strokeWeight:1.5}});
+      mk._layer='water';
+      mk.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif"><b style="color:#1d3941">\uD83D\uDCA7 '+x.name+'</b><div style="font-size:12px;color:#5b6258;text-transform:capitalize">'+(x.kind||'lake')+'</div><div style="font-size:10px;color:#a79f8c;margin-top:5px">\u00a9 OpenStreetMap</div></div>'); _placeIW.open(gmap,mk); } });
+      _placeMarkers.push(mk);
+    });
+  }).catch(function(){});
+}
 
 /* ----- Map legend with layer on/off toggles ----- */
 function buildLegend(){
   if(document.getElementById('mapLegend'))return;
   var root=document.querySelector('.map')||document.getElementById('embed-root'); if(!root)return;
-  var rows=[['places','●','#2c5562','Campgrounds & areas'],['hiking','—','#3f7a34','Hiking trails'],['offroad','—','#a15a2a','Off-road / 4x4'],['ski','—','#2a6f9e','Ski routes']];
+  var rows=[['places','●','#2c5562','Campgrounds & areas'],['water','●','#3a8fc4','Lakes & water'],['hiking','—','#3f7a34','Hiking trails'],['offroad','—','#a15a2a','Off-road / 4x4'],['ski','—','#2a6f9e','Ski routes']];
   var lg=document.createElement('div'); lg.id='mapLegend';
   lg.style.cssText='position:absolute;left:14px;bottom:120px;z-index:41;background:rgba(255,253,247,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid #e7ddca;border-radius:12px;box-shadow:0 12px 30px -16px rgba(8,18,12,.5);font-family:Hanken Grotesk,sans-serif;overflow:hidden';
   lg.innerHTML='<button id="mapLegToggle" style="display:flex;align-items:center;gap:7px;width:100%;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.04em;color:#1d3941;padding:9px 12px;white-space:nowrap"><span style="font-size:.9rem">\u29c9</span>Map layers<span id="mapLegChev" style="margin-left:auto;color:#8c8473">\u25be</span></button><div id="mapLegBody" style="display:none;padding:2px 12px 10px">'+rows.map(function(r){return '<label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:#1d3941;font-weight:600;cursor:pointer;padding:3px 0"><input type="checkbox" data-layer="'+r[0]+'" checked style="accent-color:#2c5562;cursor:pointer"><span style="color:'+r[2]+';font-size:1rem;width:12px;text-align:center">'+r[1]+'</span>'+r[3]+'</label>';}).join('')+'</div>';
@@ -583,6 +597,7 @@ function loadMapPlaces(p){
     (d.facilities||[]).forEach(function(x){ add(x,'#2c5562'); });
   }).catch(function(){});
   loadMapTrails(p);
+  loadMapWater(p);
   // gateway / adventure town pin
   if(window.PB_GATEWAY){ var g=window.PB_GATEWAY(p.name); if(g&&typeof g.lat==='number'){ var gm=new google.maps.Marker({position:{lat:g.lat,lng:g.lng},map:(_layerOn.places?gmap:null),zIndex:60,title:g.town,icon:{path:'M0,-8 L2.2,-2.2 L8,-2.2 L3.4,1.6 L5.2,7.6 L0,4 L-5.2,7.6 L-3.4,1.6 L-8,-2.2 L-2.2,-2.2 Z',scale:1.5,fillColor:'#e4be78',fillOpacity:1,strokeColor:'#15241c',strokeWeight:1}}); gm.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:210px"><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#a98a4e">Adventure basecamp</div><b style="color:#1d3941">'+g.town+'</b><div style="font-size:12px;color:#5b6258;margin-top:3px">'+g.blurb+'</div></div>'); _placeIW.open(gmap,gm); } }); _placeMarkers.push(gm); } }
 }function paintStates(){ applyMapFilter(true); }
