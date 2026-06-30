@@ -45,7 +45,7 @@ var CSS = `
 .wfx-cloud.dark{background:linear-gradient(180deg,#9fb0bd,#6f828f)}
 .wfx-sm .wfx-cloud{transform:scale(.7);transform-origin:left top}
 /* rain */
-.wfx-drop{position:absolute;z-index:2;top:-12px;width:2px;height:13px;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(210,232,245,.9));animation:wfx-fall linear infinite}
+.wfx-drop{position:absolute;z-index:2;top:-12px;width:2px;height:15px;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(225,240,250,.95));animation:wfx-fall linear infinite}
 /* snow */
 .wfx-flake{position:absolute;z-index:2;top:-10px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,#fff,rgba(255,255,255,.7));box-shadow:0 0 4px rgba(255,255,255,.8);animation:wfx-snowfall linear infinite}
 /* bolt */
@@ -62,8 +62,8 @@ var CSS = `
 @keyframes wfx-pulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.08);filter:brightness(1.12)}}
 @keyframes wfx-spin{to{transform:rotate(360deg)}}
 @keyframes wfx-drift{from{transform:translateX(-30px)}to{transform:translateX(260px)}}
-@keyframes wfx-fall{0%{transform:translateY(-14px);opacity:0}10%{opacity:1}100%{transform:translateY(150px);opacity:.9}}
-@keyframes wfx-snowfall{0%{transform:translateY(-10px) translateX(0);opacity:0}10%{opacity:1}100%{transform:translateY(140px) translateX(14px);opacity:.85}}
+@keyframes wfx-fall{0%{transform:translateY(-14px);opacity:0}8%{opacity:1}92%{opacity:.95}100%{transform:translateY(460px);opacity:0}}
+@keyframes wfx-snowfall{0%{transform:translateY(-10px) translateX(0);opacity:0}10%{opacity:1}92%{opacity:.9}100%{transform:translateY(440px) translateX(22px);opacity:0}}
 @keyframes wfx-flash{0%,7%,11%,100%{opacity:0}4%{opacity:1}9%{opacity:.85}}
 @keyframes wfx-fogmove{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
 @keyframes wfx-gust{0%{transform:translateX(0);opacity:0}30%{opacity:1}100%{transform:translateX(220%);opacity:0}}
@@ -91,9 +91,9 @@ function inner(k){
     case 'sunny': return '<div class="wfx-sky"></div><div class="wfx-rays"></div><div class="wfx-sun"></div>';
     case 'partly': return '<div class="wfx-sky"></div><div class="wfx-rays"></div><div class="wfx-sun sm"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c3"></div>';
     case 'cloudy': return '<div class="wfx-sky"></div><div class="wfx-cloud c2"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c3"></div>';
-    case 'rain': return '<div class="wfx-sky"></div><div class="wfx-cloud c2 dark"></div>'+drops(16);
-    case 'storm': return '<div class="wfx-sky"></div><div class="wfx-bolt"></div><div class="wfx-cloud c2 dark"></div>'+drops(12);
-    case 'snow': return '<div class="wfx-sky"></div><div class="wfx-cloud c2"></div>'+flakes(13);
+    case 'rain': return '<div class="wfx-sky"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c2 dark"></div><div class="wfx-cloud c3"></div>'+drops(28);
+    case 'storm': return '<div class="wfx-sky"></div><div class="wfx-bolt"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c2 dark"></div><div class="wfx-cloud c3"></div>'+drops(22);
+    case 'snow': return '<div class="wfx-sky"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c2"></div>'+flakes(24);
     case 'fog': return '<div class="wfx-sky"></div><div class="wfx-fog f1"></div><div class="wfx-fog f2"></div><div class="wfx-fog f3"></div>';
     case 'wind': return '<div class="wfx-sky"></div><div class="wfx-cloud c1"></div><div class="wfx-wind w1"></div><div class="wfx-wind w2"></div>';
   }
