@@ -11,6 +11,13 @@
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // allow long Overpass calls (Netlify/Next function timeout)
+
+const OVERPASS_MIRRORS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
 
 const STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -28,13 +35,22 @@ const OVERPASS = "https://overpass-api.de/api/interpreter";
 function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
 
 async function overpass(query) {
-  const r = await fetch(OVERPASS, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ParkBuddy/1.0 (destinations ingest)" },
-    body: "data=" + encodeURIComponent(query),
-  });
-  if (!r.ok) throw new Error("overpass " + r.status);
-  return r.json();
+  let lastErr = "";
+  for (const url of OVERPASS_MIRRORS) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45000);
+    try {
+      const r = await fetch(url, {
+        method: "POST", signal: ctrl.signal,
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ParkBuddy/1.0 (destinations ingest)" },
+        body: "data=" + encodeURIComponent(query),
+      });
+      clearTimeout(timer);
+      if (r.ok) return r.json();
+      lastErr = "overpass " + r.status;
+    } catch (e) { clearTimeout(timer); lastErr = String(e.message || e); }
+  }
+  throw new Error(lastErr || "overpass failed");
 }
 
 async function fetchState(stateName) {
@@ -96,11 +112,11 @@ export async function POST(request) {
 
   if (searchParams.get("all")) {
     const offset = parseInt(searchParams.get("offset") || "0", 10) || 0;
-    const batch = STATES.slice(offset, offset + 3); // 3 states/call — Overpass is slow
+    const batch = STATES.slice(offset, offset + 1); // 1 state/call — Overpass is slow; avoids 502 timeouts
     const results = [];
     for (const s of batch) results.push(await one(s));
     const total = results.reduce((a, r) => a + (r.upserted || 0), 0);
-    const nextOffset = offset + 3, done = nextOffset >= STATES.length;
+    const nextOffset = offset + 1, done = nextOffset >= STATES.length;
     return Response.json({ ok: true, batch: results.length, totalUpserted: total, results, done,
       next: done ? null : (origin + "/api/destinations-ingest?all=1&offset=" + nextOffset) });
   }

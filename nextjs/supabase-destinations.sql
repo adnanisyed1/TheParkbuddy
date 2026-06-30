@@ -22,5 +22,6 @@ create index if not exists destinations_type_idx on destinations (type);
 -- Allow the public (anon) key to READ destinations; writes happen only via the
 -- service-role key in the ingest job. Enable RLS + a read policy:
 alter table destinations enable row level security;
-create policy if not exists "destinations are public read"
+drop policy if exists "destinations are public read" on destinations;
+create policy "destinations are public read"
   on destinations for select using (true);
