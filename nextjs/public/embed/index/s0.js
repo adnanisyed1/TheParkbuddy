@@ -617,13 +617,18 @@ function loadMapPlaces(p){
     if(!d||(selected&&selected.id!==p.id))return;
     if(!_placeIW&&window.google)_placeIW=new google.maps.InfoWindow();
     function mkIcon(kind){
+      if(kind==='water') return {path:google.maps.SymbolPath.CIRCLE,scale:5,fillColor:'#3a8fc4',fillOpacity:.95,strokeColor:'#fffdf7',strokeWeight:1.5};
       if(kind==='camp') return {path:'M0,-8 L8,7 L-8,7 Z',scale:1.05,fillColor:'#d2843a',fillOpacity:1,strokeColor:'#fffdf7',strokeWeight:1.3};
       if(kind==='recarea') return {path:google.maps.SymbolPath.CIRCLE,scale:5.5,fillColor:'#2f7d4f',fillOpacity:1,strokeColor:'#fffdf7',strokeWeight:1.5};
       return {path:'M-4.5,-4.5 L4.5,-4.5 L4.5,4.5 L-4.5,4.5 Z',scale:1,fillColor:'#2c5562',fillOpacity:1,strokeColor:'#fffdf7',strokeWeight:1.3};
     }
+    var isWater=function(x){ return /lake|reservoir|\bpond\b|\briver\b|marina|boat|waterway|\bbay\b|lagoon/i.test((x.name||'')+' '+(x.type||'')); };
     var add=function(x,kind){ if(typeof x.lat!=='number'||typeof x.lng!=='number')return;
-      var mk=new google.maps.Marker({position:{lat:x.lat,lng:x.lng},map:(_layerOn.places?gmap:null),zIndex:50,
+      if(isWater(x)) kind='water';
+      var water=(kind==='water');
+      var mk=new google.maps.Marker({position:{lat:x.lat,lng:x.lng},map:((water?_layerOn.water:_layerOn.places)?gmap:null),zIndex:water?45:50,
         icon:mkIcon(kind),title:x.name});
+      if(water) mk._layer='water';
       mk.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:200px"><b style="color:#1d3941">'+x.name+'</b>'+(x.type||x.description?'<div style="font-size:12px;color:#5b6258;margin-top:3px">'+(x.type||x.description)+'</div>':'')+(x.url?'<a href="'+x.url+'" target="_blank" rel="noopener" style="font-size:12px;color:#2c5562;font-weight:700;display:inline-block;margin-top:5px">View on Recreation.gov ↗</a>':'')+'<div style="font-size:10px;color:#a79f8c;margin-top:6px">Recreation.gov / RIDB</div></div>'); _placeIW.open(gmap,mk); } });
       _placeMarkers.push(mk);
     };
