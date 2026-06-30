@@ -62,7 +62,7 @@ async function ingestOne(origin, lat, lng, parkCode, sb, key) {
 }
 
 export async function POST(request) {
-  const sb = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_KEY;
+  const sb = (process.env.SUPABASE_URL || "").replace(/\/+(rest(\/v1)?)?\/*$/i, ""), key = process.env.SUPABASE_SERVICE_KEY;
   if (!sb || !key) {
     return Response.json({ error: "Set SUPABASE_URL and SUPABASE_SERVICE_KEY env vars to enable ingestion." }, { status: 500 });
   }

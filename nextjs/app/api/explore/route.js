@@ -46,7 +46,7 @@ export async function GET(request) {
   const now = new Date().toISOString();
 
   // 1) Fast path: serve pre-ingested, reconciled rows from Supabase if available.
-  const sb = process.env.SUPABASE_URL, anon = process.env.SUPABASE_ANON_KEY;
+  const sb = (process.env.SUPABASE_URL || "").replace(/\/+(rest(\/v1)?)?\/*$/i, ""), anon = process.env.SUPABASE_ANON_KEY;
   if (sb && anon) {
     try {
       // bounding box ~0.5° around the point
