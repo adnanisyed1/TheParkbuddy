@@ -4,6 +4,33 @@ function init(){
 
     var PB=window.PB, WeatherFX=window.WeatherFX;
     var PARKS=PB.parks, SI=PB.stateInfo;
+    // --- Source-aware destinations (foundation for state parks / national forests) ---
+    // The built-in 63 are NPS national parks. Additional destinations (state parks &
+    // national forests from PAD-US / USFS) can arrive via window.PB.destinations or a
+    // sessionStorage handoff from the map — each with a namespaced string id + a `source`.
+    var EXTRA=[];
+    try{ if(PB.destinations&&PB.destinations.length) EXTRA=EXTRA.concat(PB.destinations); }catch(e){}
+    try{ var _hd=JSON.parse(sessionStorage.getItem('pb_dest')||'null'); if(_hd&&_hd.id!=null&&typeof _hd.lat==='number') EXTRA=EXTRA.concat([_hd]); }catch(e){}
+    function normDest(p){
+      if(!p)return p;
+      if(!p.source) p.source=(typeof p.id==='number')?'nps':'other';
+      if(!p.type) p.type=(p.source==='nps')?'national_park':(p.source==='usfs')?'national_forest':(p.source==='state')?'state_park':'destination';
+      return p;
+    }
+    PARKS.forEach(normDest); EXTRA.forEach(normDest);
+    var ALL=PARKS.concat(EXTRA);
+    function findDest(id){ for(var i=0;i<ALL.length;i++){ if(String(ALL[i].id)===String(id)) return ALL[i]; } return null; }
+    // Per-source presentation profile — drives labels, links & which AGENCY sections show.
+    // Universal sections (weather, verdict, alerts, nearby places/trails) always run.
+    function destProfile(p){
+      var s=p.source||'nps';
+      if(s==='usfs'||p.type==='national_forest') return { kind:'National Forest', agency:'USDA Forest Service', hasNPS:false,
+        recQuery:p.name, official:p.url||('https://www.google.com/search?q='+encodeURIComponent(p.name+' fs.usda.gov')), officialLabel:'Official Forest Service page \u2197' };
+      if(s==='state'||p.type==='state_park') return { kind:'State Park', agency:((p.state||'State')+' State Parks'), hasNPS:false,
+        recQuery:p.name, official:p.url||('https://www.google.com/search?q='+encodeURIComponent(p.name+' '+(p.state||'')+' state park')), officialLabel:'Official state-park page \u2197' };
+      return { kind:'National Park', agency:'National Park Service', hasNPS:true,
+        recQuery:p.name+' National Park', official:'https://www.google.com/search?q='+encodeURIComponent(p.name+' national park nps.gov'), officialLabel:'Official NPS info \u2197' };
+    }
     var el=function(id){return document.getElementById(id);};
     var rafFlag=false;
     var pgState={};
@@ -14,7 +41,7 @@ function init(){
       clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; },2200);
     }
     function addParkToTrip(){
-      var p=PARKS.find(function(x){return x.id===current;}); if(!p)return;
+      var p=findDest(current); if(!p)return;
       var t={}; try{ t=JSON.parse(localStorage.getItem('pp_trip2')||'{}')||{}; }catch(e){ t={}; }
       if(!t.s)t.s=[];
       var exists=t.s.some(function(s){return (s.pid===p.id)||(s.p===p.id);});
@@ -79,18 +106,19 @@ function init(){
 
     /* ---------- picker ---------- */
     var pick=el('pick');
-    PARKS.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){
-      var o=document.createElement('option'); o.value=p.id; o.textContent=p.name+' — '+p.state; pick.appendChild(o);
+    ALL.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){
+      var o=document.createElement('option'); o.value=p.id; o.textContent=p.name+(p.state?' — '+p.state:''); pick.appendChild(o);
     });
     function paramId(){
-      var u=new URLSearchParams(location.search), q=u.get('park'); if(!q)return null;
-      var byId=PARKS.find(function(p){return String(p.id)===q;}); if(byId)return byId.id;
-      var byName=PARKS.find(function(p){return p.name.toLowerCase().replace(/[^a-z]/g,'')===q.toLowerCase().replace(/[^a-z]/g,'');});
+      var u=new URLSearchParams(location.search), q=u.get('park')||u.get('dest'); if(!q)return null;
+      var byId=findDest(q); if(byId)return byId.id;
+      var n=q.toLowerCase().replace(/[^a-z]/g,'');
+      var byName=ALL.find(function(p){return p.name.toLowerCase().replace(/[^a-z]/g,'')===n;});
       return byName?byName.id:null;
     }
     var current=paramId()||PARKS.find(function(p){return p.name==='Yosemite';}).id;
     pick.value=current;
-    pick.onchange=function(){current=+pick.value; render();};
+    pick.onchange=function(){var v=pick.value; var d=findDest(v); current=(d&&typeof d.id==='number')?+v:v; render();};
 
     /* ---------- tabs ---------- */
     var BTN='flex:1;min-width:96px;border:none;padding:10px 14px;font-size:.86rem;font-weight:700;font-family:inherit;cursor:pointer;border-radius:11px;white-space:nowrap;';
@@ -779,7 +807,7 @@ function init(){
       var btn=el('rv-submit'); if(btn) btn.onclick=submitReview;
     })();
     function submitReview(){
-      var p=PARKS.find(function(x){return x.id===current;}); if(!p)return;
+      var p=findDest(current); if(!p)return;
       var name=(el('rv-name').value||'').trim(), body=(el('rv-body').value||'').trim(), msg=el('rv-msg');
       var show=function(t,ok){ if(msg){msg.textContent=t;msg.style.color=ok?'#3d7a2a':'#b54a3a';} };
       if(!name){show('Please add your name.',false);return;}
@@ -794,34 +822,38 @@ function init(){
 
     /* ---------- master render ---------- */
     function render(){
-      var p=PARKS.find(function(x){return x.id===current;});
+      var p=findDest(current); if(!p){ p=PARKS[0]; current=p.id; }
+      var prof=destProfile(p);
       pick.value=current;
       el('pname').textContent=p.name;
-      el('psub').textContent='· '+p.state+' · '+(REG[p.region]||'');
-      el('pest').textContent='Established '+p.year;
-      el('desc').textContent=p.desc;
-      el('aboutlive').textContent=p.desc;
-      el('about').textContent=SI[p.state]||'';
+      el('psub').textContent='· '+(p.state||'')+' · '+(p.source==='nps'?(REG[p.region]||''):prof.kind);
+      el('pest').textContent=p.year?('Established '+p.year):prof.kind;
+      el('desc').textContent=p.desc||(p.name+' — '+prof.kind.toLowerCase()+'.');
+      el('aboutlive').textContent=p.desc||'';
+      el('about').textContent=(p.state&&SI[p.state])?SI[p.state]:'';
       var maps='https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng;
-      var npsSearch='https://www.google.com/search?q='+encodeURIComponent(p.name+' national park nps.gov');
-      el('loc').innerHTML='<div><b style="color:#1d4a37">Coordinates:</b> '+p.lat.toFixed(3)+', '+p.lng.toFixed(3)+'</div><div style="'+S.row+'"><a style="'+S.btn+'" href="'+maps+'" target="_blank" rel="noopener">◎ Get directions</a><a style="'+S.btn+'" href="'+npsSearch+'" target="_blank" rel="noopener">Official NPS info ↗</a></div>';
-      var rec='https://www.recreation.gov/search?q='+encodeURIComponent(p.name+' National Park');
-      el('reserve').innerHTML='<p style="font-size:.86rem;line-height:1.55;color:#525a46;margin-bottom:12px">Some parks require timed-entry or campground reservations, booked on the official government sites — we link you straight there.</p><div style="'+S.row+';margin-top:0"><a style="'+S.btnP+'" href="'+rec+'" target="_blank" rel="noopener">Check reservations on Recreation.gov ↗</a><a style="'+S.btn+'" id="npslink" href="'+npsSearch+'" target="_blank" rel="noopener">Official park page ↗</a></div><p style="font-size:.72rem;color:#8f8b7c;margin-top:10px">Reservations and payment are handled by the official site. Many parks are free or pay-at-gate.</p>';
+      var official=prof.official;
+      el('loc').innerHTML='<div><b style="color:#1d4a37">Coordinates:</b> '+p.lat.toFixed(3)+', '+p.lng.toFixed(3)+'</div><div style="'+S.row+'"><a style="'+S.btn+'" href="'+maps+'" target="_blank" rel="noopener">◎ Get directions</a><a style="'+S.btn+'" href="'+official+'" target="_blank" rel="noopener">'+prof.officialLabel+'</a></div>';
+      var rec='https://www.recreation.gov/search?q='+encodeURIComponent(prof.recQuery);
+      el('reserve').innerHTML='<p style="font-size:.86rem;line-height:1.55;color:#525a46;margin-bottom:12px">Some destinations require timed-entry or campground reservations, booked on the official government sites — we link you straight there.</p><div style="'+S.row+';margin-top:0"><a style="'+S.btnP+'" href="'+rec+'" target="_blank" rel="noopener">Check reservations on Recreation.gov ↗</a><a style="'+S.btn+'" id="npslink" href="'+official+'" target="_blank" rel="noopener">'+prof.officialLabel+'</a></div><p style="font-size:.72rem;color:#8f8b7c;margin-top:10px">Reservations and payment are handled by the official site (managed by the '+prof.agency+').</p>';
 
       var _hp0=el('heroPhoto'); if(_hp0){ _hp0.style.display='none'; _hp0.removeAttribute('src'); }
       var _ph0=el('heroPhotoPh'); if(_ph0)_ph0.style.display='flex';
       var _wx0=el('heroWxBox'); if(_wx0)_wx0.innerHTML='';
       var _phl=el('heroPhotoPhLabel'); if(_phl)_phl.textContent='Iconic photo · '+p.name;
-      buildScene(PB.config(current));
+      var _cfg=null; try{ if(p.source==='nps') _cfg=PB.config(current); }catch(e){}
+      buildScene(_cfg||PB.config(PARKS[0].id));
       renderBest();
       resetHero();
-      crowdGauge(p);
+      try{ crowdGauge(p); }catch(e){}
       _nws=0;_nps=0; updateHeroAlerts(true);
       pgState={};
       // reset live boxes
       el('alerts').innerHTML='<span style="'+S.load+'">Checking for alerts…</span>';
       el('glance').innerHTML='<span style="'+S.load+'">Loading…</span>';
-      loadNPS(p);
+      if(prof.hasNPS){ loadNPS(p); }
+      else { setBox('nps', npsMapBlock(p)+'<span style="'+S.load+'">'+prof.kind+' · managed by '+prof.agency+'. <a href="'+prof.official+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">'+prof.officialLabel+'</a></span>');
+        ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){ var b=el(id); if(b)b.innerHTML='<span style="'+S.load+'">Provided by '+prof.agency+' — see the official page above.</span>'; }); }
       loadConditions(p);
       loadPlaces(p);
       loadTrails(p);
