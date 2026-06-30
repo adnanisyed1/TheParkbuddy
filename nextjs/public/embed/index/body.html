@@ -24,16 +24,34 @@
 <div class="body">
   <div class="mid">
     <aside class="info" id="info">
-      <button class="ix" id="ix">&times;</button>
-      <div class="itabs">
-        <button class="itab on" data-itab="live">Live</button>
-        <button class="itab" data-itab="about">About</button>
+      <button class="panel-hide" id="panelHide" title="Hide panel">&lsaquo;</button>
+      <div class="pbsearch">
+        <span class="pbsearch-ic">⌕</span>
+        <input id="pbq" type="text" autocomplete="off" placeholder="Search parks, forests, states…">
+        <button id="pbqx" title="Clear" style="display:none">&times;</button>
+        <div id="pbqres"></div>
       </div>
+      <div class="pbfilters" id="ip-filters"></div>
       <div class="ibody">
         <div class="ipane on" id="ip-live"></div>
         <div class="ipane" id="ip-about"></div>
+        <div class="ipane" id="ip-trip">
+          <div class="cart-h">
+            <div><div class="cart-t">My Trip</div><div class="cart-sub" id="cart-sub">No parks yet</div></div>
+            <button class="cart-clear" id="cart-clear" style="display:none">Clear</button>
+          </div>
+          <div class="cart-stats" id="cart-stats"></div>
+          <div class="dbody" id="cart-body"></div>
+          <div class="cart-foot" id="cart-foot"></div>
+        </div>
+      </div>
+      <div class="itabs itabs-bottom">
+        <button class="itab on" data-itab="live"><span class="ti">📡</span>Live</button>
+        <button class="itab" data-itab="about"><span class="ti">ℹ️</span>About</button>
+        <button class="itab" data-itab="trip"><span class="ti">🧳</span>Trip<span class="itab-badge" id="tripBadge" style="display:none">0</span></button>
       </div>
     </aside>
+    <button class="panel-show" id="panelShow" title="Show panel" style="display:none">☰ Filters &amp; search</button>
     <main class="map">
       <div id="lmap"></div>
       <div class="topbar" id="topbar"></div>
@@ -45,24 +63,10 @@
         <span class="vl"><i style="background:#b3ab97"></i>Loading</span>
       </div>
     </main>
-    <aside class="dash" id="dash">
-      <button class="mobtab" id="mobtab">▲ My Trip (0)</button>
-      <div class="cart-h">
-        <div>
-          <div class="cart-t">My Trip</div>
-          <div class="cart-sub" id="cart-sub">No parks yet</div>
-        </div>
-        <button class="cart-clear" id="cart-clear" style="display:none">Clear</button>
-        <button id="cart-collapse" title="Collapse" style="background:#fbf6ea;border:1px solid #e7ddca;color:#1d3941;width:30px;height:30px;border-radius:9px;cursor:pointer;font-size:.9rem;line-height:1;flex:none">−</button>
-      </div>
-      <div class="cart-stats" id="cart-stats"></div>
-      <div class="dbody" id="cart-body"></div>
-      <div class="cart-foot" id="cart-foot"></div>
-    </aside>
   </div>
   <div class="strip" id="strip"></div>
 </div>
-<div class="vtoggle" id="vtoggle"><button data-v="live">📡 Live status</button><button data-v="trip">🧭 Trip tools</button></div>
+<div class="vtoggle" id="vtoggle"><button data-v="live" class="on">📍 Explore</button></div>
 
 <!-- ParkPulse Planner Bubble (self-contained, drop on any page) -->
 

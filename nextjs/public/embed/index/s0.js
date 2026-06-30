@@ -245,6 +245,7 @@ function addToTrip(p){ if(p&&!myTrip.some(x=>x.id===p.id)){myTrip.push(p);saveTr
 function removeFromTrip(id){ myTrip=myTrip.filter(x=>x.id!==id);saveTrip();renderCart();paintMarkers(); }
 function buildTripURL(){ return '/build-trip?trip='+encodeURIComponent(JSON.stringify({n:'My map trip',s:myTrip.map(p=>({p:p.id}))})); }
 function updateMobtab(){ const mob=document.getElementById('mobtab'); if(!mob)return; const d=document.getElementById('dash'); mob.textContent=(d&&d.classList.contains('open'))?'\u25bc Close':('\u25b2 My Trip ('+myTrip.length+')'); }
+function updateTripBadge(){ var b=document.getElementById('tripBadge'); if(!b)return; if(myTrip.length){ b.textContent=myTrip.length; b.style.display=''; } else b.style.display='none'; }
 let cartDrag=null;
 function renderCart(){
   const body=document.getElementById('cart-body'); if(!body)return;
@@ -301,6 +302,7 @@ function renderCart(){
     row.addEventListener('drop',e=>{e.preventDefault();const to=+row.dataset.i;if(cartDrag==null||cartDrag===to)return;const m=myTrip.splice(cartDrag,1)[0];myTrip.splice(to,0,m);cartDrag=null;saveTrip();renderCart();});
   });
   updateMobtab();
+  updateTripBadge();
 }
 function loadPeekAlert(p){
   fetch(`https://api.weather.gov/alerts/active?point=${p.lat.toFixed(4)},${p.lng.toFixed(4)}`,{headers:{Accept:"application/geo+json"}})
@@ -335,14 +337,7 @@ function renderSide(){
   const cnt=document.getElementById("count"); if(cnt)cnt.textContent=PARKS.length+" parks";
   // slim top bar
   const topbar=document.getElementById("topbar");
-  if(topbar){
-    const parkOpts=filteredParks();
-    topbar.innerHTML=
-      `<select id="psel" aria-label="Jump to a park"><option value="">Search Park</option>${parkOpts.map(p=>`<option value="${p.id}" ${selected&&selected.id===p.id?'selected':''}>${p.name}</option>`).join("")}</select>`+
-      `<select id="sf" aria-label="Filter by state"><option value="">Search State</option>${ALL_STATES.map(s=>`<option value="${s}" ${s===stateFilter?'selected':''}>${s}</option>`).join("")}</select>`;
-    document.getElementById("psel").onchange=e=>{ const id=+e.target.value; if(id)pickFromSearch(PARKS.find(p=>p.id===id)); };
-    document.getElementById("sf").onchange=e=>{ stateFilter=e.target.value; regionFilter="all"; if(selected)closePeek(); renderSide(); paintTrees(); applyMapFilter(true); };
-  }
+  if(topbar){ topbar.innerHTML=''; }
   // bottom strip
   const strip=document.getElementById("strip");
   if(strip){
@@ -385,9 +380,44 @@ function setupDash(){
 }
 window.addEventListener("load",()=>{
   setupDash();
+  setupSearch();
+  var info=document.getElementById('info'); if(info&&!window.matchMedia('(max-width:860px)').matches){ info.classList.add('open'); document.body.classList.add('pb-panel-open'); }
+  var ph=document.getElementById('panelHide'), ps=document.getElementById('panelShow');
+  if(ph) ph.onclick=function(){ var i=document.getElementById('info'); if(i)i.classList.remove('open'); document.body.classList.remove('pb-panel-open'); if(ps)ps.style.display=''; };
+  if(ps) ps.onclick=function(){ var i=document.getElementById('info'); if(i)i.classList.add('open'); document.body.classList.add('pb-panel-open'); ps.style.display='none'; };
+  renderDash();
   renderSide();
+  buildLegend();
   loadGoogle(function(){ if(typeof google!=='undefined'&&google.maps) initMap(); });
 });
+
+// Unified cross-type search: 63 national parks + state parks & national forests (destinations table).
+var _destCache=null, _destFetched=false;
+function setupSearch(){
+  var inp=document.getElementById('pbq'), res=document.getElementById('pbqres'), x=document.getElementById('pbqx');
+  if(!inp||!res)return;
+  function close(){ res.classList.remove('on'); res.innerHTML=''; }
+  function color(t){ return t==='national_forest'?'#3f7a34':t==='state_park'?'#5a7d33':'#c79a4b'; }
+  function label(t){ return t==='national_forest'?'National Forest':t==='state_park'?'State Park':'National Park'; }
+  function run(q){
+    q=q.trim().toLowerCase(); x.style.display=q?'':'none';
+    if(q.length<2){ close(); return; }
+    var hits=[];
+    PARKS.forEach(function(p){ if(p.name.toLowerCase().indexOf(q)>-1||(p.state||'').toLowerCase().indexOf(q)>-1) hits.push({name:p.name,t:'national_park',state:p.state,park:p}); });
+    (_destCache||[]).forEach(function(d){ if(d.name.toLowerCase().indexOf(q)>-1||(d.state||'').toLowerCase().indexOf(q)>-1) hits.push({name:d.name,t:d.type,state:d.state,dest:d}); });
+    hits=hits.slice(0,40);
+    if(!hits.length){ res.innerHTML='<div style="padding:12px;font-size:.82rem;color:#a7a08c">No matches. Try a park, forest, or state.</div>'; res.classList.add('on'); return; }
+    res.innerHTML=hits.map(function(h,i){ return '<button class="qr" data-i="'+i+'"><span class="qd" style="background:'+color(h.t)+'"></span><span class="qn">'+h.name+'</span><span class="qt">'+label(h.t)+(h.state?' \u00b7 '+h.state:'')+'</span></button>'; }).join('');
+    res.classList.add('on');
+    res.querySelectorAll('.qr').forEach(function(b){ b.onclick=function(){ var h=hits[+b.getAttribute('data-i')]; inp.value=''; close();
+      if(h.park){ pickFromSearch(h.park); }
+      else if(h.dest){ try{ sessionStorage.setItem('pb_dest', JSON.stringify({id:h.dest.id,name:h.dest.name,state:h.dest.state,lat:h.dest.lat,lng:h.dest.lng,source:h.dest.source,url:h.dest.url})); }catch(e){} location.href='/park-status?dest='+encodeURIComponent(h.dest.id); }
+    }; });
+  }
+  inp.addEventListener('input',function(){ run(inp.value); if(!_destFetched&&inp.value.trim().length>=2){ _destFetched=true; fetch('/api/destinations?limit=500').then(function(r){return r.ok?r.json():null;}).then(function(d){ if(d&&d.destinations){ _destCache=d.destinations; run(inp.value); } }).catch(function(){}); } });
+  x.onclick=function(){ inp.value=''; close(); inp.focus(); };
+  document.addEventListener('click',function(e){ if(!e.target.closest('.pbsearch')) close(); });
+}
 
 // ===== Interactive map (Google Maps) =====
 var gmap=null, gmarkersById={}, mapReady=false;
@@ -554,10 +584,11 @@ function mapLoad(delta){
 
 /* ----- Nearby places layer (Recreation.gov / RIDB) ----- */
 var _placeMarkers=[], _placeIW=null;
-var _layerOn={places:true,hiking:true,offroad:true,ski:true,water:true};
+var _layerOn={natpark:true,statepark:true,forest:true,places:true,water:true,hiking:true,offroad:true,ski:true};
 function _vis(on){ return on?gmap:null; }
 function applyLayers(){
-  _placeMarkers.forEach(function(m){ m.setMap((m._layer==='water'?_layerOn.water:_layerOn.places)?gmap:null); });
+  if(mapReady) PARKS.forEach(function(p){ var m=gmarkersById[p.id]; if(m) m.setMap(_layerOn.natpark?gmap:null); });
+  _placeMarkers.forEach(function(m){ var L=m._layer; var on=L==='water'?_layerOn.water:L==='forest'?_layerOn.forest:L==='statepark'?_layerOn.statepark:_layerOn.places; m.setMap(on?gmap:null); });
   _trailLines.forEach(function(l){ l.setMap(_layerOn[l._layer]?gmap:null); });
 }
 function clearMapPlaces(){ _placeMarkers.forEach(function(m){ m.setMap(null); }); _placeMarkers=[]; if(_placeIW)_placeIW.close(); clearMapTrails(); }
@@ -577,6 +608,22 @@ function loadMapTrails(p){
     draw(d.hiking,'#3f7a34','hiking'); draw(d.offroad,'#a15a2a','offroad'); draw(d.ski,'#2a6f9e','ski');
   }).catch(function(){}).then(function(){ mapLoad(-1); });
 }
+function loadMapDestinations(p){
+  if(!window.gmap||!p||typeof p.lat!=='number')return;
+  fetch('/api/destinations?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=140').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(!d||!d.destinations||(selected&&selected.id!==p.id))return;
+    if(!_placeIW&&window.google)_placeIW=new google.maps.InfoWindow();
+    d.destinations.forEach(function(x){ if(typeof x.lat!=='number'||typeof x.lng!=='number')return;
+      if(x.source==='nps')return; // national parks already have their own pins
+      var mk=new google.maps.Marker({position:{lat:x.lat,lng:x.lng},map:((x.type==='national_forest'?_layerOn.forest:_layerOn.statepark)?gmap:null),zIndex:48,title:x.name,
+        icon:{path:'M0,-7 L7,0 L0,7 L-7,0 Z',scale:1,fillColor:x.type==='national_forest'?'#3f7a34':'#5a7d33',fillOpacity:1,strokeColor:'#fffdf7',strokeWeight:1.4}});
+      mk._layer=x.type==='national_forest'?'forest':'statepark';
+      mk.addListener('click',function(){ if(_placeIW){ var label=x.type==='national_forest'?'National Forest':'State Park';
+        _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:210px"><b style="color:#1d3941">'+x.name+'</b><div style="font-size:12px;color:#5b6258;margin-top:3px">'+label+(x.state?' \u00b7 '+x.state:'')+'</div><a href="/park-status?dest='+encodeURIComponent(x.id)+'" style="font-size:12px;color:#2c5562;font-weight:700;display:inline-block;margin-top:6px">View live status \u2192</a><div style="font-size:10px;color:#a79f8c;margin-top:6px">PAD-US / USFS / OpenStreetMap</div></div>'); _placeIW.open(gmap,mk); } });
+      _placeMarkers.push(mk);
+    });
+  }).catch(function(){});
+}
 function loadMapWater(p){
   if(!window.gmap||!p||typeof p.lat!=='number')return;
   mapLoad(1);
@@ -593,21 +640,46 @@ function loadMapWater(p){
   }).catch(function(){}).then(function(){ mapLoad(-1); });
 }
 
-/* ----- Map legend with layer on/off toggles ----- */
+/* ----- Unified Filters (persistent block at top of side panel) ----- */
 function buildLegend(){
-  if(document.getElementById('mapLegend'))return;
-  var root=document.querySelector('.map')||document.getElementById('embed-root'); if(!root)return;
-  var rows=[['places','●','#2c5562','Campgrounds & areas'],['water','●','#3a8fc4','Lakes & water'],['hiking','—','#3f7a34','Hiking trails'],['offroad','—','#a15a2a','Off-road / 4x4'],['ski','—','#2a6f9e','Ski routes']];
-  var groups=[['Stay & water',[['places','\u26fa','#d2843a','Campgrounds & state parks'],['water','\u25cf','#3a8fc4','Lakes & water']]],['Trails',[['hiking','\u2014','#3f7a34','Hiking trails'],['offroad','\u2014','#a15a2a','Off-road / 4x4'],['ski','\u2014','#2a6f9e','Ski routes']]]];
-  var keyHtml='<div style="font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a79f8c;margin:7px 0 3px">Pointer key</div><div style="display:flex;flex-direction:column;gap:3px;font-size:.74rem;color:#5b6258;font-weight:600"><span><span style="color:#d2843a">\u25b2</span> Campground / state park</span><span><span style="color:#2f7d4f">\u25cf</span> Forest / rec area</span><span><span style="color:#2c5562">\u25a0</span> Visitor center / trailhead</span><span><span style="color:#3a8fc4">\u25cf</span> Lake / water</span><span><span style="color:#e4be78">\u2605</span> Gateway town</span></div>';
-  var lg=document.createElement('div'); lg.id='mapLegend';
-  lg.style.cssText='position:absolute;left:14px;bottom:120px;z-index:41;background:rgba(255,253,247,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid #e7ddca;border-radius:12px;box-shadow:0 12px 30px -16px rgba(8,18,12,.5);font-family:Hanken Grotesk,sans-serif;overflow:hidden;min-width:170px';
-  function rowHtml(r){return '<label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:#1d3941;font-weight:600;cursor:pointer;padding:3px 0"><input type="checkbox" data-layer="'+r[0]+'" checked style="accent-color:#2c5562;cursor:pointer"><span style="color:'+r[2]+';font-size:1rem;width:12px;text-align:center">'+r[1]+'</span>'+r[3]+'</label>';}
-  lg.innerHTML='<button id="mapLegToggle" style="display:flex;align-items:center;gap:7px;width:100%;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.04em;color:#1d3941;padding:10px 13px;white-space:nowrap"><span style="font-size:.95rem">\u2699\ufe0f</span>Map settings<span id="mapLegSpin" style="display:none;width:10px;height:10px;border:2px solid #c9bfa6;border-top-color:#2c5562;border-radius:50%;margin-left:7px;animation:s .7s linear infinite"></span><span id="mapLegChev" style="margin-left:auto;color:#8c8473">\u25be</span></button><div id="mapLegBody" style="display:none;padding:2px 13px 11px">'+groups.map(function(g){return '<div style="font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a79f8c;margin:7px 0 3px">'+g[0]+'</div>'+g[1].map(rowHtml).join('');}).join('')+keyHtml+'</div>';
-  root.appendChild(lg);
-  var open=false, body=lg.querySelector('#mapLegBody'), chev=lg.querySelector('#mapLegChev');
-  lg.querySelector('#mapLegToggle').addEventListener('click',function(){ open=!open; body.style.display=open?'block':'none'; chev.style.transform=open?'rotate(180deg)':''; });
-  lg.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.addEventListener('change',function(){ _layerOn[cb.getAttribute('data-layer')]=cb.checked; applyLayers(); }); });
+  var host=document.getElementById('ip-filters'); if(!host||host._built)return; host._built=true;
+  var groups=[
+    ['Destination types',[
+      ['natpark','\u25cf','#c79a4b','National Parks'],
+      ['statepark','\u25c6','#5a7d33','State Parks'],
+      ['forest','\u25c6','#3f7a34','National Forests']
+    ]],
+    ['On the map',[
+      ['places','\u25b2','#d2843a','Campgrounds & areas'],
+      ['water','\u25cf','#3a8fc4','Lakes & water'],
+      ['hiking','\u2014','#3f7a34','Hiking trails'],
+      ['offroad','\u2014','#a15a2a','Off-road / 4x4'],
+      ['ski','\u2014','#2a6f9e','Ski routes']
+    ]]
+  ];
+  function row(r){
+    return '<label class="pbfl-row" style="display:flex;align-items:center;gap:10px;padding:7px 5px;cursor:pointer;border-radius:10px">'+
+      '<span style="width:22px;height:22px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:7px;background:'+r[2]+'1f;color:'+r[2]+';font-size:.78rem">'+r[1]+'</span>'+
+      '<span style="flex:1;font-size:.84rem;font-weight:600;color:#1d3941">'+r[3]+'</span>'+
+      '<span class="pbsw" style="position:relative;width:36px;height:21px;flex:none"><input type="checkbox" data-layer="'+r[0]+'" checked style="position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2"><span class="pbsw-tr" style="position:absolute;inset:0;border-radius:999px;background:linear-gradient(120deg,#e4be78,#c79a4b);transition:.2s"></span><span class="pbsw-kn" style="position:absolute;top:2px;left:17px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s"></span></span>'+
+    '</label>';
+  }
+  host.innerHTML='<style>#ip-filters .pbfl-row:hover{background:#f6efdf}#ip-filters .pbsw input:not(:checked)+.pbsw-tr{background:#d8cdb4}#ip-filters .pbsw input:not(:checked)~.pbsw-kn{left:2px}</style>'+
+    '<button id="flHead" style="display:flex;align-items:center;gap:9px;width:100%;cursor:pointer;font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#1d3941;background:none;border:none;padding:11px 13px">'+
+      '<span style="font-size:.92rem">\u2699\ufe0f</span>Filters'+
+      '<span id="flCount" style="font-size:.64rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:2px 8px;border-radius:999px;letter-spacing:0">8</span>'+
+      '<span id="flChev" style="margin-left:auto;color:#a98a4e;transition:transform .2s;transform:rotate(180deg)">\u25be</span></button>'+
+    '<div id="flBody" style="padding:0 13px 12px">'+
+      groups.map(function(g){return '<div style="font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a98a4e;margin:9px 2px 2px">'+g[0]+'</div>'+g[1].map(row).join('');}).join('')+
+      '<div style="display:flex;gap:7px;margin-top:11px"><button id="flAll" style="flex:1;border:1px solid #e7ddca;background:#fbf6ea;color:#1d3941;font-family:inherit;font-weight:700;font-size:.74rem;padding:7px;border-radius:9px;cursor:pointer">All</button><button id="flNone" style="flex:1;border:1px solid #e7ddca;background:#fbf6ea;color:#1d3941;font-family:inherit;font-weight:700;font-size:.74rem;padding:7px;border-radius:9px;cursor:pointer">None</button></div>'+
+    '</div>';
+  var count=host.querySelector('#flCount'), body=host.querySelector('#flBody'), chev=host.querySelector('#flChev'), open=true;
+  function refreshCount(){ count.textContent=host.querySelectorAll('input[data-layer]:checked').length; }
+  host.querySelector('#flHead').addEventListener('click',function(){ open=!open; body.style.display=open?'':'none'; chev.style.transform=open?'rotate(180deg)':''; });
+  host.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.addEventListener('change',function(){ _layerOn[cb.getAttribute('data-layer')]=cb.checked; applyLayers(); refreshCount(); }); });
+  function setAll(v){ host.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.checked=v; _layerOn[cb.getAttribute('data-layer')]=v; }); applyLayers(); refreshCount(); }
+  host.querySelector('#flAll').addEventListener('click',function(){ setAll(true); });
+  host.querySelector('#flNone').addEventListener('click',function(){ setAll(false); });
 }
 function loadMapPlaces(p){
   if(!window.gmap||!p||typeof p.lat!=='number')return;
@@ -637,6 +709,7 @@ function loadMapPlaces(p){
   }).catch(function(){}).then(function(){ mapLoad(-1); });
   loadMapTrails(p);
   loadMapWater(p);
+  loadMapDestinations(p);
   // gateway / adventure town pin
   if(window.PB_GATEWAY){ var g=window.PB_GATEWAY(p.name); if(g&&typeof g.lat==='number'){ var gm=new google.maps.Marker({position:{lat:g.lat,lng:g.lng},map:(_layerOn.places?gmap:null),zIndex:60,title:g.town,icon:{path:'M0,-8 L2.2,-2.2 L8,-2.2 L3.4,1.6 L5.2,7.6 L0,4 L-5.2,7.6 L-3.4,1.6 L-8,-2.2 L-2.2,-2.2 Z',scale:1.5,fillColor:'#e4be78',fillOpacity:1,strokeColor:'#15241c',strokeWeight:1}}); gm.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:210px"><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#a98a4e">Adventure basecamp</div><b style="color:#1d3941">'+g.town+'</b><div style="font-size:12px;color:#5b6258;margin-top:3px">'+g.blurb+'</div></div>'); _placeIW.open(gmap,gm); } }); _placeMarkers.push(gm); } }
 }function paintStates(){ applyMapFilter(true); }
