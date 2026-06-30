@@ -33,13 +33,19 @@ function id(name, lat, lng) {
 }
 
 async function ingestOne(origin, lat, lng, parkCode, sb, key) {
-  const r = await fetch(origin + "/api/explore?lat=" + lat + "&lng=" + lng);
-  if (!r.ok) return { parkCode, error: "explore failed" };
+  // Use the FAST places source (RIDB) for caching — not /api/explore, whose slow
+  // OpenStreetMap trails/water calls would blow the function timeout in a loop.
+  const r = await fetch(origin + "/api/places?lat=" + lat + "&lng=" + lng);
+  if (!r.ok) return { parkCode, error: "places failed" };
   const data = await r.json();
-  const rows = (data.places || []).map((p) => ({
+  const places = [].concat(
+    (data.recAreas || []).map((x) => ({ ...x, type: "recreation-area" })),
+    (data.facilities || []).map((x) => ({ ...x, type: /camp/i.test(x.type || "") ? "campground" : "facility" })),
+  ).filter((p) => p.lat != null && p.lng != null);
+  const rows = places.map((p) => ({
     id: id(p.name, p.lat, p.lng),
     name: p.name, type: p.type, lat: p.lat, lng: p.lng,
-    url: p.url || "", detail: p.detail || "", sources: p.sources || [],
+    url: p.url || "", detail: p.detail || p.description || "", sources: ["Recreation.gov/RIDB"],
     park_code: parkCode || null, fetched_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   }));
   if (!rows.length) return { parkCode, upserted: 0 };
@@ -67,12 +73,21 @@ export async function POST(request) {
   const origin = new URL(request.url).origin;
 
   if (searchParams.get("all")) {
+    // Process a small batch per call so we never hit the function timeout.
+    // Page through with ?all=1&offset=0, then offset=6, offset=12 …
+    const offset = parseInt(searchParams.get("offset") || "0", 10) || 0;
+    const batch = SEED.slice(offset, offset + 6);
     const results = [];
-    for (const [code, lat, lng] of SEED) {
-      results.push(await ingestOne(origin, lat, lng, code, sb, key)); // sequential = gentle on source rate limits
+    for (const [code, lat, lng] of batch) {
+      results.push(await ingestOne(origin, lat, lng, code, sb, key));
     }
     const total = results.reduce((a, r) => a + (r.upserted || 0), 0);
-    return Response.json({ ok: true, parks: results.length, totalUpserted: total, results });
+    const nextOffset = offset + 6;
+    const done = nextOffset >= SEED.length;
+    return Response.json({
+      ok: true, batch: results.length, totalUpserted: total, results,
+      done, next: done ? null : (origin + "/api/ingest?all=1&offset=" + nextOffset),
+    });
   }
 
   const lat = parseFloat(searchParams.get("lat")), lng = parseFloat(searchParams.get("lng"));
