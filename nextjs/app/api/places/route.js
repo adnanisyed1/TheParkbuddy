@@ -81,9 +81,37 @@ export async function GET(request) {
     url: r.RecAreaID ? "https://www.recreation.gov/gateways/" + r.RecAreaID : "",
   })).filter((r) => r.name);
 
+  // Fill the gap RIDB misses (state parks, private & dispersed sites): OpenStreetMap
+  // tourism=camp_site near the point. Free, no key. De-dupe against RIDB by name.
+  let osmCamps = [];
+  try {
+    const rM = Math.min(radius, 60) * 1609;
+    const A = "(around:" + rM + "," + lat + "," + lng + ")";
+    const oq = "[out:json][timeout:18];(" +
+      'node["tourism"="camp_site"]["name"]' + A + ";" +
+      'way["tourism"="camp_site"]["name"]' + A + ";" +
+      ");out tags center 60;";
+    const orsp = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ParkBuddy" },
+      body: "data=" + encodeURIComponent(oq), next: { revalidate: 86400 },
+    });
+    if (orsp.ok) {
+      const od = await orsp.json();
+      const seenC = {};
+      osmCamps = (od.elements || []).map((el) => {
+        const t = el.tags || {}, c = el.center || el;
+        return { name: t.name, type: "campground", description: t.operator || "State / local / private campground", lat: num(c.lat), lng: num(c.lon), url: t.website || "", source: "OpenStreetMap" };
+      }).filter((c) => {
+        if (!c.name || c.lat == null || c.lng == null) return false;
+        const k = c.name.toLowerCase();
+        if (seenC[k] || seenFac[k]) return false; seenC[k] = 1; return true;
+      }).slice(0, 30);
+    }
+  } catch (e) { /* OSM best-effort */ }
+
   return Response.json({
-    facilities: facilities.slice(0, 45),
+    facilities: facilities.concat(osmCamps).slice(0, 70),
     recAreas: recAreas.slice(0, 20),
-    credit: "Recreation.gov / RIDB \u2014 U.S. federal land-management agencies (NPS, USFS, BLM, USACE, USFWS, USBR).",
+    credit: "Recreation.gov / RIDB (federal) + OpenStreetMap contributors (state/local/private campgrounds).",
   });
 }
