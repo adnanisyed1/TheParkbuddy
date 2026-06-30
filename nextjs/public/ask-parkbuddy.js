@@ -68,7 +68,7 @@
     var T = window.PBTrip;
     if (!T) {
       // Not on the Build a Trip page — carry the actions over and go build them there.
-      var buildy = actions.filter(function (a) { return a.name === 'build_itinerary' || a.name === 'add_park' || a.name === 'set_trip_details'; });
+      var buildy = actions.filter(function (a) { return a.name === 'build_itinerary' || a.name === 'add_park' || a.name === 'set_trip_details' || a.name === 'add_checklist_items' || a.name === 'generate_checklist'; });
       if (buildy.length) {
         try { sessionStorage.setItem('pb_agent_actions', JSON.stringify(buildy)); } catch (e) {}
         note('\u2713 Taking you to Build a Trip to set this up\u2026');
@@ -94,6 +94,9 @@
         note('\u2713 Updated trip details');
       } else if (a.name === 'generate_checklist') {
         T.generateChecklist(); note('\u2713 Drafted your Pack & Go checklist below');
+      } else if (a.name === 'add_checklist_items') {
+        if (window.PBChecklist) { var rc = window.PBChecklist.addItems(inp.items || []); window.PBChecklist.open(); note('\u2713 Added to your checklist: ' + ((rc.added || []).join(', ') || 'nothing new')); }
+        else { note('\u2715 Checklist is on the Build a Trip page \u2014 open it to add items.'); }
       } else if (a.name === 'save_passport') {
         T.downloadPassport(); note('\u2713 Opened your Trip Passport PDF');
       }
@@ -139,9 +142,12 @@
     history.push({ role: 'user', content: text });
     typing(true);
     try {
+      var ctx = {};
+      try { if (window.PBTrip) ctx.trip = window.PBTrip.state(); } catch (e) {}
+      try { if (window.PBChecklist) ctx.checklist = window.PBChecklist.state(); } catch (e) {}
       var r = await fetch('/api/agent', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: history.slice(0, -1) }),
+        body: JSON.stringify({ message: text, history: history.slice(0, -1), context: ctx }),
       });
       var data = await r.json();
       typing(false);

@@ -34,6 +34,8 @@ Your job: help people decide where to go, AND actually build their trip on the p
 Rules:
 - For any question about specific parks, conditions, activities, fees, or "which park should I…", call search_parks FIRST and base your answer on what it returns. Never invent park details.
 - When the user wants to plan or build a trip ("plan me 4 days in Utah", "add Zion", "build a Colorado trip with kids"), use the ACTION tools to do it for real: build_itinerary to assemble a whole route, add_park to add one, set_trip_details for dates/travelers/name, generate_checklist to draft their packing list, save_passport to make the PDF. Prefer build_itinerary when they describe a multi-park trip.
+- When the user asks what to pack/bring, or to add things to their list, use add_checklist_items: analyze the trip context (parks, season, conditions) and add specific, useful items with the right category (pack/grab/do) and a short reason. Don't duplicate items already on their list.
+- SAFETY-FIRST FOR RISKY DAYS: Give an honest verdict, but never just say "don't go." Many people go anyway. Whenever conditions are marginal or a no-go (heat, storms, snow/ice, flash-flood risk, smoke, cold, remoteness), briefly state the risk, then proactively offer a precautionary kit — "If you still go, carry these" — and use add_checklist_items to add the specific safety gear that addresses that exact hazard (e.g. flash-flood: check forecast + avoid slot canyons + start early; heat: 1 gal water/person + electrolytes + sun protection; cold/snow: insulated layers + traction + emergency blanket; smoke: N95 masks; remote: offline map + extra food/water + first-aid + tell someone your plan). Keep people safe, not home.
 - Only put REAL U.S. National Park names in itineraries (use search_parks to confirm names and states first).
 - After taking actions, tell the user plainly what you did ("I added Zion, Bryce and Capitol Reef and set 6 days"). Keep it short and friendly.
 - If the data doesn't cover something (live weather, today's closures), say so and point them to that park's live status page rather than guessing.
@@ -86,6 +88,30 @@ const TOOLS = [
     input_schema: { type: "object", properties: {}, required: [] },
   },
   {
+    name: "add_checklist_items",
+    description:
+      "Analyze the trip and add specific items to the user's Pack & Go checklist. Use when the user asks 'what should I pack/bring', 'add X to my list', or wants help getting ready. Each item has a category: 'pack' (pack at home), 'grab' (buy on the way), or 'do' (at the destination). Base items on the actual parks, season and conditions in the provided trip context.",
+    input_schema: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          description: "Checklist items to add.",
+          items: {
+            type: "object",
+            properties: {
+              cat: { type: "string", enum: ["pack", "grab", "do"], description: "When/where it happens." },
+              label: { type: "string", description: "Short item name, under 6 words." },
+              note: { type: "string", description: "Optional one-line reason, e.g. 'cold dawn at Zion'." },
+            },
+            required: ["cat", "label"],
+          },
+        },
+      },
+      required: ["items"],
+    },
+  },
+  {
     name: "save_passport",
     description: "Generate the downloadable Trip Passport PDF (full itinerary) for the current trip.",
     input_schema: { type: "object", properties: {}, required: [] },
@@ -93,7 +119,7 @@ const TOOLS = [
 ];
 
 // Names of tools that are applied client-side (recorded, not executed on the server).
-const ACTION_TOOLS = { build_itinerary: 1, add_park: 1, set_trip_details: 1, generate_checklist: 1, save_passport: 1 };
+const ACTION_TOOLS = { build_itinerary: 1, add_park: 1, set_trip_details: 1, generate_checklist: 1, save_passport: 1, add_checklist_items: 1 };
 
 // --- The real tool implementation -------------------------------------------
 // Calls the NPS API server-side and trims each result so we don't dump the full
@@ -174,6 +200,23 @@ export async function POST(request) {
         .slice(-8)
     : [];
 
+  // Optional live page context (current trip + checklist) so the agent can analyze
+  // what's already planned and add only what's missing.
+  let contextNote = "";
+  if (body && body.context && typeof body.context === "object") {
+    try {
+      const t = body.context.trip, c = body.context.checklist;
+      const bits = [];
+      if (t && Array.isArray(t.stops) && t.stops.length) {
+        bits.push("Current trip: " + t.stops.join(" \u2192 ") + (t.startDate ? " (starts " + t.startDate + ")" : "") + (t.travelers ? ", " + t.travelers + " travelers" : "") + ".");
+      }
+      if (c && typeof c.total === "number") {
+        bits.push("Checklist has " + c.total + " items" + (Array.isArray(c.items) && c.items.length ? ": " + c.items.map(function (i) { return i.label; }).slice(0, 30).join(", ") : "") + ".");
+      }
+      if (bits.length) contextNote = "\n\n[Live page context \u2014 use this to tailor and avoid duplicates]\n" + bits.join("\n");
+    } catch (e) {}
+  }
+
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     console.error("[agent] ANTHROPIC_API_KEY is not set.");
@@ -184,7 +227,7 @@ export async function POST(request) {
 
   // Build the conversation. Prompt caching on the system prompt + tools (both
   // repeat on every call) cuts cost — Anthropic caches the stable prefix.
-  const messages = [...history, { role: "user", content: message }];
+  const messages = [...history, { role: "user", content: message + contextNote }];
 
   try {
     let finalText = "";

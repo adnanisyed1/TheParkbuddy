@@ -457,4 +457,27 @@
 
   function boot() { return build(); }
   if (!boot()) { document.addEventListener('DOMContentLoaded', boot); window.addEventListener('load', boot); setTimeout(boot, 1000); }
+
+  /* ---- Agent control surface: lets "Ask Park Buddy" add items & read the list ---- */
+  window.PBChecklist = {
+    addItems: function (arr) {
+      if (!Array.isArray(arr)) return { ok: false, error: 'expected a list' };
+      var added = [];
+      arr.forEach(function (it) {
+        var cat = (it && it.cat || '').toLowerCase();
+        if (['pack', 'grab', 'do'].indexOf(cat) < 0) cat = 'pack';
+        var label = it && (it.label || it.text || '');
+        if (!label || has(label)) return;
+        items.push({ id: uid(), cat: cat, label: String(label).slice(0, 80), note: (it && it.note) || '', done: false });
+        added.push(label);
+      });
+      if (added.length) { save(); renderLists(); }
+      return { ok: true, added: added };
+    },
+    state: function () {
+      return { total: items.length, done: items.filter(function (x) { return x.done; }).length,
+        items: items.map(function (x) { return { cat: x.cat, label: x.label, done: !!x.done }; }) };
+    },
+    open: function () { var ck = document.querySelector('.pbck'); if (ck) { var y = ck.getBoundingClientRect().top + (window.pageYOffset || 0) - 70; window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); return { ok: true }; } return { ok: false }; }
+  };
 })();
