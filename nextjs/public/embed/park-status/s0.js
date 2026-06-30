@@ -412,6 +412,23 @@ function init(){
       var msg='Live weather appears on the published site.';
       el('glance').innerHTML='<div style="'+S.gchip+';flex:1 1 100%"><div style="'+S.gk+'">Live data</div><div style="'+S.gv+';font-size:1rem">On the published site</div><div style="'+S.gs+'">weather.gov can\u2019t load from a local file</div></div>';
     }
+    function loadConditions(p){
+      var pane=el('pane-now'); if(!pane) return;
+      var card=el('liveCond');
+      if(!card){ card=document.createElement('div'); card.id='liveCond'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane.insertBefore(card, pane.firstChild); }
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:9px">Live alerts &amp; conditions</div><span style="'+S.load+'">Checking weather alerts, wildfire &amp; air quality…</span>';
+      fetch('/api/conditions?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(!d){ card.style.display='none'; return; }
+        var H='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:12px">Live alerts &amp; conditions</div>';
+        var any=false;
+        var pill=function(bg,bd,col,ic,t,s){return '<div style="display:flex;gap:11px;align-items:flex-start;background:'+bg+';border:1px solid '+bd+';border-radius:13px;padding:12px 13px;margin-bottom:9px"><span style="font-size:1.1rem;line-height:1">'+ic+'</span><div style="min-width:0"><b style="color:'+col+';font-size:.9rem;display:block">'+t+'</b>'+(s?'<span style="font-size:.78rem;color:#5b6258;line-height:1.4;display:block;margin-top:2px">'+s+'</span>':'')+'</div></div>';};
+        (d.weatherAlerts||[]).forEach(function(a){ any=true; var sev=/extreme|severe/i.test(a.severity); H+=pill(sev?'rgba(217,83,79,.08)':'rgba(199,154,75,.1)', sev?'rgba(217,83,79,.3)':'rgba(199,154,75,.32)', sev?'#b03b36':'#9a6f28', sev?'⚠️':'⚡', a.event+(a.area?' · '+a.area.split(';')[0]:''), (a.headline||a.instruction||'').slice(0,150)); });
+        (d.wildfires||[]).forEach(function(f){ any=true; H+=pill('rgba(217,83,79,.08)','rgba(217,83,79,.3)','#b03b36','🔥', f.name+' wildfire'+(f.distanceMi!=null?' · ~'+f.distanceMi+' mi away':''), [f.acres!=null?f.acres.toLocaleString()+' acres':'', f.percentContained!=null?f.percentContained+'% contained':''].filter(Boolean).join(' · ')); });
+        if(d.airQuality){ any=true; var aq=d.airQuality, bad=aq.aqi>100; H+=pill(bad?'rgba(217,83,79,.08)':'rgba(63,122,52,.1)', bad?'rgba(217,83,79,.3)':'rgba(63,122,52,.28)', bad?'#b03b36':'#2f7d4f','🌫️', 'Air quality: '+aq.category+' (AQI '+aq.aqi+')', aq.parameter+(aq.reportingArea?' · '+aq.reportingArea:'')); }
+        if(!any){ H+='<div style="display:flex;gap:10px;align-items:center;color:#2f7d4f;font-weight:700;font-size:.88rem;background:rgba(63,122,52,.08);border:1px solid rgba(63,122,52,.25);border-radius:13px;padding:13px"><span>✓</span> No active weather alerts, wildfires, or air-quality concerns nearby.</div>'; }
+        card.innerHTML=H; card.style.display='';
+      }).catch(function(){ card.style.display='none'; });
+    }
     function loadForecast(p){
       fetch('https://api.weather.gov/points/'+p.lat.toFixed(4)+','+p.lng.toFixed(4),{headers:{Accept:'application/geo+json'}})
         .then(function(r){if(!r.ok)throw 0;return r.json();})
@@ -771,6 +788,7 @@ function init(){
       el('alerts').innerHTML='<span style="'+S.load+'">Checking for alerts…</span>';
       el('glance').innerHTML='<span style="'+S.load+'">Loading…</span>';
       loadNPS(p);
+      loadConditions(p);
       loadReviews(p);
       if(p.region==='territory'){ offline('This U.S. territory is outside the National Weather Service coverage area.'); return; }
       loadForecast(p); loadAlerts(p);
