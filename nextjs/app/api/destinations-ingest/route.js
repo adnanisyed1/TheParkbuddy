@@ -39,7 +39,7 @@ function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").rep
 async function overpass(query, mirrorIdx) {
   const url = OVERPASS_MIRRORS[(mirrorIdx || 0) % OVERPASS_MIRRORS.length];
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 22000);
+  const timer = setTimeout(() => ctrl.abort(), 12000);
   try {
     const r = await fetch(url, {
       method: "POST", signal: ctrl.signal,
@@ -52,33 +52,48 @@ async function overpass(query, mirrorIdx) {
   } catch (e) { clearTimeout(timer); throw new Error(String(e.message || e)); }
 }
 
-async function fetchState(stateName, mirrorIdx) {
-  const bb = STATE_BBOX[stateName]; if (!bb) return [];
-  const box = bb.join(",");
-  // BBOX query (south,west,north,east) — far faster than area[] resolution.
-  const q = `[out:json][timeout:20];
+function buildQ(box){
+  return `[out:json][timeout:14];
 (
   relation["boundary"="protected_area"]["name"~"National Forest"](${box});
   relation["boundary"="protected_area"]["protection_title"~"State Park",i](${box});
   relation["leisure"="park"]["name"~"State Park"](${box});
 );
 out center tags;`;
-  const data = await overpass(q, mirrorIdx);
-  const seen = {}, out = [];
+}
+function collect(data, stateName, seen, out){
   for (const el of (data.elements || [])) {
     const t = el.tags || {}; const name = t.name; if (!name) continue;
     const lat = el.lat || (el.center && el.center.lat), lng = el.lon || (el.center && el.center.lon);
     if (typeof lat !== "number" || typeof lng !== "number") continue;
     const isForest = /National Forest/i.test(name);
-    const type = isForest ? "national_forest" : "state_park";
-    const source = isForest ? "usfs" : "state";
     const id = (isForest ? "usfs:" : "state:") + (ST_ABBR[stateName] || "").toLowerCase() + "-" + slug(name);
     if (seen[id]) continue; seen[id] = 1;
     out.push({
-      id, name, type, source, lat, lng, state: stateName,
-      url: t.website || t.url || "", detail: t["description"] || "",
+      id, name, type: isForest ? "national_forest" : "state_park", source: isForest ? "usfs" : "state",
+      lat, lng, state: stateName, url: t.website || t.url || "", detail: t["description"] || "",
       tier: 1, fetched_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     });
+  }
+}
+async function fetchState(stateName, mirrorIdx) {
+  const bb = STATE_BBOX[stateName]; if (!bb) return [];
+  const [s, w, n, e] = bb;
+  // Large states get tiled into a grid so each Overpass query stays small & fast (avoids 504/timeout).
+  const area = (n - s) * (e - w);
+  const grid = area > 60 ? 3 : area > 22 ? 2 : 1;
+  const seen = {}, out = [];
+  let mi = mirrorIdx || 0;
+  const deadline = Date.now() + 50000; // overall budget, under maxDuration
+  for (let ix = 0; ix < grid; ix++) {
+    for (let iy = 0; iy < grid; iy++) {
+      if (Date.now() > deadline) return out;
+      const ts = s + (n - s) * iy / grid, tn = s + (n - s) * (iy + 1) / grid;
+      const tw = w + (e - w) * ix / grid, te = w + (e - w) * (ix + 1) / grid;
+      const box = [ts.toFixed(3), tw.toFixed(3), tn.toFixed(3), te.toFixed(3)].join(",");
+      try { const data = await overpass(buildQ(box), mi++); collect(data, stateName, seen, out); }
+      catch (e) { /* skip this tile; a re-run fills gaps (upsert is idempotent) */ }
+    }
   }
   return out;
 }
