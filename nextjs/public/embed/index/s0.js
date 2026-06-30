@@ -430,6 +430,7 @@ function initMap(){
   applyMapFilter(false);
   paintMarkers();
   setupLocate();
+  buildLegend();
 }
 /* ----- "Parks near me": fly to location, ripple nearby parks ----- */
 function setupLocate(){
@@ -524,8 +525,61 @@ function showBoundary(p){
     .catch(function(){ fly(); });
 }
 // ---- overrides wiring the side panel + filters to the real map ----
-function selectPark(p){ selected=p; renderDash(); paintMarkers(); showBoundary(p); var info=document.getElementById("info"); if(info)info.classList.add("open"); if(window.matchMedia('(max-width:860px)').matches){var d=document.getElementById("dash"); if(d)d.classList.remove("open");} if(typeof updateToggle==='function')updateToggle(); }
-function closePeek(){ selected=null; clearBoundary(); paintMarkers(); var info=document.getElementById("info"); if(info)info.classList.remove("open"); if(typeof updateToggle==='function')updateToggle(); }
+function selectPark(p){ selected=p; renderDash(); paintMarkers(); showBoundary(p); loadMapPlaces(p); var info=document.getElementById("info"); if(info)info.classList.add("open"); if(window.matchMedia('(max-width:860px)').matches){var d=document.getElementById("dash"); if(d)d.classList.remove("open");} if(typeof updateToggle==='function')updateToggle(); }
+function closePeek(){ selected=null; clearBoundary(); clearMapPlaces(); paintMarkers(); var info=document.getElementById("info"); if(info)info.classList.remove("open"); if(typeof updateToggle==='function')updateToggle(); }
 function paintTrees(){ paintMarkers(); }
-function paintStates(){ applyMapFilter(true); }
+
+/* ----- Nearby places layer (Recreation.gov / RIDB) ----- */
+var _placeMarkers=[], _placeIW=null;
+var _layerOn={places:true,hiking:true,offroad:true,ski:true};
+function _vis(on){ return on?gmap:null; }
+function applyLayers(){
+  _placeMarkers.forEach(function(m){ m.setMap(_layerOn.places?gmap:null); });
+  _trailLines.forEach(function(l){ l.setMap(_layerOn[l._layer]?gmap:null); });
+}
+function clearMapPlaces(){ _placeMarkers.forEach(function(m){ m.setMap(null); }); _placeMarkers=[]; if(_placeIW)_placeIW.close(); clearMapTrails(); }
+var _trailLines=[];
+function clearMapTrails(){ _trailLines.forEach(function(l){ l.setMap(null); }); _trailLines=[]; }
+function loadMapTrails(p){
+  if(!window.gmap||!p||typeof p.lat!=='number')return;
+  clearMapTrails();
+  fetch('/api/trails?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=30').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(!d||(selected&&selected.id!==p.id))return;
+    var draw=function(arr,color,layer){ (arr||[]).forEach(function(x){ if(!x.path||x.path.length<2)return;
+      var pl=new google.maps.Polyline({path:x.path.map(function(c){return {lat:c[0],lng:c[1]};}),map:(_layerOn[layer]?gmap:null),strokeColor:color,strokeOpacity:.85,strokeWeight:3,zIndex:30});
+      pl._layer=layer;
+      pl.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif"><b style="color:#1d3941">'+x.name+'</b>'+(x.difficulty?'<div style="font-size:12px;color:#5b6258">'+x.difficulty+'</div>':'')+'<div style="font-size:10px;color:#a79f8c;margin-top:5px">© OpenStreetMap</div></div>'); _placeIW.setPosition(x.path[Math.floor(x.path.length/2)]?{lat:x.path[Math.floor(x.path.length/2)][0],lng:x.path[Math.floor(x.path.length/2)][1]}:null); _placeIW.open(gmap); } });
+      _trailLines.push(pl); }); };
+    draw(d.hiking,'#3f7a34','hiking'); draw(d.offroad,'#a15a2a','offroad'); draw(d.ski,'#2a6f9e','ski');
+  }).catch(function(){});
+}
+
+/* ----- Map legend with layer on/off toggles ----- */
+function buildLegend(){
+  if(document.getElementById('mapLegend'))return;
+  var root=document.querySelector('.map')||document.getElementById('embed-root'); if(!root)return;
+  var rows=[['places','●','#2c5562','Campgrounds & areas'],['hiking','—','#3f7a34','Hiking trails'],['offroad','—','#a15a2a','Off-road / 4x4'],['ski','—','#2a6f9e','Ski routes']];
+  var lg=document.createElement('div'); lg.id='mapLegend';
+  lg.style.cssText='position:absolute;left:14px;bottom:14px;z-index:40;background:rgba(255,253,247,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid #e7ddca;border-radius:13px;padding:10px 12px;box-shadow:0 12px 30px -16px rgba(8,18,12,.5);font-family:Hanken Grotesk,sans-serif';
+  lg.innerHTML='<div style="font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;margin-bottom:7px">Map layers</div>'+rows.map(function(r){return '<label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:#1d3941;font-weight:600;cursor:pointer;padding:3px 0"><input type="checkbox" data-layer="'+r[0]+'" checked style="accent-color:#2c5562;cursor:pointer"><span style="color:'+r[2]+';font-size:1rem;width:12px;text-align:center">'+r[1]+'</span>'+r[3]+'</label>';}).join('');
+  root.appendChild(lg);
+  lg.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.addEventListener('change',function(){ _layerOn[cb.getAttribute('data-layer')]=cb.checked; applyLayers(); }); });
+}
+function loadMapPlaces(p){
+  if(!window.gmap||!p||typeof p.lat!=='number')return;
+  clearMapPlaces();
+  fetch('/api/places?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=40').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(!d||(selected&&selected.id!==p.id))return;
+    if(!_placeIW&&window.google)_placeIW=new google.maps.InfoWindow();
+    var add=function(x,color){ if(typeof x.lat!=='number'||typeof x.lng!=='number')return;
+      var mk=new google.maps.Marker({position:{lat:x.lat,lng:x.lng},map:(_layerOn.places?gmap:null),zIndex:50,
+        icon:{path:google.maps.SymbolPath.CIRCLE,scale:5,fillColor:color,fillOpacity:1,strokeColor:'#fffdf7',strokeWeight:1.5},title:x.name});
+      mk.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:200px"><b style="color:#1d3941">'+x.name+'</b>'+(x.type||x.description?'<div style="font-size:12px;color:#5b6258;margin-top:3px">'+(x.type||x.description)+'</div>':'')+(x.url?'<a href="'+x.url+'" target="_blank" rel="noopener" style="font-size:12px;color:#2c5562;font-weight:700;display:inline-block;margin-top:5px">View on Recreation.gov ↗</a>':'')+'<div style="font-size:10px;color:#a79f8c;margin-top:6px">Recreation.gov / RIDB</div></div>'); _placeIW.open(gmap,mk); } });
+      _placeMarkers.push(mk);
+    };
+    (d.recAreas||[]).forEach(function(x){ add(x,'#2f7d4f'); });
+    (d.facilities||[]).forEach(function(x){ add(x,'#2c5562'); });
+  }).catch(function(){});
+  loadMapTrails(p);
+}function paintStates(){ applyMapFilter(true); }
 function showLabel(){} function hideLabel(){}

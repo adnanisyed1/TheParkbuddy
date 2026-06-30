@@ -49,7 +49,7 @@ export async function GET(request) {
     'way["highway"="track"]["name"]["tracktype"]' + A + ";" +
     'way["4wd_only"="yes"]["name"]' + A + ";" +
     'way["piste:type"]["name"]' + A + ";" +
-    ");out tags center 120;";
+    ");out tags geom 120;";
 
   const data = await overpass(query);
   if (!data || !Array.isArray(data.elements)) {
@@ -62,7 +62,13 @@ export async function GET(request) {
     const name = t.name;
     if (!name || seen[name.toLowerCase()]) continue;
     seen[name.toLowerCase()] = 1;
-    const item = { name, difficulty: t.sac_scale || t["piste:difficulty"] || t.tracktype || "" };
+    // Sample the geometry down to <=40 points to keep the payload small.
+    let path = null;
+    if (Array.isArray(el.geometry) && el.geometry.length) {
+      const g = el.geometry, step = Math.max(1, Math.floor(g.length / 40));
+      path = g.filter((_, i) => i % step === 0 || i === g.length - 1).map((pt) => [pt.lat, pt.lon]);
+    }
+    const item = { name, difficulty: t.sac_scale || t["piste:difficulty"] || t.tracktype || "", path };
     if (t["piste:type"]) { if (ski.length < 12) ski.push(item); }
     else if (t["4wd_only"] === "yes" || (t.highway === "track" && t.tracktype)) { if (offroad.length < 12) offroad.push(item); }
     else { if (hiking.length < 16) hiking.push(item); }
