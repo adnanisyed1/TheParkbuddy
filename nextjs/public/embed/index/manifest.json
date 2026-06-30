@@ -22,6 +22,7 @@
     "/passport.js",
     "/map-style.js",
     "/transition.js",
+    "/gateway-towns.js",
     "/ask-parkbuddy.js"
   ]
 }

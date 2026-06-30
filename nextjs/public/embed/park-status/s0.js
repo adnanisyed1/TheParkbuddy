@@ -433,9 +433,11 @@ function init(){
       }).catch(function(){ card.style.display='none'; });
     }
     function loadPlaces(p){
-      var pane=el('pane-now'); if(!pane) return;
+      var g=(window.PB_GATEWAY&&window.PB_GATEWAY(p.name))||null;
+      if(g){ var pane=el('pane-now'); if(pane){ var gc=el('gateway'); if(!gc){ gc=document.createElement('div'); gc.id='gateway'; gc.style.cssText='grid-column:1/-1;background:linear-gradient(150deg,#33555f,#1d3941);border:1px solid rgba(228,190,120,.3);border-radius:20px;padding:18px;color:#fbf6ea;box-shadow:0 18px 44px -22px rgba(8,18,12,.5)'; pane.insertBefore(gc, pane.firstChild); } gc.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#e4be78;font-weight:800;margin-bottom:7px">Adventure basecamp</div><div style="font-family:Spectral,serif;font-weight:700;font-size:1.3rem">🏕️ '+g.town+'</div><p style="font-size:.86rem;color:rgba(251,246,234,.82);line-height:1.5;margin-top:6px">'+g.blurb+'</p><a href="https://www.google.com/maps/search/lodging+near+'+encodeURIComponent(g.town)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:.82rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:9px 15px;border-radius:11px;text-decoration:none">Find lodging here →</a>'; } }
+      var pane2=el('pane-now'); if(!pane2) return;
       var card=el('nearbyRec');
-      if(!card){ card=document.createElement('div'); card.id='nearbyRec'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane.appendChild(card); }
+      if(!card){ card=document.createElement('div'); card.id='nearbyRec'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane2.appendChild(card); }
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:9px">Nearby to explore</div><span style="'+S.load+'">Finding campgrounds, forests &amp; trails nearby…</span>';
       fetch('/api/places?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
         if(!d||(!d.facilities||!d.facilities.length)&&(!d.recAreas||!d.recAreas.length)){ card.style.display='none'; return; }

@@ -583,5 +583,7 @@ function loadMapPlaces(p){
     (d.facilities||[]).forEach(function(x){ add(x,'#2c5562'); });
   }).catch(function(){});
   loadMapTrails(p);
+  // gateway / adventure town pin
+  if(window.PB_GATEWAY){ var g=window.PB_GATEWAY(p.name); if(g&&typeof g.lat==='number'){ var gm=new google.maps.Marker({position:{lat:g.lat,lng:g.lng},map:(_layerOn.places?gmap:null),zIndex:60,title:g.town,icon:{path:'M0,-8 L2.2,-2.2 L8,-2.2 L3.4,1.6 L5.2,7.6 L0,4 L-5.2,7.6 L-3.4,1.6 L-8,-2.2 L-2.2,-2.2 Z',scale:1.5,fillColor:'#e4be78',fillOpacity:1,strokeColor:'#15241c',strokeWeight:1}}); gm.addListener('click',function(){ if(_placeIW){ _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:210px"><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#a98a4e">Adventure basecamp</div><b style="color:#1d3941">'+g.town+'</b><div style="font-size:12px;color:#5b6258;margin-top:3px">'+g.blurb+'</div></div>'); _placeIW.open(gmap,gm); } }); _placeMarkers.push(gm); } }
 }function paintStates(){ applyMapFilter(true); }
 function showLabel(){} function hideLabel(){}

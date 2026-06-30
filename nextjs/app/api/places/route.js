@@ -45,14 +45,20 @@ export async function GET(request) {
 
   const geo = { latitude: lat, longitude: lng, radius: radius, limit: "50" };
 
-  const [facD, recD] = await Promise.all([
+  // Two facility passes: a general nearby search + a camping-focused one (RIDB activity
+  // 9 = CAMPING). Merging them surfaces far more campgrounds, since RIDB's generic
+  // nearby search often returns non-camping facilities first.
+  const [facD, facCampD, recD] = await Promise.all([
     ridb("/facilities", { ...geo, ...(q ? { query: q } : {}) }, key),
+    ridb("/facilities", { ...geo, activity: "9" }, key),
     ridb("/recareas", { ...geo, ...(q ? { query: q } : {}) }, key),
   ]);
 
   const clean = (s, n) => String(s || "").replace(/<[^>]+>/g, "").slice(0, n || 200);
 
-  const facilities = ((facD && facD.RECDATA) || []).map((f) => ({
+  const rawFac = [].concat((facCampD && facCampD.RECDATA) || [], (facD && facD.RECDATA) || []);
+  const seenFac = {};
+  const facilities = rawFac.map((f) => ({
     name: f.FacilityName,
     type: f.FacilityTypeDescription || "",
     description: clean(f.FacilityDescription, 220),
@@ -61,7 +67,10 @@ export async function GET(request) {
     reservable: !!f.Reservable,
     phone: f.FacilityPhone || "",
     url: f.FacilityID ? "https://www.recreation.gov/camping/campgrounds/" + f.FacilityID : "",
-  })).filter((f) => f.name);
+  })).filter((f) => {
+    if (!f.name || f.lat == null || f.lng == null || (f.lat === 0 && f.lng === 0)) return false;
+    const k = f.name.toLowerCase(); if (seenFac[k]) return false; seenFac[k] = 1; return true;
+  });
 
   const recAreas = ((recD && recD.RECDATA) || []).map((r) => ({
     name: r.RecAreaName,
