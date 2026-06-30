@@ -12,6 +12,7 @@
     "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
     "/supabase-config.js",
     "/auth.js",
-    "/transition.js"
+    "/transition.js",
+    "/ask-parkbuddy.js"
   ]
 }

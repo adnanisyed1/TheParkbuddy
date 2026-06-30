@@ -445,9 +445,18 @@ function init(){
       _npsCache[name]=pr; return pr;
     }
     function setBox(id,html){var e=el(id); if(e)e.innerHTML=html;}
+    function npsMapBlock(p){
+      var u=(window.PB_NPS_MAP&&window.PB_NPS_MAP(p.name))||'';
+      var lat=p.lat,lng=p.lng,h='';
+      if(typeof lat==='number'&&typeof lng==='number'){
+        var bb=(lng-0.55).toFixed(4)+','+(lat-0.38).toFixed(4)+','+(lng+0.55).toFixed(4)+','+(lat+0.38).toFixed(4);
+        h+='<iframe title="'+(p.name||'Park')+' map" loading="lazy" style="width:100%;height:240px;border:1px solid #e7ddca;border-radius:13px;display:block;margin-bottom:11px" src="https://www.openstreetmap.org/export/embed.html?bbox='+bb+'&layer=mapnik&marker='+lat+','+lng+'"></iframe>';
+      }
+      h+='<div style="'+S.row+'">'+(u?'<a style="'+S.btn+'" href="'+u+'" target="_blank" rel="noopener">\uD83D\uDDFA Official NPS park map \u2197</a>':'')+(typeof lat==='number'?'<a style="'+S.btn+'" href="https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lng+'#map=10/'+lat+'/'+lng+'" target="_blank" rel="noopener">Open full map \u2197</a>':'')+'</div>';
+      return h;
+    }
     function loadNPS(p){
-      var _m=(window.PB_NPS_MAP&&window.PB_NPS_MAP(p.name))||'';
-      setBox('nps',(_m?'<div style="'+S.row+'"><a style="'+S.btn+'" href="'+_m+'" target="_blank" rel="noopener">\uD83D\uDDFA Official park map \u2197</a></div>':'')+'<span style="'+S.load+'">Loading official NPS info…</span>');
+      setBox('nps', npsMapBlock(p)+'<span style="'+S.load+'">Loading official NPS details\u2026</span>');
       fetchNPS(p.name).then(function(d){
         var park=d.park||{};
         var _imgs=park.images||[];
@@ -464,8 +473,8 @@ function init(){
           if(fees.length) html+='<div><b style="color:#1d4a37">Entrance:</b> '+fees.map(function(f){return ((f.cost&&f.cost!=='0.00')?('$'+f.cost):'Free')+(f.title?(' — '+f.title):'');}).join(' · ')+'</div>';
           else html+='<div>Entrance fee information isn\u2019t posted for this park.</div>';
           if(hours) html+='<div style="margin-top:5px"><b style="color:#1d4a37">Hours:</b> '+hours+'</div>';
-          if(park.url){ var _mbase=park.url.replace(/index\.htm.*$/i,'').replace(/\/+$/,''); html+='<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Official park page ↗</a><a style="'+S.btn+'" href="'+_mbase+'/planyourvisit/maps.htm" target="_blank" rel="noopener">🗺 Official park map ↗</a></div>'; }
-          html+='</div>'; box.innerHTML=html;
+          if(park.url) html+='<div style="'+S.row+'"><a style="'+S.btn+'" href="'+park.url+'" target="_blank" rel="noopener">Official park page ↗</a></div>';
+          html+='</div>'; box.innerHTML=npsMapBlock(p)+html;
         }
         var td=d.thingsToDo||[];
         setBox('todo', td.length?td.map(function(t){return '<div style="'+S.td+'">'+(t.image?'<img style="'+S.tdimg+'" src="'+t.image+'" alt="">':'')+'<div><h4 style="'+S.h4+'">'+(t.title||'')+'</h4><p style="'+S.p+'">'+(t.shortDescription||'')+'</p>'+(t.duration?'<div style="'+S.dur+'">⏱ '+t.duration+'</div>':'')+(t.url?' <a href="'+t.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No things-to-do listed for this park.</span>');
@@ -491,10 +500,9 @@ function init(){
         var pl=d.places||[];
         setBox('places', pl.length?pl.map(function(x){return '<div style="'+S.td+'">'+(x.image?'<img style="'+S.tdimg+'" src="'+x.image+'" alt="">':'')+'<div><h4 style="'+S.h4+'">'+(x.title||'')+'</h4>'+(x.description?'<p style="'+S.p+'">'+x.description+'</p>':'')+(x.url?' <a href="'+x.url+'" target="_blank" rel="noopener" style="font-size:.78rem;color:#1d4a37;font-weight:600">Details ↗</a>':'')+'</div></div>';}).join(''):'<span style="'+S.load+'">No points of interest listed.</span>');
       }).catch(function(){
-        var msg='<span style="'+S.load+'">Official NPS content appears once the site is published with an NPS key configured.</span>';
+        var msg='<span style="'+S.load+'">Official NPS details appear once the site is published with an NPS key configured.</span>';
         ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){setBox(id,msg);});
-        var _m=(window.PB_NPS_MAP&&window.PB_NPS_MAP(p.name))||'';
-        setBox('nps',(_m?'<div style="'+S.row+'"><a style="'+S.btn+'" href="'+_m+'" target="_blank" rel="noopener">\uD83D\uDDFA Official park map \u2197</a></div>':'')+msg);
+        setBox('nps', npsMapBlock(p)+msg);
       });
     }
 

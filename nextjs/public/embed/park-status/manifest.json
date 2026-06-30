@@ -12,6 +12,7 @@
     "/embed/park-status/s0.js",
     "/commerce.js",
     "/auth.js",
-    "/transition.js"
+    "/transition.js",
+    "/ask-parkbuddy.js"
   ]
 }

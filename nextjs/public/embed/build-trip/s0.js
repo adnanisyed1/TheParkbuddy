@@ -435,3 +435,53 @@ function setMobileView(t,skipScroll){
   if(target){var y=target.getBoundingClientRect().top+window.pageYOffset-66;window.scrollTo({top:Math.max(0,y),behavior:'smooth'});}
 }
 (function(){var mj=document.getElementById('mjump');if(!mj)return;mj.querySelectorAll('button').forEach(function(b){b.onclick=function(){setMobileView(b.getAttribute('data-t'));};});})();
+
+/* ---- Agent control surface: lets "Ask Park Buddy" build the trip live on this page ---- */
+window.PBTrip = (function(){
+  function norm(s){return String(s||'').toLowerCase().replace(/national park.*$|national preserve.*$/,'').replace(/&/g,'and').replace(/[^a-z]/g,'');}
+  function find(name){
+    var n=norm(name); if(!n) return null;
+    var ex=PARKS.filter(function(p){return norm(p.name)===n;}); if(ex.length) return ex[0];
+    var part=PARKS.filter(function(p){var pn=norm(p.name);return pn.indexOf(n)>-1||n.indexOf(pn)>-1;});
+    return part[0]||null;
+  }
+  function addPark(name,nights){
+    var p=find(name); if(!p) return {ok:false,error:'No matching national park: '+name};
+    if(trip.stops.some(function(s){return s.pid===p.id;})) return {ok:true,name:p.name,note:'already in trip'};
+    trip.stops.push({pid:p.id,nights:nights||NIGHTS[p.id]||2,lodge:''});
+    render(true); return {ok:true,name:p.name};
+  }
+  function setBasics(o){
+    o=o||{};
+    if(o.name!=null) trip.name=o.name;
+    if(o.startDate) trip.startDate=o.startDate;
+    if(o.travelers) trip.travelers=Math.max(1,parseInt(o.travelers,10)||1);
+    fillBasics(); render(false); return {ok:true};
+  }
+  function buildTrip(names,opts){
+    opts=opts||{};
+    trip.stops=[]; var added=[],missed=[];
+    (names||[]).forEach(function(nm){var p=find(nm); if(p){ if(!trip.stops.some(function(s){return s.pid===p.id;})){ trip.stops.push({pid:p.id,nights:NIGHTS[p.id]||2,lodge:''}); added.push(p.name);} } else missed.push(nm);});
+    if(opts.name!=null) trip.name=opts.name;
+    if(opts.startDate) trip.startDate=opts.startDate;
+    if(opts.travelers) trip.travelers=Math.max(1,parseInt(opts.travelers,10)||1);
+    fillBasics(); render(true); return {ok:true,added:added,missed:missed};
+  }
+  function clearTrip(){ trip.stops=[]; render(true); return {ok:true}; }
+  function generateChecklist(){
+    try{ var ck=document.querySelector('.pbck'); if(!ck) return {ok:false,error:'checklist not ready'};
+      var g=ck.querySelector('[data-gen="trip"]'); if(g){ g.click(); setTimeout(function(){ var a=ck.querySelector('.pbck-addall'); if(a)a.click(); },450); }
+      var y=ck.getBoundingClientRect().top+(window.pageYOffset||0)-70; window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+      return {ok:true};
+    }catch(e){ return {ok:false}; }
+  }
+  function startMode(){ try{ var b=document.querySelector('.pbck-start'); if(b){ b.click(); return {ok:true}; } return {ok:false}; }catch(e){ return {ok:false}; } }
+  function downloadPassport(){ var b=document.getElementById('passportbtn'); if(b){ b.click(); return {ok:true}; } return {ok:false}; }
+  function state(){
+    var names=trip.stops.filter(function(s){return !s.hidden;}).map(function(s){return s.pid&&byId[s.pid]?byId[s.pid].name:(s.name||'stop');});
+    return {name:trip.name||'',startDate:trip.startDate||'',travelers:trip.travelers,stops:names,
+      days:(typeof tripDays==='function'?tripDays():null),
+      miles:(typeof totalMiles==='function'?Math.round(totalMiles()):null)};
+  }
+  return {addPark:addPark,setBasics:setBasics,buildTrip:buildTrip,clearTrip:clearTrip,generateChecklist:generateChecklist,startMode:startMode,downloadPassport:downloadPassport,find:find,state:state};
+})();

@@ -6,3 +6,11 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# A multi-round agent loop (app/api/agent) can exceed the 10s default.
+# 26s is the max on the Netlify Pro plan.
+[functions]
+  included_files = []
+
+[functions."___netlify-server-handler"]
+  timeout = 26
