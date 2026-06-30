@@ -14,6 +14,12 @@ de-duplicated, source-stamped payload (dedupe by name + 250m proximity; each rec
 {source, fetchedAt}). Next: run the same reconciliation on a SCHEDULE into a database for
 full offline coverage + add state-park / USFS camping + user "report a spot" corrections.
 
+✅ STORE: /api/ingest reconciles via /api/explore and UPSERTs into Supabase table pb_places
+(run supabase-schema.sql once). /api/explore now reads pb_places first (instant/complete),
+falling back to live. Env: SUPABASE_URL, SUPABASE_SERVICE_KEY (ingest), SUPABASE_ANON_KEY (read).
+Trigger: POST /api/ingest?all=1 (seed parks) or ?lat=&lng=. Schedule it daily (cron/Netlify
+scheduled function). Next: add state-park/USFS camping sources + user "report a spot".
+
 ---
 
 ## Phase 1 — Go deep on what we already touch (free, biggest value-per-effort)

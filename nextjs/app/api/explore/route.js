@@ -45,6 +45,26 @@ export async function GET(request) {
   const ll = "lat=" + lat + "&lng=" + lng;
   const now = new Date().toISOString();
 
+  // 1) Fast path: serve pre-ingested, reconciled rows from Supabase if available.
+  const sb = process.env.SUPABASE_URL, anon = process.env.SUPABASE_ANON_KEY;
+  if (sb && anon) {
+    try {
+      // bounding box ~0.5° around the point
+      const d = 0.5;
+      const url = sb + "/rest/v1/pb_places?select=name,type,lat,lng,url,detail,sources,fetched_at" +
+        "&lat=gte." + (lat - d) + "&lat=lte." + (lat + d) +
+        "&lng=gte." + (lng - d) + "&lng=lte." + (lng + d) + "&limit=200";
+      const r = await fetch(url, { headers: { apikey: anon, Authorization: "Bearer " + anon }, next: { revalidate: 600 } });
+      if (r.ok) {
+        const cached = await r.json();
+        if (Array.isArray(cached) && cached.length) {
+          return Response.json({ query: { lat, lng }, places: cached, fromCache: true, count: cached.length,
+            sources: ["Recreation.gov / RIDB", "OpenStreetMap (ODbL)", "NWS/NIFC/AirNow"], servedAt: now });
+        }
+      }
+    } catch (e) { /* fall through to live */ }
+  }
+
   // Pull every source in parallel (each already cached at its own layer).
   const [places, water, trails, conditions] = await Promise.all([
     get(origin, "/api/places?" + ll),
