@@ -35,8 +35,8 @@ Rules:
 - For any question about specific parks, conditions, activities, fees, or "which park should I…", call search_parks FIRST and base your answer on what it returns. Never invent park details.
 - When the user wants to plan or build a trip ("plan me 4 days in Utah", "add Zion", "build a Colorado trip with kids"), use the ACTION tools to do it for real: build_itinerary to assemble a whole route, add_park to add one, set_trip_details for dates/travelers/name, generate_checklist to draft their packing list, save_passport to make the PDF. Prefer build_itinerary when they describe a multi-park trip.
 - When the user asks what to pack/bring, or to add things to their list, use add_checklist_items: analyze the trip context (parks, season, conditions) and add specific, useful items with the right category (pack/grab/do) and a short reason. Don't duplicate items already on their list.
-- SAFETY-FIRST FOR RISKY DAYS: Give an honest verdict, but never just say "don't go." Many people go anyway. Whenever conditions are marginal or a no-go (heat, storms, snow/ice, flash-flood risk, smoke, cold, remoteness), briefly state the risk, then proactively offer a precautionary kit — "If you still go, carry these" — and use add_checklist_items to add the specific safety gear that addresses that exact hazard (e.g. flash-flood: check forecast + avoid slot canyons + start early; heat: 1 gal water/person + electrolytes + sun protection; cold/snow: insulated layers + traction + emergency blanket; smoke: N95 masks; remote: offline map + extra food/water + first-aid + tell someone your plan). Keep people safe, not home.
-- Only put REAL U.S. National Park names in itineraries (use search_parks to confirm names and states first).
+- SAFETY-FIRST FOR RISKY DAYS: When the user asks whether it's safe, or about weather/fire/smoke, call get_park_conditions (after search_parks for the lat/lng) to get LIVE alerts, wildfires and air quality. Give an honest verdict based on real data, but never just say "don't go." Many people go anyway. Whenever conditions are marginal or a no-go (heat, storms, snow/ice, flash-flood risk, smoke, cold, remoteness), briefly state the risk, then proactively offer a precautionary kit — "If you still go, carry these" — and use add_checklist_items to add the specific safety gear that addresses that exact hazard (e.g. flash-flood: check forecast + avoid slot canyons + start early; heat: 1 gal water/person + electrolytes + sun protection; cold/snow: insulated layers + traction + emergency blanket; smoke: N95 masks; remote: offline map + extra food/water + first-aid + tell someone your plan). Keep people safe, not home.
+- When the user wants things to do, camping, off-roading, lakes, or places beyond the park itself, call search_recreation (after search_parks for lat/lng) to suggest real nearby Recreation.gov places. Credit the source naturally when relevant.
 - After taking actions, tell the user plainly what you did ("I added Zion, Bryce and Capitol Reef and set 6 days"). Keep it short and friendly.
 - If the data doesn't cover something (live weather, today's closures), say so and point them to that park's live status page rather than guessing.
 - Never output raw JSON or mention "tools" — just talk naturally.`;
@@ -56,6 +56,36 @@ const TOOLS = [
         stateCode: { type: "string", description: 'Optional two-letter US state code, e.g. "CO", "UT".' },
       },
       required: ["query"],
+    },
+  },
+  {
+    name: "get_park_conditions",
+    description:
+      "Get LIVE safety conditions for a location: active National Weather Service alerts (floods, red-flag/fire-weather, heat, winter), nearby wildfires, and air quality / smoke. Call this when the user asks if it's safe to go, about weather warnings, fire, or smoke. Get lat/lng from search_parks first.",
+    input_schema: {
+      type: "object",
+      properties: { lat: { type: "number" }, lng: { type: "number" } },
+      required: ["lat", "lng"],
+    },
+  },
+  {
+    name: "search_trails",
+    description:
+      "Find named hiking trails, 4x4/OHV off-road tracks, and ski routes near a location (OpenStreetMap data). Use for 'best hikes near', 'off-roading trails', 'ski touring'. Get lat/lng from search_parks first. Credit OpenStreetMap contributors when listing these.",
+    input_schema: {
+      type: "object",
+      properties: { lat: { type: "number" }, lng: { type: "number" }, radius: { type: "number", description: "Optional search radius in km (default 25)." } },
+      required: ["lat", "lng"],
+    },
+  },
+  {
+    name: "search_recreation",
+    description:
+      "Find nearby recreation places from Recreation.gov/RIDB — campgrounds, national forests, trailheads, OHV/off-road areas, boat launches, lakes — around a location. Use when the user wants things to do, camping, or places beyond the national park itself. Get lat/lng from search_parks first; optional query filters (e.g. 'camping', 'OHV', 'boat').",
+    input_schema: {
+      type: "object",
+      properties: { lat: { type: "number" }, lng: { type: "number" }, query: { type: "string" } },
+      required: ["lat", "lng"],
     },
   },
   {
@@ -124,6 +154,48 @@ const ACTION_TOOLS = { build_itinerary: 1, add_park: 1, set_trip_details: 1, gen
 // --- The real tool implementation -------------------------------------------
 // Calls the NPS API server-side and trims each result so we don't dump the full
 // (huge) payload into the model's context.
+// Trails tool — calls our own /api/trails (OpenStreetMap): hiking, 4x4/OHV, ski routes.
+async function getTrails({ lat, lng, radius }, request) {
+  if (lat == null || lng == null) return { error: "lat and lng are required (get them from search_parks)." };
+  try {
+    const origin = new URL(request.url).origin;
+    const u = origin + "/api/trails?lat=" + lat + "&lng=" + lng + (radius ? "&radius=" + radius : "");
+    const r = await fetch(u);
+    if (!r.ok) return { error: "trails unavailable" };
+    return await r.json();
+  } catch (e) {
+    return { error: "trails request failed" };
+  }
+}
+
+// Recreation places tool — calls our own /api/places (Recreation.gov / RIDB):
+// campgrounds, national forests, OHV areas, boat launches, trailheads near a point.
+async function getPlaces({ lat, lng, query }, request) {
+  if (lat == null || lng == null) return { error: "lat and lng are required (get them from search_parks)." };
+  try {
+    const origin = new URL(request.url).origin;
+    const u = origin + "/api/places?lat=" + lat + "&lng=" + lng + (query ? "&q=" + encodeURIComponent(query) : "");
+    const r = await fetch(u);
+    if (!r.ok) return { error: "places unavailable" };
+    return await r.json();
+  } catch (e) {
+    return { error: "places request failed" };
+  }
+}
+
+// Live conditions tool — calls our own /api/conditions (NWS alerts + NIFC wildfire + AirNow).
+async function getConditions({ lat, lng }, request) {
+  if (lat == null || lng == null) return { error: "lat and lng are required (get them from search_parks)." };
+  try {
+    const origin = new URL(request.url).origin;
+    const r = await fetch(origin + "/api/conditions?lat=" + lat + "&lng=" + lng);
+    if (!r.ok) return { error: "conditions unavailable" };
+    return await r.json();
+  } catch (e) {
+    return { error: "conditions request failed" };
+  }
+}
+
 async function searchParks({ query, stateCode }) {
   const key = process.env.NPS_API_KEY;
   if (!key) return { error: "NPS_API_KEY is not configured on the server." };
@@ -142,6 +214,8 @@ async function searchParks({ query, stateCode }) {
       states: p.states,
       description: (p.description || "").slice(0, 300),
       url: p.url,
+      lat: p.latitude ? parseFloat(p.latitude) : null,
+      lng: p.longitude ? parseFloat(p.longitude) : null,
     }));
     return { count: parks.length, parks };
   } catch (e) {
@@ -263,6 +337,12 @@ export async function POST(request) {
           let result;
           if (tu.name === "search_parks") {
             result = await searchParks(tu.input || {});
+          } else if (tu.name === "get_park_conditions") {
+            result = await getConditions(tu.input || {}, request);
+          } else if (tu.name === "search_recreation") {
+            result = await getPlaces(tu.input || {}, request);
+          } else if (tu.name === "search_trails") {
+            result = await getTrails(tu.input || {}, request);
           } else if (ACTION_TOOLS[tu.name]) {
             // Record for the browser to apply; ack optimistically so the model continues.
             actions.push({ name: tu.name, input: tu.input || {} });

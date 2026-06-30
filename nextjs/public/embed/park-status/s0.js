@@ -426,6 +426,38 @@ function init(){
         (d.wildfires||[]).forEach(function(f){ any=true; H+=pill('rgba(217,83,79,.08)','rgba(217,83,79,.3)','#b03b36','🔥', f.name+' wildfire'+(f.distanceMi!=null?' · ~'+f.distanceMi+' mi away':''), [f.acres!=null?f.acres.toLocaleString()+' acres':'', f.percentContained!=null?f.percentContained+'% contained':''].filter(Boolean).join(' · ')); });
         if(d.airQuality){ any=true; var aq=d.airQuality, bad=aq.aqi>100; H+=pill(bad?'rgba(217,83,79,.08)':'rgba(63,122,52,.1)', bad?'rgba(217,83,79,.3)':'rgba(63,122,52,.28)', bad?'#b03b36':'#2f7d4f','🌫️', 'Air quality: '+aq.category+' (AQI '+aq.aqi+')', aq.parameter+(aq.reportingArea?' · '+aq.reportingArea:'')); }
         if(!any){ H+='<div style="display:flex;gap:10px;align-items:center;color:#2f7d4f;font-weight:700;font-size:.88rem;background:rgba(63,122,52,.08);border:1px solid rgba(63,122,52,.25);border-radius:13px;padding:13px"><span>✓</span> No active weather alerts, wildfires, or air-quality concerns nearby.</div>'; }
+        var credits=['Alerts: NOAA/NWS weather.gov','Wildfire: NIFC'];
+        if(d.airQuality){ credits.push('Air quality: AirNow — EPA &amp; state/local/tribal air agencies'); }
+        H+='<div style="font-size:.62rem;color:#a79f8c;margin-top:11px;line-height:1.4">Data &amp; credit: '+credits.join(' · ')+'. Agencies are the owners and authorities for their data.</div>';
+        card.innerHTML=H; card.style.display='';
+      }).catch(function(){ card.style.display='none'; });
+    }
+    function loadPlaces(p){
+      var pane=el('pane-now'); if(!pane) return;
+      var card=el('nearbyRec');
+      if(!card){ card=document.createElement('div'); card.id='nearbyRec'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane.appendChild(card); }
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:9px">Nearby to explore</div><span style="'+S.load+'">Finding campgrounds, forests &amp; trails nearby…</span>';
+      fetch('/api/places?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(!d||(!d.facilities||!d.facilities.length)&&(!d.recAreas||!d.recAreas.length)){ card.style.display='none'; return; }
+        var item=function(x,ic){return '<a href="'+(x.url||'#')+'" target="_blank" rel="noopener" style="display:flex;gap:11px;align-items:flex-start;text-decoration:none;padding:11px 0;border-top:1px solid #f1ead9"><span style="font-size:1.1rem">'+ic+'</span><div style="min-width:0"><b style="color:#1d4a37;font-size:.9rem;display:block">'+x.name+'</b>'+(x.type||x.description?'<span style="font-size:.76rem;color:#5b6258;line-height:1.4;display:block;margin-top:1px">'+(x.type||x.description)+'</span>':'')+'</div></a>';};
+        var H='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:4px">Nearby to explore</div>';
+        (d.recAreas||[]).slice(0,4).forEach(function(r){ H+=item(r,'🏞️'); });
+        (d.facilities||[]).slice(0,6).forEach(function(f){ H+=item(f,/camp/i.test(f.type)?'⛺':/trail/i.test(f.type)?'🥾':'📍'); });
+        H+='<div style="font-size:.62rem;color:#a79f8c;margin-top:11px;line-height:1.4">Data &amp; credit: '+(d.credit||'Recreation.gov / RIDB')+'</div>';
+        card.innerHTML=H; card.style.display='';
+      }).catch(function(){ card.style.display='none'; });
+    }
+    function loadTrails(p){
+      var pane=el('pane-now'); if(!pane) return;
+      var card=el('nearbyTrails');
+      if(!card){ card=document.createElement('div'); card.id='nearbyTrails'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane.appendChild(card); }
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:9px">Trails &amp; routes nearby</div><span style="'+S.load+'">Finding hikes, off-road &amp; ski routes…</span>';
+      fetch('/api/trails?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(!d||(!d.hiking||!d.hiking.length)&&(!d.offroad||!d.offroad.length)&&(!d.ski||!d.ski.length)){ card.style.display='none'; return; }
+        var grp=function(title,ic,arr){ if(!arr||!arr.length) return ''; return '<div style="margin-top:10px"><div style="font-size:.74rem;font-weight:800;color:#1d4a37;margin-bottom:5px">'+ic+' '+title+'</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+arr.slice(0,8).map(function(x){return '<span style="font-size:.76rem;color:#3a463c;background:#fbf6ea;border:1px solid #e7ddca;border-radius:999px;padding:5px 10px">'+x.name+'</span>';}).join('')+'</div></div>'; };
+        var H='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:2px">Trails &amp; routes nearby</div>';
+        H+=grp('Hiking trails','🥾',d.hiking)+grp('Off-road / 4x4','🚙',d.offroad)+grp('Ski routes','⛷️',d.ski);
+        H+='<div style="font-size:.62rem;color:#a79f8c;margin-top:11px;line-height:1.4">Data &amp; credit: '+(d.credit||'© OpenStreetMap contributors')+'</div>';
         card.innerHTML=H; card.style.display='';
       }).catch(function(){ card.style.display='none'; });
     }
@@ -789,6 +821,8 @@ function init(){
       el('glance').innerHTML='<span style="'+S.load+'">Loading…</span>';
       loadNPS(p);
       loadConditions(p);
+      loadPlaces(p);
+      loadTrails(p);
       loadReviews(p);
       if(p.region==='territory'){ offline('This U.S. territory is outside the National Weather Service coverage area.'); return; }
       loadForecast(p); loadAlerts(p);

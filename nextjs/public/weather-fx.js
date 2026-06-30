@@ -25,6 +25,7 @@ var CSS = `
 .wfx-storm .wfx-sky{background:linear-gradient(165deg,#2b313c 0%,#454e5c 60%,#5d6675 100%)}
 .wfx-snow .wfx-sky{background:linear-gradient(165deg,#6985a0 0%,#9fb4c8 55%,#dde7ef 100%)}
 .wfx-fog .wfx-sky{background:linear-gradient(165deg,#7c8a92 0%,#a7b1b6 55%,#ccd3d6 100%)}
+.wfx-smoke .wfx-sky{background:linear-gradient(165deg,#9a8f7e 0%,#b8ab97 50%,#d8ccb6 100%)}
 .wfx-wind .wfx-sky{background:linear-gradient(165deg,#3f8fa6 0%,#74b3c6 55%,#c2e2ea 100%)}
 /* sun */
 .wfx-sun{position:absolute;z-index:1;top:14px;right:18px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#fff3c4,#ffd24a 60%,#f6b21e);box-shadow:0 0 26px 8px rgba(255,206,80,.7);animation:wfx-pulse 3s ease-in-out infinite}
@@ -51,10 +52,13 @@ var CSS = `
 /* bolt */
 .wfx-bolt{position:absolute;z-index:2;inset:0;background:radial-gradient(circle at 60% 30%,rgba(255,247,200,.95),transparent 38%);opacity:0;animation:wfx-flash 4.2s ease-out infinite;mix-blend-mode:screen}
 /* fog */
-.wfx-fog{position:absolute;z-index:2;left:-30%;width:160%;height:16px;border-radius:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);filter:blur(3px)}
-.wfx-fog.f1{top:32%;animation:wfx-fogmove 9s linear infinite}
-.wfx-fog.f2{top:52%;animation:wfx-fogmove 12s linear infinite reverse;opacity:.8}
-.wfx-fog.f3{top:72%;animation:wfx-fogmove 15s linear infinite;opacity:.6}
+.wfx-fog{position:absolute;z-index:2;left:-30%;width:160%;height:14px;border-radius:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);filter:blur(4px)}
+.wfx-fog.f1{top:34%;animation:wfx-fogmove 9s linear infinite}
+.wfx-fog.f2{top:54%;animation:wfx-fogmove 12s linear infinite reverse;opacity:.6}
+.wfx-fog.f3{top:74%;animation:wfx-fogmove 15s linear infinite;opacity:.45}
+/* smoke — a soft hazy veil + dim sun, distinct from white fog */
+.wfx-haze{position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,rgba(190,180,160,.55),rgba(150,138,120,.35) 60%,rgba(120,110,95,.3));animation:wfx-pulse 7s ease-in-out infinite}
+.wfx-hazesun{position:absolute;z-index:1;top:18%;left:50%;transform:translateX(-50%);width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,rgba(255,226,170,.85),rgba(220,180,130,.4) 60%,transparent 75%);filter:blur(2px)}
 /* wind */
 .wfx-wind{position:absolute;z-index:2;left:-40%;width:70%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent)}
 .wfx-wind.w1{top:38%;animation:wfx-gust 3.2s ease-in-out infinite}
@@ -76,7 +80,8 @@ function kindOf(text){
   if(/thunder|t-?storm|lightning/.test(t)) return 'storm';
   if(/snow|flurr|sleet|wintry|blizzard|ice|freezing/.test(t)) return 'snow';
   if(/rain|shower|drizzle|precip/.test(t)) return 'rain';
-  if(/fog|haze|mist|smoke/.test(t)) return 'fog';
+  if(/smoke/.test(t)) return 'smoke';
+  if(/fog|haze|mist/.test(t)) return 'fog';
   if(/wind|breez|gust/.test(t)) return 'wind';
   if(/partly|few clouds|scattered|mostly sunny|mostly clear/.test(t)) return 'partly';
   if(/overcast|mostly cloudy|cloudy/.test(t)) return 'cloudy';
@@ -95,6 +100,7 @@ function inner(k){
     case 'storm': return '<div class="wfx-sky"></div><div class="wfx-bolt"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c2 dark"></div><div class="wfx-cloud c3"></div>'+drops(22);
     case 'snow': return '<div class="wfx-sky"></div><div class="wfx-cloud c1"></div><div class="wfx-cloud c2"></div>'+flakes(24);
     case 'fog': return '<div class="wfx-sky"></div><div class="wfx-fog f1"></div><div class="wfx-fog f2"></div><div class="wfx-fog f3"></div>';
+    case 'smoke': return '<div class="wfx-sky"></div><div class="wfx-hazesun"></div><div class="wfx-haze"></div><div class="wfx-fog f1" style="opacity:.4"></div><div class="wfx-fog f3" style="opacity:.3"></div>';
     case 'wind': return '<div class="wfx-sky"></div><div class="wfx-cloud c1"></div><div class="wfx-wind w1"></div><div class="wfx-wind w2"></div>';
   }
   return '<div class="wfx-sky"></div>';
