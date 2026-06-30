@@ -20,6 +20,9 @@ falling back to live. Env: SUPABASE_URL, SUPABASE_SERVICE_KEY (ingest), SUPABASE
 Trigger: POST /api/ingest?all=1 (seed parks) or ?lat=&lng=. Schedule it daily (cron/Netlify
 scheduled function). Next: add state-park/USFS camping sources + user "report a spot".
 
+✅ AUTOMATED: netlify/functions/scheduled-ingest.mjs runs daily (09:00 UTC cron) and pages
+through /api/ingest automatically — the cache refreshes itself, no manual clicking.
+
 ---
 
 ## Phase 1 — Go deep on what we already touch (free, biggest value-per-effort)
