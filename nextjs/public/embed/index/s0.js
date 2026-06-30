@@ -560,15 +560,17 @@ function buildLegend(){
   var root=document.querySelector('.map')||document.getElementById('embed-root'); if(!root)return;
   var rows=[['places','●','#2c5562','Campgrounds & areas'],['hiking','—','#3f7a34','Hiking trails'],['offroad','—','#a15a2a','Off-road / 4x4'],['ski','—','#2a6f9e','Ski routes']];
   var lg=document.createElement('div'); lg.id='mapLegend';
-  lg.style.cssText='position:absolute;left:14px;bottom:14px;z-index:40;background:rgba(255,253,247,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid #e7ddca;border-radius:13px;padding:10px 12px;box-shadow:0 12px 30px -16px rgba(8,18,12,.5);font-family:Hanken Grotesk,sans-serif';
-  lg.innerHTML='<div style="font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;margin-bottom:7px">Map layers</div>'+rows.map(function(r){return '<label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:#1d3941;font-weight:600;cursor:pointer;padding:3px 0"><input type="checkbox" data-layer="'+r[0]+'" checked style="accent-color:#2c5562;cursor:pointer"><span style="color:'+r[2]+';font-size:1rem;width:12px;text-align:center">'+r[1]+'</span>'+r[3]+'</label>';}).join('');
+  lg.style.cssText='position:absolute;left:14px;bottom:120px;z-index:41;background:rgba(255,253,247,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid #e7ddca;border-radius:12px;box-shadow:0 12px 30px -16px rgba(8,18,12,.5);font-family:Hanken Grotesk,sans-serif;overflow:hidden';
+  lg.innerHTML='<button id="mapLegToggle" style="display:flex;align-items:center;gap:7px;width:100%;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.04em;color:#1d3941;padding:9px 12px;white-space:nowrap"><span style="font-size:.9rem">\u29c9</span>Map layers<span id="mapLegChev" style="margin-left:auto;color:#8c8473">\u25be</span></button><div id="mapLegBody" style="display:none;padding:2px 12px 10px">'+rows.map(function(r){return '<label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:#1d3941;font-weight:600;cursor:pointer;padding:3px 0"><input type="checkbox" data-layer="'+r[0]+'" checked style="accent-color:#2c5562;cursor:pointer"><span style="color:'+r[2]+';font-size:1rem;width:12px;text-align:center">'+r[1]+'</span>'+r[3]+'</label>';}).join('')+'</div>';
   root.appendChild(lg);
+  var open=false, body=lg.querySelector('#mapLegBody'), chev=lg.querySelector('#mapLegChev');
+  lg.querySelector('#mapLegToggle').addEventListener('click',function(){ open=!open; body.style.display=open?'block':'none'; chev.style.transform=open?'rotate(180deg)':''; });
   lg.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.addEventListener('change',function(){ _layerOn[cb.getAttribute('data-layer')]=cb.checked; applyLayers(); }); });
 }
 function loadMapPlaces(p){
   if(!window.gmap||!p||typeof p.lat!=='number')return;
   clearMapPlaces();
-  fetch('/api/places?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=40').then(function(r){return r.ok?r.json():null;}).then(function(d){
+  fetch('/api/places?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=50').then(function(r){return r.ok?r.json():null;}).then(function(d){
     if(!d||(selected&&selected.id!==p.id))return;
     if(!_placeIW&&window.google)_placeIW=new google.maps.InfoWindow();
     var add=function(x,color){ if(typeof x.lat!=='number'||typeof x.lng!=='number')return;

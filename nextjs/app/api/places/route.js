@@ -43,7 +43,7 @@ export async function GET(request) {
     return Response.json({ error: "lat and lng query params are required." }, { status: 400 });
   }
 
-  const geo = { latitude: lat, longitude: lng, radius: radius, limit: "20" };
+  const geo = { latitude: lat, longitude: lng, radius: radius, limit: "50" };
 
   const [facD, recD] = await Promise.all([
     ridb("/facilities", { ...geo, ...(q ? { query: q } : {}) }, key),
@@ -73,8 +73,8 @@ export async function GET(request) {
   })).filter((r) => r.name);
 
   return Response.json({
-    facilities: facilities.slice(0, 16),
-    recAreas: recAreas.slice(0, 12),
+    facilities: facilities.slice(0, 45),
+    recAreas: recAreas.slice(0, 20),
     credit: "Recreation.gov / RIDB \u2014 U.S. federal land-management agencies (NPS, USFS, BLM, USACE, USFWS, USBR).",
   });
 }
