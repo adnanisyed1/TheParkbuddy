@@ -664,7 +664,7 @@ function buildLegend(){
       '<span class="pbsw" style="position:relative;width:36px;height:21px;flex:none"><input type="checkbox" data-layer="'+r[0]+'" checked style="position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2"><span class="pbsw-tr" style="position:absolute;inset:0;border-radius:999px;background:linear-gradient(120deg,#e4be78,#c79a4b);transition:.2s"></span><span class="pbsw-kn" style="position:absolute;top:2px;left:17px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s"></span></span>'+
     '</label>';
   }
-  host.innerHTML='<style>#ip-filters .pbfl-row:hover{background:#f6efdf}#ip-filters .pbsw input:not(:checked)+.pbsw-tr{background:#d8cdb4}#ip-filters .pbsw input:not(:checked)~.pbsw-kn{left:2px}</style>'+
+  host.innerHTML='<style>#ip-filters .pbfl-row:hover{background:#f6efdf}#ip-filters .pbsw input:not(:checked)+.pbsw-tr{background:#cdd3c2!important}#ip-filters .pbsw input:not(:checked)~.pbsw-kn{left:2px!important}</style>'+
     '<button id="flHead" style="display:flex;align-items:center;gap:9px;width:100%;cursor:pointer;font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#1d3941;background:none;border:none;padding:11px 13px">'+
       '<span style="font-size:.92rem">\u2699\ufe0f</span>Filters'+
       '<span id="flCount" style="font-size:.64rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:2px 8px;border-radius:999px;letter-spacing:0">8</span>'+
@@ -676,8 +676,9 @@ function buildLegend(){
   var count=host.querySelector('#flCount'), body=host.querySelector('#flBody'), chev=host.querySelector('#flChev'), open=true;
   function refreshCount(){ count.textContent=host.querySelectorAll('input[data-layer]:checked').length; }
   host.querySelector('#flHead').addEventListener('click',function(){ open=!open; body.style.display=open?'':'none'; chev.style.transform=open?'rotate(180deg)':''; });
-  host.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.addEventListener('change',function(){ _layerOn[cb.getAttribute('data-layer')]=cb.checked; applyLayers(); refreshCount(); }); });
-  function setAll(v){ host.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.checked=v; _layerOn[cb.getAttribute('data-layer')]=v; }); applyLayers(); refreshCount(); }
+  function paintSw(cb){ var sw=cb.parentNode, kn=sw.querySelector('.pbsw-kn'), tr=sw.querySelector('.pbsw-tr'); if(!kn||!tr)return; if(cb.checked){ kn.style.left='17px'; tr.style.background='linear-gradient(120deg,#e4be78,#c79a4b)'; } else { kn.style.left='2px'; tr.style.background='#cdd3c2'; } }
+  host.querySelectorAll('input[data-layer]').forEach(function(cb){ paintSw(cb); cb.addEventListener('change',function(){ _layerOn[cb.getAttribute('data-layer')]=cb.checked; paintSw(cb); applyLayers(); refreshCount(); }); });
+  function setAll(v){ host.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.checked=v; _layerOn[cb.getAttribute('data-layer')]=v; paintSw(cb); }); applyLayers(); refreshCount(); }
   host.querySelector('#flAll').addEventListener('click',function(){ setAll(true); });
   host.querySelector('#flNone').addEventListener('click',function(){ setAll(false); });
 }
