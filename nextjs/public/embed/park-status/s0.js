@@ -553,6 +553,18 @@ function init(){
         }
       }).catch(function(){});
     }
+    // A representative photo (+ extract) for non-NPS destinations, from Wikipedia/Wikimedia.
+    var photoToken = 0;
+    function loadPhoto(p){
+      var mine = ++photoToken;
+      fetch('/api/photo?name='+encodeURIComponent(p.name)+'&state='+encodeURIComponent(p.state||'')).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(mine!==photoToken || !d || !d.found || !d.image) return;
+        var hp=el('heroPhoto'), ph=el('heroPhotoPh');
+        if(hp){ hp.onload=function(){ hp.style.display='block'; if(ph)ph.style.display='none'; }; hp.src=d.image; hp.alt=p.name; }
+        if(d.extract){ var al=el('aboutlive'); if(al && (!al.textContent || al.textContent.length<40)) al.textContent=d.extract; }
+        var g=el('gallery'); if(g){ g.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><a href="'+(d.pageUrl||d.image)+'" target="_blank" rel="noopener"><img src="'+d.thumb+'" alt="'+p.name+'" style="width:100%;height:120px;object-fit:cover;border-radius:12px"></a></div><div style="font-size:.62rem;color:#a79f8c;margin-top:8px;line-height:1.4">'+d.credit+'</div>'; }
+      }).catch(function(){});
+    }
     function loadPlaces(p){
       loadGateway(p);
       var pane2=el('pane-now'); if(!pane2) return;
@@ -574,7 +586,7 @@ function init(){
       var card=el('nearbyTrails');
       if(!card){ card=document.createElement('div'); card.id='nearbyTrails'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane.appendChild(card); }
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:9px">Trails &amp; routes nearby</div><span style="'+S.load+'">Finding hikes, off-road &amp; ski routes…</span>';
-      fetch('/api/trails?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      fetch('/api/trails?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius='+((p.source==='nps')?25:45)).then(function(r){return r.ok?r.json():null;}).then(function(d){
         if(!d||(!d.hiking||!d.hiking.length)&&(!d.offroad||!d.offroad.length)&&(!d.ski||!d.ski.length)){ card.style.display='none'; return; }
         var grp=function(title,ic,arr){ if(!arr||!arr.length) return ''; return '<div style="margin-top:10px"><div style="font-size:.74rem;font-weight:800;color:#1d4a37;margin-bottom:5px">'+ic+' '+title+'</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+arr.slice(0,8).map(function(x){return '<span style="font-size:.76rem;color:#3a463c;background:#fbf6ea;border:1px solid #e7ddca;border-radius:999px;padding:5px 10px">'+x.name+'</span>';}).join('')+'</div></div>'; };
         var H='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8c8473;font-weight:800;margin-bottom:2px">Trails &amp; routes nearby</div>';
@@ -946,7 +958,8 @@ function init(){
       if(prof.hasNPS){ loadNPS(p); }
       else { setBox('nps', npsMapBlock(p)+'<span style="'+S.load+'">'+prof.kind+' · managed by '+prof.agency+'. <a href="'+prof.official+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">'+prof.officialLabel+'</a></span>');
         ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){ var b=el(id); if(b)b.innerHTML='<span style="'+S.load+'">Provided by '+prof.agency+' — see the official page above.</span>'; });
-        if(p.source==='usfs'||p.type==='national_forest'){ loadForestDetail(p, prof); } }
+        if(p.source==='usfs'||p.type==='national_forest'){ loadForestDetail(p, prof); }
+        loadPhoto(p); }
       loadConditions(p);
       loadPlaces(p);
       loadTrails(p);
