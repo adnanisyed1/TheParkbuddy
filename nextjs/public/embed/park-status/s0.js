@@ -127,7 +127,10 @@ function init(){
       var u=new URLSearchParams(location.search), q=u.get('park')||u.get('dest');
       if(!q || paramId()!=null) return; // nothing to resolve, or already resolvable locally
       fetch('/api/destinations?id='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
-        var d=((j&&j.destinations)||[])[0]; if(!d) return;
+        var list=(j&&j.destinations)||[], d=null;
+        for(var i=0;i<list.length;i++){ if(String(list[i].id)===String(q)){ d=list[i]; break; } }
+        if(!d && list.length===1) d=list[0]; // exact-id API deployed: single row is the match
+        if(!d) return;
         d=normDest(d); EXTRA.push(d); ALL=PARKS.concat(EXTRA);
         addPickOption(d);
         current=d.id; pick.value=current; render();
