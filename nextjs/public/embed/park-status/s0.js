@@ -123,18 +123,18 @@ function init(){
     // Direct navigation to a state park / national forest (e.g. ?dest=usfs:co-white-river-national-forest)
     // won't have been handed off by the map, so it isn't in ALL yet. Pull it from the destinations API
     // by exact id, register it, and re-render — otherwise the page would silently fall back to Yosemite.
-    function resolveMissingDest(){
+    function resolveMissingDest(pending){
       var u=new URLSearchParams(location.search), q=u.get('park')||u.get('dest');
-      if(!q || paramId()!=null) return; // nothing to resolve, or already resolvable locally
+      if(!q || paramId()!=null){ if(pending) render(); return; } // nothing to resolve, or already resolvable locally
       fetch('/api/destinations?id='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
         var list=(j&&j.destinations)||[], d=null;
         for(var i=0;i<list.length;i++){ if(String(list[i].id)===String(q)){ d=list[i]; break; } }
         if(!d && list.length===1) d=list[0]; // exact-id API deployed: single row is the match
-        if(!d) return;
+        if(!d){ if(pending) render(); return; } // fall back to the default view
         d=normDest(d); EXTRA.push(d); ALL=PARKS.concat(EXTRA);
         addPickOption(d);
         current=d.id; pick.value=current; render();
-      }).catch(function(){});
+      }).catch(function(){ if(pending) render(); });
     }
     var current=paramId()||PARKS.find(function(p){return p.name==='Yosemite';}).id;
     pick.value=current;
@@ -482,7 +482,7 @@ function init(){
     }
     function loadPlaces(p){
       var g=(window.PB_GATEWAY&&window.PB_GATEWAY(p.name))||null;
-      if(g){ var pane=el('pane-now'); if(pane){ var gc=el('gateway'); if(!gc){ gc=document.createElement('div'); gc.id='gateway'; gc.style.cssText='grid-column:1/-1;background:linear-gradient(150deg,#33555f,#1d3941);border:1px solid rgba(228,190,120,.3);border-radius:20px;padding:18px;color:#fbf6ea;box-shadow:0 18px 44px -22px rgba(8,18,12,.5)'; pane.insertBefore(gc, pane.firstChild); } gc.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#e4be78;font-weight:800;margin-bottom:7px">Adventure basecamp</div><div style="font-family:Spectral,serif;font-weight:700;font-size:1.3rem">🏕️ '+g.town+'</div><p style="font-size:.86rem;color:rgba(251,246,234,.82);line-height:1.5;margin-top:6px">'+g.blurb+'</p><a href="https://www.google.com/maps/search/lodging+near+'+encodeURIComponent(g.town)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:.82rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:9px 15px;border-radius:11px;text-decoration:none">Find lodging here →</a>'; } }
+      if(g){ var pane=el('pane-now'); if(pane){ var gc=el('gateway'); if(!gc){ gc=document.createElement('div'); gc.id='gateway'; gc.style.cssText='grid-column:1/-1;background:linear-gradient(150deg,#33555f,#1d3941);border:1px solid rgba(228,190,120,.3);border-radius:20px;padding:18px;color:#fbf6ea;box-shadow:0 18px 44px -22px rgba(8,18,12,.5)'; pane.insertBefore(gc, pane.firstChild); } gc.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#e4be78;font-weight:800;margin-bottom:7px">Adventure basecamp</div><div style="font-family:Spectral,serif;font-weight:700;font-size:1.3rem">🏕️ '+g.town+'</div><p style="font-size:.86rem;color:rgba(251,246,234,.82);line-height:1.5;margin-top:6px">'+g.blurb+'</p><a href="https://www.google.com/maps/search/lodging+near+'+encodeURIComponent(g.town)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:.82rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:9px 15px;border-radius:11px;text-decoration:none">Find lodging here →</a>'; gc.style.display=''; } } else { var gc0=el('gateway'); if(gc0) gc0.style.display='none'; }
       var pane2=el('pane-now'); if(!pane2) return;
       var card=el('nearbyRec');
       if(!card){ card=document.createElement('div'); card.id='nearbyRec'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane2.appendChild(card); }
@@ -882,8 +882,12 @@ function init(){
       loadForecast(p); loadAlerts(p);
     }
 
-    render();
-    resolveMissingDest();
+    // If a state-park/forest dest must be fetched, skip the first paint so the user
+    // never sees the Yosemite fallback flash — resolveMissingDest renders once resolved.
+    var _u=new URLSearchParams(location.search), _q=_u.get('park')||_u.get('dest');
+    var pending=!!_q && paramId()==null;
+    if(!pending) render();
+    resolveMissingDest(pending);
 }
 var tries=0;
 (function wait(){ if(window.PB && window.WeatherFX){ init(); } else if(tries++ < 250){ setTimeout(wait,30); } else { init(); } })();
