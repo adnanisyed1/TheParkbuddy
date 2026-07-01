@@ -456,6 +456,7 @@ function initMap(){
     gmarkersById[p.id]=mk;
   });
   gmap.addListener('click',function(){ closePeek(); });
+  gmap.addListener('idle',function(){ loadDestinationsInView(); });
   mapReady=true;
   applyMapFilter(false);
   paintMarkers();
@@ -608,6 +609,42 @@ function loadMapTrails(p){
     draw(d.hiking,'#3f7a34','hiking'); draw(d.offroad,'#a15a2a','offroad'); draw(d.ski,'#2a6f9e','ski');
   }).catch(function(){}).then(function(){ mapLoad(-1); });
 }
+// Viewport loader: show state parks + national forests across the whole map (not just near a selected park).
+var _destMarkers={};
+var _radiusCircle=null;
+function _milesBetween(a,b){ var R=3959,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180; var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)*Math.sin(dLng/2); return 2*R*Math.asin(Math.sqrt(h)); }
+function applyRadius(miles){
+  if(!window.gmap||!window._radiusCenter)return;
+  var c=window._radiusCenter;
+  if(!_radiusCircle){ _radiusCircle=new google.maps.Circle({map:gmap,center:c,radius:miles*1609.34,fillColor:'#2c5562',fillOpacity:.06,strokeColor:'#2c5562',strokeOpacity:.5,strokeWeight:1.5,clickable:false,zIndex:5}); }
+  else { _radiusCircle.setCenter(c); _radiusCircle.setRadius(miles*1609.34); _radiusCircle.setMap(gmap); }
+  gmap.fitBounds(_radiusCircle.getBounds());
+  // hide national-park pins outside the radius
+  if(mapReady) PARKS.forEach(function(p){ var m=gmarkersById[p.id]; if(!m)return; var within=_milesBetween(c,{lat:p.lat,lng:p.lng})<=miles; m.setMap((_layerOn.natpark&&within)?gmap:null); });
+  loadDestinationsInView();
+}
+function clearRadius(){ if(_radiusCircle){ _radiusCircle.setMap(null); } window._radiusCenter=null; if(mapReady)applyLayers(); }
+function loadDestinationsInView(){
+  if(!window.gmap)return;
+  var b=gmap.getBounds(); if(!b)return;
+  var sw=b.getSouthWest(), ne=b.getNorthEast();
+  var bbox=sw.lng().toFixed(3)+','+sw.lat().toFixed(3)+','+ne.lng().toFixed(3)+','+ne.lat().toFixed(3);
+  fetch('/api/destinations?bbox='+bbox+'&limit=400').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(!d||!d.destinations)return;
+    if(!_placeIW&&window.google)_placeIW=new google.maps.InfoWindow();
+    d.destinations.forEach(function(x){
+      if(x.source==='nps'||typeof x.lat!=='number'||typeof x.lng!=='number')return;
+      if(_destMarkers[x.id])return; // dedupe across pans
+      var forest=x.type==='national_forest';
+      var mk=new google.maps.Marker({position:{lat:x.lat,lng:x.lng},map:((forest?_layerOn.forest:_layerOn.statepark)?gmap:null),zIndex:48,title:x.name,
+        icon:{path:'M0,-7 L7,0 L0,7 L-7,0 Z',scale:1,fillColor:forest?'#3f7a34':'#5a7d33',fillOpacity:1,strokeColor:'#fffdf7',strokeWeight:1.4}});
+      mk._layer=forest?'forest':'statepark';
+      mk.addListener('click',function(){ if(_placeIW){ var label=forest?'National Forest':'State Park';
+        _placeIW.setContent('<div style="font-family:Hanken Grotesk,sans-serif;max-width:210px"><b style="color:#1d3941">'+x.name+'</b><div style="font-size:12px;color:#5b6258;margin-top:3px">'+label+(x.state?' \u00b7 '+x.state:'')+'</div><a href="/park-status?dest='+encodeURIComponent(x.id)+'" style="font-size:12px;color:#2c5562;font-weight:700;display:inline-block;margin-top:6px">View live status \u2192</a></div>'); _placeIW.open(gmap,mk); } });
+      _destMarkers[x.id]=mk; _placeMarkers.push(mk);
+    });
+  }).catch(function(){});
+}
 function loadMapDestinations(p){
   if(!window.gmap||!p||typeof p.lat!=='number')return;
   fetch('/api/destinations?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&radius=140').then(function(r){return r.ok?r.json():null;}).then(function(d){
@@ -670,7 +707,13 @@ function buildLegend(){
       '<span id="flCount" style="font-size:.64rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:2px 8px;border-radius:999px;letter-spacing:0">8</span>'+
       '<span id="flChev" style="margin-left:auto;color:#a98a4e;transition:transform .2s;transform:rotate(180deg)">\u25be</span></button>'+
     '<div id="flBody" style="padding:0 13px 12px">'+
-      groups.map(function(g){return '<div style="font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a98a4e;margin:9px 2px 2px">'+g[0]+'</div>'+g[1].map(row).join('');}).join('')+
+      '<div style="font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a98a4e;margin:11px 2px 4px">Search radius</div>'+
+      '<div style="background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7);border-radius:12px;padding:11px 12px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:.8rem;font-weight:700;color:#1d3941">Within <b id="flRadVal" style="color:#2c5562">150 mi</b></span><button id="flNear" style="font-size:.7rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);border:none;padding:6px 11px;border-radius:999px;cursor:pointer">📍 Near me</button></div>'+
+        '<input id="flRad" type="range" min="25" max="500" step="25" value="150" style="width:100%;accent-color:#c79a4b;cursor:pointer">'+
+        '<div id="flRadHint" style="font-size:.7rem;color:#8c8473;margin-top:5px">Tap “Near me” or pick a place, then set the distance.</div>'+
+      '</div>'+
+      groups.map(function(g){return '<div style="font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a98a4e;margin:11px 2px 2px">'+g[0]+'</div>'+g[1].map(row).join('');}).join('')+
       '<div style="display:flex;gap:7px;margin-top:11px"><button id="flAll" style="flex:1;border:1px solid #e7ddca;background:#fbf6ea;color:#1d3941;font-family:inherit;font-weight:700;font-size:.74rem;padding:7px;border-radius:9px;cursor:pointer">All</button><button id="flNone" style="flex:1;border:1px solid #e7ddca;background:#fbf6ea;color:#1d3941;font-family:inherit;font-weight:700;font-size:.74rem;padding:7px;border-radius:9px;cursor:pointer">None</button></div>'+
     '</div>';
   var count=host.querySelector('#flCount'), body=host.querySelector('#flBody'), chev=host.querySelector('#flChev'), open=true;
@@ -681,6 +724,13 @@ function buildLegend(){
   function setAll(v){ host.querySelectorAll('input[data-layer]').forEach(function(cb){ cb.checked=v; _layerOn[cb.getAttribute('data-layer')]=v; paintSw(cb); }); applyLayers(); refreshCount(); }
   host.querySelector('#flAll').addEventListener('click',function(){ setAll(true); });
   host.querySelector('#flNone').addEventListener('click',function(){ setAll(false); });
+  var radEl=host.querySelector('#flRad'), radVal=host.querySelector('#flRadVal'), radHint=host.querySelector('#flRadHint');
+  radEl.addEventListener('input',function(){ radVal.textContent=radEl.value+' mi'; if(window._radiusCenter) applyRadius(+radEl.value); });
+  host.querySelector('#flNear').addEventListener('click',function(){
+    radHint.textContent='Locating\u2026';
+    if(!navigator.geolocation){ radHint.textContent='Location unavailable on this device.'; return; }
+    navigator.geolocation.getCurrentPosition(function(pos){ window._radiusCenter={lat:pos.coords.latitude,lng:pos.coords.longitude}; radHint.textContent='Showing within '+radEl.value+' mi of you.'; applyRadius(+radEl.value); }, function(){ radHint.textContent='Couldn\u2019t get your location — allow location access.'; });
+  });
 }
 function loadMapPlaces(p){
   if(!window.gmap||!p||typeof p.lat!=='number')return;

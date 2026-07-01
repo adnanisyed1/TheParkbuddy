@@ -48,6 +48,19 @@ export async function POST(request) {
     out.national_forests = await upsert(sb, key, rows);
   } catch (e) { out.national_forests_error = String(e.message || e).slice(0, 160); }
 
+  // --- State Parks (curated, in-repo) ---
+  try {
+    const r = await fetch(origin + "/state-parks.json", { cache: "no-cache" });
+    const j = await r.json();
+    const rows = (j.parks || []).filter((f) => typeof f.lat === "number" && typeof f.lng === "number").map((f) => ({
+      id: "state:" + (ST_ABBR[f.state] || "us").toLowerCase() + "-" + slug(f.name),
+      name: f.name, type: "state_park", source: "state",
+      lat: f.lat, lng: f.lng, state: f.state, url: f.url || "", detail: f.detail || "",
+      tier: 1, fetched_at: now, updated_at: now,
+    }));
+    out.state_parks = await upsert(sb, key, rows);
+  } catch (e) { out.state_parks_error = String(e.message || e).slice(0, 160); }
+
   return Response.json({ ok: true, seeded: out });
 }
 
