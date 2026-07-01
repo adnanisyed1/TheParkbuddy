@@ -20,10 +20,15 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");
   const q = searchParams.get("q");
+  const id = searchParams.get("id");
   const limit = Math.min(parseInt(searchParams.get("limit") || "200", 10) || 200, 500);
 
   let filter = "";
-  if (q) {
+  if (id) {
+    // Exact lookup by namespaced id (e.g. usfs:co-white-river-national-forest).
+    // Used by the park-status page to resolve a destination on direct navigation.
+    filter = "&id=eq." + encodeURIComponent(id);
+  } else if (q) {
     filter = "&name=ilike.*" + encodeURIComponent(q) + "*";
   } else if (searchParams.get("bbox")) {
     const [minLng, minLat, maxLng, maxLat] = searchParams.get("bbox").split(",").map(Number);

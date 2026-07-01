@@ -116,6 +116,23 @@ function init(){
       var byName=ALL.find(function(p){return p.name.toLowerCase().replace(/[^a-z]/g,'')===n;});
       return byName?byName.id:null;
     }
+    function addPickOption(p){
+      if(pick.querySelector('option[value="'+String(p.id).replace(/"/g,'\\"')+'"]'))return;
+      var o=document.createElement('option'); o.value=p.id; o.textContent=p.name+(p.state?' — '+p.state:''); pick.appendChild(o);
+    }
+    // Direct navigation to a state park / national forest (e.g. ?dest=usfs:co-white-river-national-forest)
+    // won't have been handed off by the map, so it isn't in ALL yet. Pull it from the destinations API
+    // by exact id, register it, and re-render — otherwise the page would silently fall back to Yosemite.
+    function resolveMissingDest(){
+      var u=new URLSearchParams(location.search), q=u.get('park')||u.get('dest');
+      if(!q || paramId()!=null) return; // nothing to resolve, or already resolvable locally
+      fetch('/api/destinations?id='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+        var d=((j&&j.destinations)||[])[0]; if(!d) return;
+        d=normDest(d); EXTRA.push(d); ALL=PARKS.concat(EXTRA);
+        addPickOption(d);
+        current=d.id; pick.value=current; render();
+      }).catch(function(){});
+    }
     var current=paramId()||PARKS.find(function(p){return p.name==='Yosemite';}).id;
     pick.value=current;
     pick.onchange=function(){var v=pick.value; var d=findDest(v); current=(d&&typeof d.id==='number')?+v:v; render();};
@@ -863,6 +880,7 @@ function init(){
     }
 
     render();
+    resolveMissingDest();
 }
 var tries=0;
 (function wait(){ if(window.PB && window.WeatherFX){ init(); } else if(tries++ < 250){ setTimeout(wait,30); } else { init(); } })();
