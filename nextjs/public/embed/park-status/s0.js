@@ -480,9 +480,81 @@ function init(){
         card.innerHTML=H; card.style.display='';
       }).catch(function(){ card.style.display='none'; });
     }
+    // Adventure Basecamp: curated towns win (editorial quality); otherwise pull the nearest
+    // real towns live from OpenStreetMap so EVERY destination shows gateway towns, not just
+    // the marquee ones. gwToken guards against a slow fetch landing after the user switches.
+    var gwToken = 0;
+    function gatewayCard(){
+      var pane = el('pane-now'); if(!pane) return null;
+      var gc = el('gateway');
+      if(!gc){ gc=document.createElement('div'); gc.id='gateway'; gc.style.cssText='grid-column:1/-1;background:linear-gradient(150deg,#33555f,#1d3941);border:1px solid rgba(228,190,120,.3);border-radius:20px;padding:18px;color:#fbf6ea;box-shadow:0 18px 44px -22px rgba(8,18,12,.5)'; pane.insertBefore(gc, pane.firstChild); }
+      return gc;
+    }
+    function renderGateway(g){
+      var gc = gatewayCard(); if(!gc) return;
+      var towns = (g.towns && g.towns.length) ? g.towns : (g.town ? [{ name:g.town }] : []);
+      if(!towns.length){ gc.style.display='none'; return; }
+      var multi = towns.length > 1;
+      var head = '<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#e4be78;font-weight:800;margin-bottom:7px">Adventure basecamp'+(multi?'s':'')+'</div>';
+      var chip = 'display:inline-flex;align-items:center;gap:6px;background:linear-gradient(120deg,#e4be78,#c79a4b);color:#15241c;font-size:.82rem;font-weight:800;padding:8px 13px;border-radius:11px;text-decoration:none';
+      var lodge = function(t){ return 'https://www.google.com/maps/search/lodging+near+'+encodeURIComponent(t.name); };
+      var html;
+      if(multi){
+        var chips = towns.map(function(t){
+          var dist = (t.distanceMi!=null) ? ' <span style="font-weight:600;opacity:.75">· '+t.distanceMi+' mi</span>' : '';
+          return '<a href="'+lodge(t)+'" target="_blank" rel="noopener" style="'+chip+'">\uD83C\uDFD5\uFE0F '+t.name+dist+'</a>';
+        }).join('');
+        html = head + '<p style="font-size:.86rem;color:rgba(251,246,234,.82);line-height:1.5;margin:0 0 12px">'+g.blurb+'</p><div style="display:flex;flex-wrap:wrap;gap:8px">'+chips+'</div>';
+      } else {
+        var t0 = towns[0];
+        html = head + '<div style="font-family:Spectral,serif;font-weight:700;font-size:1.3rem">\uD83C\uDFD5\uFE0F '+t0.name+'</div><p style="font-size:.86rem;color:rgba(251,246,234,.82);line-height:1.5;margin-top:6px">'+g.blurb+'</p><a href="'+lodge(t0)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;'+chip+'">Find lodging here \u2192</a>';
+      }
+      gc.innerHTML = html; gc.style.display='';
+    }
+    function loadGateway(p){
+      var curated = (window.PB_GATEWAY && window.PB_GATEWAY(p.name)) || null;
+      if(curated){ renderGateway(curated); return; }
+      var mine = ++gwToken, gc0 = el('gateway'); if(gc0) gc0.style.display='none';
+      fetch('/api/gateway?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)+'&state='+encodeURIComponent(p.state||'')).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(mine!==gwToken) return; // user switched destinations — drop stale result
+        if(!d || !d.towns || !d.towns.length){ var g1=el('gateway'); if(g1)g1.style.display='none'; return; }
+        renderGateway({ blurb: d.blurb || 'Closest towns for lodging, food and supplies.', towns: d.towns });
+      }).catch(function(){ if(mine===gwToken){ var g2=el('gateway'); if(g2)g2.style.display='none'; } });
+    }
+    // National forests: pull the real rec-area record (description, activities, campgrounds,
+    // directions) from Recreation.gov / RIDB and fill the sections that otherwise just link out.
+    var fdToken = 0;
+    function loadForestDetail(p, prof){
+      var mine = ++fdToken;
+      fetch('/api/forest?name='+encodeURIComponent(p.name)+'&lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(mine!==fdToken || !d || !d.found) return; // keep the link-out fallback
+        var off = d.official || prof.official;
+        var offLink = '<a href="'+off+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">'+prof.officialLabel+'</a>';
+        var credit = '<div style="font-size:.62rem;color:#a79f8c;margin-top:11px;line-height:1.4">Data &amp; credit: '+(d.credit||'Recreation.gov / RIDB')+'</div>';
+        if(d.description){ setBox('nps', npsMapBlock(p)+'<p style="'+S.p+';margin-bottom:10px">'+d.description+'</p><div style="font-size:.78rem;color:#6a7160">'+prof.kind+' · '+prof.agency+'. '+offLink+'</div>'); }
+        if(d.activities && d.activities.length){
+          var chips='<div style="display:flex;flex-wrap:wrap;gap:8px">'+d.activities.slice(0,18).map(function(a){ return '<span style="'+S.achip+'">'+a+'</span>'; }).join('')+'</div>'+credit;
+          var tb=el('todo'); if(tb) tb.innerHTML=chips;
+          var ab=el('activities'); if(ab) ab.innerHTML=chips;
+        }
+        if(d.campgrounds && d.campgrounds.length){
+          var cg=d.campgrounds.map(function(c){
+            return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+c.name+'</b>'
+              +(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:3px">'+c.description+'</p>':'')
+              +(c.url?'<div style="display:flex;gap:8px;margin-top:8px"><a href="'+c.url+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:700;text-decoration:none">'+(c.reservable?'Reserve ↗':'Details ↗')+'</a></div>':'')
+              +'</div>';
+          }).join('');
+          var cb=el('camps'); if(cb) cb.innerHTML=cg+credit;
+        }
+        if(d.directions || d.phone){
+          var db=el('directions');
+          if(db) db.innerHTML=(d.directions?'<p style="'+S.p+'">'+d.directions+'</p>':'')
+            +(d.phone?'<div style="'+S.row+'"><a style="'+S.btn+'" href="tel:'+d.phone.replace(/[^0-9+]/g,'')+'">☎ '+d.phone+'</a>'+(off?'<a style="'+S.btn+'" href="'+off+'" target="_blank" rel="noopener">'+prof.officialLabel+'</a>':'')+'</div>':'');
+        }
+      }).catch(function(){});
+    }
     function loadPlaces(p){
-      var g=(window.PB_GATEWAY&&window.PB_GATEWAY(p.name))||null;
-      if(g){ var pane=el('pane-now'); if(pane){ var gc=el('gateway'); if(!gc){ gc=document.createElement('div'); gc.id='gateway'; gc.style.cssText='grid-column:1/-1;background:linear-gradient(150deg,#33555f,#1d3941);border:1px solid rgba(228,190,120,.3);border-radius:20px;padding:18px;color:#fbf6ea;box-shadow:0 18px 44px -22px rgba(8,18,12,.5)'; pane.insertBefore(gc, pane.firstChild); } gc.innerHTML='<div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#e4be78;font-weight:800;margin-bottom:7px">Adventure basecamp</div><div style="font-family:Spectral,serif;font-weight:700;font-size:1.3rem">🏕️ '+g.town+'</div><p style="font-size:.86rem;color:rgba(251,246,234,.82);line-height:1.5;margin-top:6px">'+g.blurb+'</p><a href="https://www.google.com/maps/search/lodging+near+'+encodeURIComponent(g.town)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:.82rem;font-weight:800;color:#15241c;background:linear-gradient(120deg,#e4be78,#c79a4b);padding:9px 15px;border-radius:11px;text-decoration:none">Find lodging here →</a>'; gc.style.display=''; } } else { var gc0=el('gateway'); if(gc0) gc0.style.display='none'; }
+      loadGateway(p);
       var pane2=el('pane-now'); if(!pane2) return;
       var card=el('nearbyRec');
       if(!card){ card=document.createElement('div'); card.id='nearbyRec'; card.style.cssText='grid-column:1/-1;background:#fffdf7;border:1px solid #e7ddca;border-radius:20px;padding:18px;box-shadow:0 18px 44px -22px rgba(28,46,34,.45),0 2px 6px rgba(28,46,34,.05)'; pane2.appendChild(card); }
@@ -873,7 +945,8 @@ function init(){
       el('glance').innerHTML='<span style="'+S.load+'">Loading…</span>';
       if(prof.hasNPS){ loadNPS(p); }
       else { setBox('nps', npsMapBlock(p)+'<span style="'+S.load+'">'+prof.kind+' · managed by '+prof.agency+'. <a href="'+prof.official+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">'+prof.officialLabel+'</a></span>');
-        ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){ var b=el(id); if(b)b.innerHTML='<span style="'+S.load+'">Provided by '+prof.agency+' — see the official page above.</span>'; }); }
+        ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){ var b=el(id); if(b)b.innerHTML='<span style="'+S.load+'">Provided by '+prof.agency+' — see the official page above.</span>'; });
+        if(p.source==='usfs'||p.type==='national_forest'){ loadForestDetail(p, prof); } }
       loadConditions(p);
       loadPlaces(p);
       loadTrails(p);

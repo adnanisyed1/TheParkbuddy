@@ -28,7 +28,39 @@
     capitolreef: { town: "Torrey, UT", blurb: "Tiny scenic-byway town \u2014 lodging, pie, and the west entrance.", lat: 38.2989, lng: -111.4194 },
     saguaro: { town: "Tucson, AZ", blurb: "Desert city basecamp \u2014 splits Saguaro's east & west districts.", lat: 32.2226, lng: -110.9747 },
     badlands: { town: "Wall, SD", blurb: "Roadside gateway \u2014 Wall Drug, lodging, and the loop road.", lat: 43.9933, lng: -102.2411 },
-    grandtetons: { town: "Jackson, WY", blurb: "Iconic mountain town minutes from the Tetons.", lat: 43.4799, lng: -110.7624 }
+    grandtetons: { town: "Jackson, WY", blurb: "Iconic mountain town minutes from the Tetons.", lat: 43.4799, lng: -110.7624 },
+
+    // --- National Forests (multi-town basecamps) ---
+    whiterivernationalforest: {
+      blurb: "Colorado's busiest national forest \u2014 world-class ski towns ring the Elk, Gore and Sawatch ranges, each a full-service basecamp.",
+      towns: [
+        { name: "Aspen, CO", lat: 39.1911, lng: -106.8175 },
+        { name: "Vail, CO", lat: 39.6403, lng: -106.3742 },
+        { name: "Glenwood Springs, CO", lat: 39.5505, lng: -107.3248 },
+        { name: "Breckenridge, CO", lat: 39.4817, lng: -106.0384 },
+        { name: "Frisco, CO", lat: 39.5744, lng: -106.0975 }
+      ]
+    },
+    sanjuannationalforest: {
+      blurb: "The rugged San Juan Mountains \u2014 historic mining towns turned adventure hubs, ringed by 13ers and alpine trailheads.",
+      towns: [
+        { name: "Durango, CO", lat: 37.2753, lng: -107.8801 },
+        { name: "Silverton, CO", lat: 37.8119, lng: -107.6645 },
+        { name: "Ouray, CO", lat: 38.0228, lng: -107.6712 },
+        { name: "Telluride, CO", lat: 37.9375, lng: -107.8123 },
+        { name: "Pagosa Springs, CO", lat: 37.2695, lng: -107.0098 }
+      ]
+    },
+    grandmesauncompahgreandgunnisonnationalforests: {
+      blurb: "Basecamps for the Uncompahgre high country and the West Elks \u2014 box canyons, hot springs and wildflower passes.",
+      towns: [
+        { name: "Telluride, CO", lat: 37.9375, lng: -107.8123 },
+        { name: "Ouray, CO", lat: 38.0228, lng: -107.6712 },
+        { name: "Ridgway, CO", lat: 38.1533, lng: -107.7573 },
+        { name: "Crested Butte, CO", lat: 38.8697, lng: -106.9878 },
+        { name: "Gunnison, CO", lat: 38.5458, lng: -106.9253 }
+      ]
+    }
   };
   function norm(n) { return String(n || "").toLowerCase().replace(/national park.*$|national preserve.*$/, "").replace(/&/g, "and").replace(/[^a-z]/g, ""); }
   window.PB_GATEWAY = function (name) { return T[norm(name)] || null; };
