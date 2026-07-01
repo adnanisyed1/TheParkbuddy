@@ -1,11 +1,12 @@
-// Park Buddy — national-forest (and other federal rec area) DETAIL from Recreation.gov / RIDB.
+// Park Buddy — national-forest (and other federal land) DETAIL from Recreation.gov / RIDB.
 // GET /api/forest?name=White River National Forest&lat=..&lng=..
-//   → the forest's own rec-area record: description, activities, directions, contact,
-//     official link, and its campgrounds. Fills the sections that used to just say
-//     "see the official page" for anything that isn't an NPS national park.
+//   → activities, rec areas and campgrounds that actually sit INSIDE the forest, plus a
+//     description/directions when a matching rec area exists.
 //
-// Needs RIDB_API_KEY (free, ridb.recreation.gov). Degrades to {found:false} without it,
-// so the page keeps its link-out fallback. Credit: Recreation.gov / RIDB (federal agencies).
+// Why geo, not name: RIDB does NOT store whole forests as rec areas — it stores the specific
+// recreation areas within them (Maroon Bells, Hanging Lake…). Searching by the forest name
+// returns nothing, so we search by LOCATION and aggregate what's there. Needs RIDB_API_KEY.
+// Credit: Recreation.gov / RIDB (U.S. Forest Service, BLM & partner agencies).
 
 export const runtime = "nodejs";
 export const revalidate = 86400;
@@ -34,58 +35,59 @@ export async function GET(request) {
   const lat = num(searchParams.get("lat"));
   const lng = num(searchParams.get("lng"));
   if (!key) return Response.json({ found: false, note: "RIDB_API_KEY not configured" });
-  if (!name && (lat == null || lng == null)) {
-    return Response.json({ error: "name or lat/lng required" }, { status: 400 });
-  }
+  if (lat == null || lng == null) return Response.json({ error: "lat/lng required" }, { status: 400 });
 
-  // Find the matching rec area: search by name, biased to the forest's location. full=true
-  // returns the ACTIVITY list and links inline so we don't need a second round-trip.
-  const geo = (lat != null && lng != null) ? { latitude: lat, longitude: lng, radius: "75" } : {};
-  const search = await ridb("/recareas", { query: name, ...geo, limit: "25", full: "true" }, key);
-  const list = (search && search.RECDATA) || [];
-  if (!list.length) return Response.json({ found: false });
+  const geo = { latitude: lat, longitude: lng, radius: "60" };
 
-  // Best match: exact/contains name match wins; otherwise the first (RIDB sorts by relevance).
+  // Rec areas INSIDE the forest (by location), full=true for activities + descriptions.
+  const [recD, campD] = await Promise.all([
+    ridb("/recareas", { ...geo, limit: "50", full: "true" }, key),
+    ridb("/facilities", { ...geo, activity: "9", limit: "60" }, key), // activity 9 = camping
+  ]);
+
+  const recList = (recD && recD.RECDATA) || [];
   const target = normName(name);
-  let best = list.find((r) => normName(r.RecAreaName) === target)
-    || list.find((r) => target && normName(r.RecAreaName).indexOf(target) >= 0)
-    || list.find((r) => { const n = normName(r.RecAreaName); return target && n && target.indexOf(n) >= 0; })
-    || list[0];
 
-  const activities = ((best.ACTIVITY || best.activities || []).map((a) => a.ActivityName || a.activityName).filter(Boolean));
-  const links = (best.LINK || []).map((l) => ({ title: l.Title, url: l.URL, type: l.LinkType })).filter((l) => l.url);
+  // A rec area that matches the forest name gives us the best description/directions/links.
+  const primary = recList.find((r) => normName(r.RecAreaName) === target)
+    || recList.find((r) => target && normName(r.RecAreaName).indexOf(target) >= 0)
+    || null;
+
+  // Aggregate the activity types available across all rec areas in the forest.
+  const actSet = {};
+  recList.forEach((r) => (r.ACTIVITY || []).forEach((a) => { const n = a.ActivityName; if (n) actSet[n] = 1; }));
+  const activities = Object.keys(actSet).slice(0, 20);
+
+  // Rec areas as "points of interest" — nearest / most complete first.
+  const seenR = {};
+  const recAreas = recList
+    .map((r) => ({ name: r.RecAreaName, description: clean(r.RecAreaDescription, 160), url: r.RecAreaID ? "https://www.recreation.gov/gateways/" + r.RecAreaID : "" }))
+    .filter((r) => { if (!r.name) return false; const k = r.name.toLowerCase(); if (seenR[k]) return false; seenR[k] = 1; return true; })
+    .slice(0, 12);
+
+  // Campgrounds inside the forest.
+  const seenC = {};
+  const campgrounds = ((campD && campD.RECDATA) || [])
+    .filter((f) => /camp/i.test((f.FacilityTypeDescription || "") + " " + (f.FacilityName || "")))
+    .map((f) => ({ name: f.FacilityName, description: clean(f.FacilityDescription, 180), reservable: !!f.Reservable, url: f.FacilityID ? "https://www.recreation.gov/camping/campgrounds/" + f.FacilityID : "" }))
+    .filter((c) => { if (!c.name) return false; const k = c.name.toLowerCase(); if (seenC[k]) return false; seenC[k] = 1; return true; })
+    .slice(0, 12);
+
+  const links = ((primary && primary.LINK) || []).map((l) => ({ title: l.Title, url: l.URL, type: l.LinkType })).filter((l) => l.url);
   const official = (links.find((l) => /official|home|web/i.test(l.type + " " + l.title)) || links[0] || {}).url || "";
 
-  // Campgrounds within this rec area.
-  let campgrounds = [];
-  if (best.RecAreaID) {
-    const fac = await ridb("/recareas/" + best.RecAreaID + "/facilities", { limit: "60" }, key);
-    const rows = (fac && fac.RECDATA) || [];
-    const seen = {};
-    campgrounds = rows
-      .filter((f) => /camp/i.test((f.FacilityTypeDescription || "") + " " + (f.FacilityName || "")))
-      .map((f) => ({
-        name: f.FacilityName,
-        description: clean(f.FacilityDescription, 200),
-        reservable: !!f.Reservable,
-        url: f.FacilityID ? "https://www.recreation.gov/camping/campgrounds/" + f.FacilityID : "",
-      }))
-      .filter((c) => { if (!c.name) return false; const k = c.name.toLowerCase(); if (seen[k]) return false; seen[k] = 1; return true; })
-      .slice(0, 12);
-  }
+  const found = !!(activities.length || recAreas.length || campgrounds.length || primary);
 
   return Response.json({
-    found: true,
-    id: best.RecAreaID,
-    name: best.RecAreaName,
-    description: clean(best.RecAreaDescription, 700),
-    directions: clean(best.RecAreaDirections, 500),
-    phone: (best.RecAreaPhone || "").trim(),
-    email: (best.RecAreaEmail || "").trim(),
+    found,
+    name: (primary && primary.RecAreaName) || name,
+    description: primary ? clean(primary.RecAreaDescription, 700) : "",
+    directions: primary ? clean(primary.RecAreaDirections, 500) : "",
+    phone: (primary && (primary.RecAreaPhone || "")).trim(),
     official,
-    reservationUrl: best.RecAreaID ? "https://www.recreation.gov/search?q=" + encodeURIComponent(best.RecAreaName) : "",
     activities,
+    recAreas,
     campgrounds,
-    credit: "Recreation.gov / RIDB — U.S. Forest Service, BLM & partner agencies.",
+    credit: "Recreation.gov / RIDB — U.S. Forest Service & partner agencies.",
   });
 }

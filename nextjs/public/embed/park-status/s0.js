@@ -524,6 +524,7 @@ function init(){
     // National forests: pull the real rec-area record (description, activities, campgrounds,
     // directions) from Recreation.gov / RIDB and fill the sections that otherwise just link out.
     var fdToken = 0;
+    function fmtName(s){ return String(s||'').replace(/_/g,' ').toLowerCase().replace(/\b([a-z])/g,function(m,c){return c.toUpperCase();}); }
     function loadForestDetail(p, prof){
       var mine = ++fdToken;
       fetch('/api/forest?name='+encodeURIComponent(p.name)+'&lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
@@ -533,36 +534,71 @@ function init(){
         var credit = '<div style="font-size:.62rem;color:#a79f8c;margin-top:11px;line-height:1.4">Data &amp; credit: '+(d.credit||'Recreation.gov / RIDB')+'</div>';
         if(d.description){ setBox('nps', npsMapBlock(p)+'<p style="'+S.p+';margin-bottom:10px">'+d.description+'</p><div style="font-size:.78rem;color:#6a7160">'+prof.kind+' · '+prof.agency+'. '+offLink+'</div>'); }
         if(d.activities && d.activities.length){
-          var chips='<div style="display:flex;flex-wrap:wrap;gap:8px">'+d.activities.slice(0,18).map(function(a){ return '<span style="'+S.achip+'">'+a+'</span>'; }).join('')+'</div>'+credit;
+          var chips='<div style="display:flex;flex-wrap:wrap;gap:8px">'+d.activities.slice(0,18).map(function(a){ return '<span style="'+S.achip+'">'+fmtName(a)+'</span>'; }).join('')+'</div>'+credit;
           var tb=el('todo'); if(tb) tb.innerHTML=chips;
           var ab=el('activities'); if(ab) ab.innerHTML=chips;
         }
         if(d.campgrounds && d.campgrounds.length){
           var cg=d.campgrounds.map(function(c){
-            return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+c.name+'</b>'
-              +(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:3px">'+c.description+'</p>':'')
+            return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+fmtName(c.name)+'</b>'
+              +(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:3px">'+c.description.replace(/^Overview\s*/i,'')+'</p>':'')
               +(c.url?'<div style="display:flex;gap:8px;margin-top:8px"><a href="'+c.url+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:700;text-decoration:none">'+(c.reservable?'Reserve ↗':'Details ↗')+'</a></div>':'')
               +'</div>';
           }).join('');
           var cb=el('camps'); if(cb) cb.innerHTML=cg+credit;
         }
-        if(d.directions || d.phone){
-          var db=el('directions');
-          if(db) db.innerHTML=(d.directions?'<p style="'+S.p+'">'+d.directions+'</p>':'')
-            +(d.phone?'<div style="'+S.row+'"><a style="'+S.btn+'" href="tel:'+d.phone.replace(/[^0-9+]/g,'')+'">☎ '+d.phone+'</a>'+(off?'<a style="'+S.btn+'" href="'+off+'" target="_blank" rel="noopener">'+prof.officialLabel+'</a>':'')+'</div>':'');
-        }
+        if(d.recAreas && d.recAreas.length){
+          var pr=el('places'); if(pr) pr.innerHTML=d.recAreas.map(function(x){ return '<div style="'+S.td+'"><div><h4 style="'+S.h4+'">'+fmtName(x.name)+'</h4>'+(x.description?'<p style="'+S.p+'">'+x.description.replace(/^Overview\s*/i,'')+'</p>':'')+(x.url?'<div style="'+S.dur+'"><a href="'+x.url+'" target="_blank" rel="noopener" style="color:#1d4a37;font-weight:700;text-decoration:none">Details ↗</a></div>':'')+'</div></div>'; }).join('')+credit; }
+        var _maps='https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng;
+        var _gd=d.directions && !/^n\/?a\.?$/i.test(String(d.directions).trim());
+        var _gp=d.phone && !/^1+$/.test(String(d.phone).replace(/[^0-9]/g,''));
+        var db=el('directions');
+        if(db) db.innerHTML=(_gd?'<p style="'+S.p+'">'+d.directions+'</p>':'<p style="'+S.p+'">'+p.name+' — '+p.lat.toFixed(3)+', '+p.lng.toFixed(3)+'.</p>')
+          +'<div style="'+S.row+'"><a style="'+S.btnP+'" href="'+_maps+'" target="_blank" rel="noopener">◎ Get driving directions</a>'
+          +(_gp?'<a style="'+S.btn+'" href="tel:'+d.phone.replace(/[^0-9+]/g,'')+'">☎ '+d.phone+'</a>':'')
+          +'<a style="'+S.btn+'" href="'+off+'" target="_blank" rel="noopener">'+prof.officialLabel+'</a></div>';
       }).catch(function(){});
     }
     // A representative photo (+ extract) for non-NPS destinations, from Wikipedia/Wikimedia.
     var photoToken = 0;
-    function loadPhoto(p){
+    function loadPhoto(p, prof){
       var mine = ++photoToken;
       fetch('/api/photo?name='+encodeURIComponent(p.name)+'&state='+encodeURIComponent(p.state||'')).then(function(r){return r.ok?r.json():null;}).then(function(d){
-        if(mine!==photoToken || !d || !d.found || !d.image) return;
-        var hp=el('heroPhoto'), ph=el('heroPhotoPh');
-        if(hp){ hp.onload=function(){ hp.style.display='block'; if(ph)ph.style.display='none'; }; hp.src=d.image; hp.alt=p.name; }
+        if(mine!==photoToken || !d || !d.found) return;
+        if(d.image){ var hp=el('heroPhoto'), ph=el('heroPhotoPh');
+          if(hp){ hp.onload=function(){ hp.style.display='block'; if(ph)ph.style.display='none'; }; hp.src=d.image; hp.alt=p.name; }
+          var g=el('gallery'); if(g){ g.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><a href="'+(d.pageUrl||d.image)+'" target="_blank" rel="noopener"><img src="'+d.thumb+'" alt="'+p.name+'" style="width:100%;height:120px;object-fit:cover;border-radius:12px"></a></div><div style="font-size:.62rem;color:#a79f8c;margin-top:8px;line-height:1.4">'+d.credit+'</div>'; } }
         if(d.extract){ var al=el('aboutlive'); if(al && (!al.textContent || al.textContent.length<40)) al.textContent=d.extract; }
-        var g=el('gallery'); if(g){ g.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><a href="'+(d.pageUrl||d.image)+'" target="_blank" rel="noopener"><img src="'+d.thumb+'" alt="'+p.name+'" style="width:100%;height:120px;object-fit:cover;border-radius:12px"></a></div><div style="font-size:.62rem;color:#a79f8c;margin-top:8px;line-height:1.4">'+d.credit+'</div>'; }
+        // Wikipedia extract as the overview when RIDB doesn't supply one.
+        if(d.extract && prof){
+          setBox('nps', npsMapBlock(p)+'<p style="'+S.p+';margin-bottom:10px">'+d.extract+(d.pageUrl?' <a href="'+d.pageUrl+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">Wikipedia ↗</a>':'')+'</p><div style="font-size:.78rem;color:#6a7160">'+prof.kind+' · '+prof.agency+'. <a href="'+prof.official+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">'+prof.officialLabel+'</a></div>');
+        }
+      }).catch(function(){});
+    }
+    // Fill the universally-available sections for ANY non-NPS destination (state parks included):
+    // directions from coordinates, plus campgrounds & points of interest from Recreation.gov / OSM.
+    var ddToken = 0;
+    function loadDestDetail(p, prof){
+      var maps='https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng;
+      var db=el('directions');
+      if(db) db.innerHTML='<p style="'+S.p+'">'+p.name+' is at '+p.lat.toFixed(3)+', '+p.lng.toFixed(3)+'.</p><div style="'+S.row+'"><a style="'+S.btnP+'" href="'+maps+'" target="_blank" rel="noopener">◎ Get driving directions</a><a style="'+S.btn+'" href="'+prof.official+'" target="_blank" rel="noopener">'+prof.officialLabel+'</a></div>';
+      var mine=++ddToken;
+      fetch('/api/places?lat='+p.lat.toFixed(4)+'&lng='+p.lng.toFixed(4)).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(mine!==ddToken || !d) return;
+        var credit='<div style="font-size:.62rem;color:#a79f8c;margin-top:11px;line-height:1.4">Data &amp; credit: '+(d.credit||'Recreation.gov / RIDB + OpenStreetMap')+'</div>';
+        var isCamp=function(f){return /camp/i.test((f.type||'')+' '+(f.name||''));};
+        var camps=(d.facilities||[]).filter(isCamp);
+        if(camps.length){ var cb=el('camps'); if(cb) cb.innerHTML=camps.slice(0,10).map(function(c){
+          return '<div style="'+S.vi+'"><b style="font-size:.86rem;color:#163a2b;display:block">'+c.name+'</b>'
+            +(c.description?'<p style="font-size:.78rem;color:#6a7160;line-height:1.45;margin-top:3px">'+c.description+'</p>':'')
+            +(c.url?'<div style="display:flex;gap:8px;margin-top:8px"><a href="'+c.url+'" target="_blank" rel="noopener" style="font-size:.74rem;color:#1d4a37;font-weight:700;text-decoration:none">'+(c.reservable?'Reserve ↗':'Details ↗')+'</a></div>':'')
+            +'</div>'; }).join('')+credit; }
+        var poi=(d.recAreas||[]).concat((d.facilities||[]).filter(function(f){return !isCamp(f);}));
+        if(poi.length){ var pb=el('places'); if(pb) pb.innerHTML=poi.slice(0,10).map(function(x){
+          return '<div style="'+S.td+'"><div><h4 style="'+S.h4+'">'+x.name+'</h4>'
+            +((x.description||x.type)?'<p style="'+S.p+'">'+(x.description||x.type)+'</p>':'')
+            +(x.url?'<div style="'+S.dur+'"><a href="'+x.url+'" target="_blank" rel="noopener" style="color:#1d4a37;font-weight:700;text-decoration:none">Details ↗</a></div>':'')
+            +'</div></div>'; }).join('')+credit; }
       }).catch(function(){});
     }
     function loadPlaces(p){
@@ -958,8 +994,9 @@ function init(){
       if(prof.hasNPS){ loadNPS(p); }
       else { setBox('nps', npsMapBlock(p)+'<span style="'+S.load+'">'+prof.kind+' · managed by '+prof.agency+'. <a href="'+prof.official+'" target="_blank" rel="noopener" style="color:#2c5562;font-weight:700">'+prof.officialLabel+'</a></span>');
         ['npsalerts','todo','activities','gallery','fees','hours','camps','vcenters','directions','events','news','places'].forEach(function(id){ var b=el(id); if(b)b.innerHTML='<span style="'+S.load+'">Provided by '+prof.agency+' — see the official page above.</span>'; });
-        if(p.source==='usfs'||p.type==='national_forest'){ loadForestDetail(p, prof); }
-        loadPhoto(p); }
+        var _isF=(p.source==='usfs'||p.type==='national_forest');
+        if(_isF){ loadForestDetail(p, prof); } else { loadDestDetail(p, prof); }
+        loadPhoto(p, prof); }
       loadConditions(p);
       loadPlaces(p);
       loadTrails(p);
